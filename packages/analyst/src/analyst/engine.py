@@ -142,30 +142,26 @@ class Analyst:
         rows = result.value or []
         if not rows:
             return {
-                "answer": (
-                    result.unavailable
-                    or "No Completes older than 30 days with unpaid insurance."
-                )
-                + " "
-                + result.details.get("schema_gap", ""),
+                "answer": result.unavailable or "No Completes older than 30 days with InsBalance > 0.",
                 "evidence": result.to_dict(),
             }
         lines = [
-            f"- {r['payer']} @ {r['location']}: {r['unpaid_completes']} unpaid Completes, "
-            f"avg age {r['avg_age_days']:.0f} days, InsPaid sum {r['ins_paid']:.2f}"
+            f"- {r['payer']} @ {r['location']}: ${r['ins_balance']:.2f} InsBalance "
+            f"on {r['claims']} Completes, avg age {r['avg_age_days']:.0f} days"
             for r in rows[:12]
         ]
         answer = (
-            "Payers with insurance collections still sitting past 30 days, by location "
-            "(Completes with DOS older than 30 days and InsPaid = 0 or FirstInsPayment null). "
-            "Dollar AR (billed − paid) is not in the described PREP schema and is not invented.\n"
+            "Dollar AR aged > 30 days is SUM(InsBalance) on Completes with InsBalance > 0, "
+            "by PrimaryPayorName × LocationName. Insurance only. "
+            "This is not billed − paid, not PatBalance, and not Tableau NET AR. "
+            "Expected-recovery (InsPaid × open-claim count) is a separate question.\n"
             + "\n".join(lines)
         )
         suggestions = []
         top = rows[0]
         suggestions.append(
-            f"{top['payer']} at {top['location']} has the most aged unpaid Completes "
-            f"({top['unpaid_completes']}). Work that payer/location pair first."
+            f"{top['payer']} at {top['location']} has ${top['ins_balance']:.2f} InsBalance "
+            f"on {top['claims']} Completes aged > 30 days. Work that payer/location pair first."
         )
         return {"answer": answer, "evidence": result.to_dict(), "suggestions": suggestions}
 
@@ -340,10 +336,11 @@ class Analyst:
             top = ar.value[0]
             suggestions.append(
                 f"Work {top['payer']} at {top['location']} first: "
-                f"{top['unpaid_completes']} Completes past 30 days with unpaid insurance."
+                f"${top['ins_balance']:.2f} InsBalance on {top['claims']} Completes aged > 30 days."
             )
             parts.append(
-                f"Aged unpaid Completes: {sum(r['unpaid_completes'] for r in ar.value)} across "
+                f"Dollar AR aged > 30 days (SUM InsBalance): "
+                f"${sum(r['ins_balance'] for r in ar.value):.2f} across "
                 f"{len(ar.value)} payer×location pairs."
             )
         drops = [

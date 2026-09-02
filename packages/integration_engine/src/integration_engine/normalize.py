@@ -8,7 +8,6 @@ from typing import Any
 import pandas as pd
 
 from warehouse.schema import (
-    AGE_GROUP_ALIASES,
     BOOM_CLINIC_ID_TO_COMPANY,
     DISCIPLINE_ALIASES,
     STATUS_ALIASES,
@@ -29,12 +28,6 @@ def normalize_discipline(value: Any) -> Any:
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return None
     return DISCIPLINE_ALIASES.get(_norm_key(value), str(value).strip().upper())
-
-
-def normalize_age_group(value: Any) -> Any:
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return None
-    return AGE_GROUP_ALIASES.get(_norm_key(value), str(value).strip().title())
 
 
 def normalize_completed(value: Any) -> Any:
@@ -117,14 +110,15 @@ def normalize_number(value: Any) -> Any:
 NORMALIZERS = {
     "AppointmentStatus": normalize_status,
     "Discipline": normalize_discipline,
-    "AgeGroup": normalize_age_group,
     "Completed?": normalize_completed,
     "Company": normalize_company,
     "Telehealth": normalize_bool,
     "PatientActive": normalize_bool,
     "ApptDate": normalize_date,
     "FirstInsPayment": normalize_date,
+    "DOB": normalize_date,
     "DateTimeCreated": normalize_timestamp,
     "InsPaid": normalize_number,
+    "InsBalance": normalize_number,
     "TotalPaid": normalize_number,
 }

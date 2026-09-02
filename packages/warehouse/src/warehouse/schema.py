@@ -10,7 +10,8 @@ use generic clinic names and must not display CST/AOT/KID/PTA as the product.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import date
 
 
 # Reference only. Do not use these brands as default demo-tenant display names.
@@ -104,11 +105,11 @@ APPOINTMENT = Table(
             ("therapist_name", "therapist", "rendering_provider", "clinician", "provider"),
         ),
         Column(
-            "Location",
+            "LocationName",
             "VARCHAR",
             False,
             "Site / office. Needed for AR-by-location and primary location.",
-            ("location", "site", "office", "clinic_location", "facility"),
+            ("location_name", "location", "site", "office", "clinic_location", "facility"),
         ),
         Column(
             "PrimaryPayorName",
@@ -121,8 +122,16 @@ APPOINTMENT = Table(
             "InsPaid",
             "DOUBLE",
             False,
-            "Insurance paid. AR/collections use InsPaid only.",
+            "Insurance paid. AR/collections use InsPaid except dollar AR aged > 30 (InsBalance).",
             ("ins_paid", "insurance_paid", "ins_payment"),
+        ),
+        Column(
+            "InsBalance",
+            "DOUBLE",
+            False,
+            "Insurance balance. Dollar AR aged > 30 = SUM(InsBalance) on Completes.",
+            ("ins_balance", "insurance_balance"),
+            "Not billed − paid. Not PatBalance. Not Tableau NET AR.",
         ),
         Column(
             "TotalPaid",
@@ -148,9 +157,9 @@ APPOINTMENT = Table(
     ),
 )
 
-# AgeGroup is not named in a PREP DDL dump. Early-quit watch is locked and
-# requires child vs adult OT-ST tenure bars. If Boom PREP uses a different
-# column name, remap here — do not change the tenure bars.
+# Early-quit child vs adult is derived from PATIENT.DOB. Do not store AgeGroup.
+CHILD_AGE_YEARS = 18
+
 PATIENT = Table(
     name="PATIENT",
     grain="Company × PatientId",
@@ -177,12 +186,12 @@ PATIENT = Table(
             ("patient_active", "is_active_flag", "active", "is_active"),
         ),
         Column(
-            "AgeGroup",
-            "VARCHAR",
+            "DOB",
+            "DATE",
             False,
-            "Child / Adult. Required to apply locked early-quit tenure bars.",
-            ("age_group", "age_band", "pediatric_adult"),
-            "Inferred landing name — see PR note. Not a second metric model.",
+            "Date of birth. Early-quit bars derive child vs adult from this.",
+            ("dob", "date_of_birth", "birth_date", "birthdate"),
+            "Not shown on default screens. Child = age < 18 at last closed month end.",
         ),
     ),
 )
@@ -227,18 +236,19 @@ REFERRAL = Table(
             ("discipline", "therapy_type", "discipline_code"),
         ),
         Column(
-            "Location",
+            "LocationName",
             "VARCHAR",
             False,
             "Site / office",
-            ("location", "site", "office"),
+            ("location_name", "location", "site", "office"),
         ),
         Column(
-            "ReferralSource",
+            "Source",
             "VARCHAR",
             False,
-            "Source. Needed for referral-source drop-off questions.",
-            ("referral_source", "source", "referred_by"),
+            "Referral source. Often blank. KID often uses PCP Name in the dump; that is not this field.",
+            ("source", "referral_source", "referred_by"),
+            "Do not use REFERRAL_SOURCES.\"Org Name\" (CST-only) as the generic source.",
         ),
     ),
 )
@@ -285,13 +295,12 @@ DISCIPLINE_ALIASES = {
     "slp": "ST",
 }
 
-AGE_GROUP_ALIASES = {
-    "child": "Child",
-    "pediatric": "Child",
-    "paediatric": "Child",
-    "kid": "Child",
-    "adult": "Adult",
-}
+def age_band_from_dob(dob: date | None, as_of: date) -> str:
+    """Child vs adult for locked early-quit bars. Child = age < 18. Missing DOB → Adult."""
+    if dob is None:
+        return "Adult"
+    years = as_of.year - dob.year - ((as_of.month, as_of.day) < (dob.month, dob.day))
+    return "Child" if years < CHILD_AGE_YEARS else "Adult"
 
 
 def qident(name: str) -> str:

@@ -7,8 +7,8 @@ be treated as a client billing extract.
 Two column layouts of the same semantic tenant exist so the integration engine
 can prove mapping onto PREP `APPOINTMENT`, `REFERRAL`, and `PATIENT`.
 
-- `layout_a/` — PREP-like headers (`ApptDate`, `AppointmentStatus`, `Completed?`)
-- `layout_b/` — a different export shape (`date_of_service`, `visit_status`, `eval_completed`)
+- `layout_a/` — PREP-like headers (`ApptDate`, `LocationName`, `InsBalance`, `Source`, `DOB`)
+- `layout_b/` — a different export shape (`date_of_service`, `site`, `insurance_balance`, `source`, `dob`)
 
 Regenerate with:
 

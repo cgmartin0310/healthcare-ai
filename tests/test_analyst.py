@@ -40,7 +40,8 @@ def test_analyst_answers_ar_by_payer_location(warehouse, as_of):
                 InsPaid=0,
                 FirstInsPayment=None,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
+                InsBalance=125.0,
             )
         ],
     )
@@ -50,18 +51,21 @@ def test_analyst_answers_ar_by_payer_location(warehouse, as_of):
     assert out["intent"] == "ar_past_30"
     assert "Acme Health" in out["answer"]
     assert "Site B" in out["answer"]
-    assert "not invented" in out["answer"].lower() or "not in the described PREP" in out["answer"]
+    assert "InsBalance" in out["answer"]
+    assert "$125.00" in out["answer"]
+    assert "not Tableau NET AR" in out["answer"]
+    assert "billed − paid" in out["answer"] or "billed - paid" in out["answer"]
 
 
 def test_analyst_answers_referrals(warehouse, as_of):
     load_refs(
         warehouse,
         [
-            referral_row(ReferralId="1", DateTimeCreated=date(2026, 8, 2), ReferralSource="School District Example", **{"Completed?": 1}),
-            referral_row(ReferralId="2", DateTimeCreated=date(2026, 8, 3), ReferralSource="School District Example", **{"Completed?": 0}),
-            referral_row(ReferralId="3", DateTimeCreated=date(2026, 7, 2), ReferralSource="School District Example", **{"Completed?": 1}),
-            referral_row(ReferralId="4", DateTimeCreated=date(2026, 7, 3), ReferralSource="School District Example", **{"Completed?": 1}),
-            referral_row(ReferralId="5", DateTimeCreated=date(2026, 7, 4), ReferralSource="School District Example", **{"Completed?": 0}),
+            referral_row(ReferralId="1", DateTimeCreated=date(2026, 8, 2), Source="School District Example", **{"Completed?": 1}),
+            referral_row(ReferralId="2", DateTimeCreated=date(2026, 8, 3), Source="School District Example", **{"Completed?": 0}),
+            referral_row(ReferralId="3", DateTimeCreated=date(2026, 7, 2), Source="School District Example", **{"Completed?": 1}),
+            referral_row(ReferralId="4", DateTimeCreated=date(2026, 7, 3), Source="School District Example", **{"Completed?": 1}),
+            referral_row(ReferralId="5", DateTimeCreated=date(2026, 7, 4), Source="School District Example", **{"Completed?": 0}),
         ],
     )
     out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask(
@@ -102,15 +106,17 @@ def test_improve_is_grounded(warehouse, as_of):
                 ApptDate=date(2026, 6, 1),
                 InsPaid=0,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
+                InsBalance=80.0,
             )
         ],
     )
     out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask("What can I do to improve my business?")
     assert out["intent"] == "improve_business"
     assert out["suggestions"]
+    assert any("InsBalance" in s for s in out["suggestions"])
     for s in out["suggestions"]:
-        assert "invent" not in s.lower() or "no additional action is invented" in s.lower() or "not invented" in s.lower()
+        assert "invent" not in s.lower() or "no additional action is invented" in s.lower()
 
 
 def test_alerts_cancelation_and_referral_drop(warehouse, as_of):

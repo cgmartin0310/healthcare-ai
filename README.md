@@ -121,6 +121,7 @@ Sample questions the slice actually answers from mapped data:
 | Avg Paid | `InsPaid>0` only, last 3 months through as-of. |
 | Days to pay | `DATEDIFF(day, ApptDate, FirstInsPayment)` on Completes with `InsPaid>0`, exclude negatives, min 20 claims. |
 | Payments vs AR | Payments = `TotalPaid`. AR/collections = `InsPaid`. |
+| Dollar AR aged > 30 | `SUM(InsBalance)` on Completes where `InsBalance > 0` and `ApptDate` aged > 30 days, split by `PrimaryPayorName` × `LocationName`. Insurance only. Not billed − paid (no charge). Not `PatBalance`. Not Tableau NET AR. Expected-recovery (`InsPaid` × open-claim count) is a separate question. |
 
 Staffing working model (when the analyst forecasts FTE):
 
@@ -136,13 +137,16 @@ Staffing working model (when the analyst forecasts FTE):
 
 ## Schema notes (no full DDL dump)
 
-No second metric model was invented. A few PREP column *names* are inferred because locked metrics or sample questions need them and no official dump lists them:
+Column remaps onto PREP (not new metrics):
 
-- `PATIENT.AgeGroup` — child vs adult, required for the locked early-quit tenure bars. If Boom PREP uses another name, remap; do not change the bars.
-- `APPOINTMENT.Location`, `TherapistName`, `REFERRAL.ReferralSource` — required to answer AR-by-location, headcount, and referral-source drop-off.
+- `APPOINTMENT.LocationName` (not `Location`). `TherapistName` is already on `APPOINTMENT`.
+- `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
+- `PATIENT.DOB` — there is no `AgeGroup` warehouse column. Locked early-quit bars derive child vs adult from DOB (child = age < 18 at last closed month end): PT / adult OT-ST < 3 months; child OT-ST < 6. DOB is not shown on default screens.
+- `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.
 - `APPOINTMENT.Telehealth` is stored for schema fidelity. There is no locked telehealth metric, so none is computed.
-- **Dollar AR (billed − paid) cannot land.** PREP as described has `InsPaid` / `FirstInsPayment` / `TotalPaid`, not a charge. The analyst reports Completes aged > 30 days with unpaid insurance, by payer × location, and says so. Self-pay is excluded (not insurance AR).
 - Payroll is not a PREP object. Therapist profitability after payroll is refused.
+
+Payments stay `TotalPaid`. AR/collections stay `InsPaid` except the `InsBalance` landing for dollar AR aged > 30 days.
 
 ## Non-goals
 

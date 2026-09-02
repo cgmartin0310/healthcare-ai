@@ -157,7 +157,7 @@ def _guess_entity(columns: list[str], filename: str) -> str | None:
     }
     appt_hits = ("appt", "visit", "dos", "status", "payor", "payer", "ins paid", "therapist")
     ref_hits = ("referral", "referred", "datetime created", "completed", "eval completed", "source")
-    pat_hits = ("patient active", "age group", "age band", "is active")
+    pat_hits = ("patient active", "dob", "date of birth", "birth date", "is active")
     for h in appt_hits:
         if h in blob:
             scores["APPOINTMENT"] += 1

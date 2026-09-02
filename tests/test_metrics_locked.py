@@ -6,6 +6,7 @@ from datetime import date
 
 from tests.conftest import appt_row, load_appts, load_patients, load_refs, patient_row, referral_row
 from warehouse.dates import last_closed_month
+from warehouse.schema import APPOINTMENT, PATIENT, REFERRAL
 from warehouse.metrics import (
     active_book,
     ar_past_30_days,
@@ -21,6 +22,21 @@ from warehouse.metrics import (
     referrals,
 )
 from warehouse.staffing import DEFAULT_ROUNDING, demand_next_month, round_fte
+
+
+def test_prep_column_remaps_are_locked():
+    appt = {c.name for c in APPOINTMENT.columns}
+    patient = {c.name for c in PATIENT.columns}
+    referral = {c.name for c in REFERRAL.columns}
+    assert "LocationName" in appt
+    assert "Location" not in appt
+    assert "InsBalance" in appt
+    assert "PatBalance" not in appt
+    assert "DOB" in patient
+    assert "AgeGroup" not in patient
+    assert "Source" in referral
+    assert "ReferralSource" not in referral
+    assert "LocationName" in referral
 
 
 def test_last_closed_month_mid_month():
@@ -137,7 +153,7 @@ def test_early_quit_child_ot_uses_six_month_bar(warehouse, as_of):
         appt_row(ApptId="4", PatientId="C1", Discipline="OT", ApptDate=date(2026, 8, 16), AppointmentStatus="No Show"),
     ]
     load_appts(warehouse, rows)
-    load_patients(warehouse, [patient_row(PatientId="C1", AgeGroup="Child")])
+    load_patients(warehouse, [patient_row(PatientId="C1", DOB=date(2018, 3, 1))])
     result = early_quit_watch(warehouse, as_of)
     assert result.value == 1
     assert result.details["flagged"][0]["tenure_bar_months"] == 6
@@ -151,7 +167,7 @@ def test_early_quit_adult_ot_uses_three_month_bar_and_clears_when_over(warehouse
         appt_row(ApptId="3", PatientId="A1", Discipline="OT", ApptDate=date(2026, 8, 9), AppointmentStatus="Cancelled"),
     ]
     load_appts(warehouse, rows)
-    load_patients(warehouse, [patient_row(PatientId="A1", AgeGroup="Adult")])
+    load_patients(warehouse, [patient_row(PatientId="A1", DOB=date(1988, 3, 1))])
     result = early_quit_watch(warehouse, as_of)
     assert result.value == 0
 
@@ -272,41 +288,39 @@ def test_payments_use_total_paid_not_ins_paid(warehouse):
     assert result.details["do_not_mix"] is True
 
 
-def test_ar_past_30_groups_by_payer_and_location(warehouse, as_of):
+def test_ar_past_30_sums_insbalance_by_payer_and_location(warehouse, as_of):
     load_appts(
         warehouse,
         [
             appt_row(
                 ApptId="1",
                 ApptDate=date(2026, 6, 1),
-                InsPaid=0,
-                FirstInsPayment=None,
+                InsBalance=100.0,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
             ),
             appt_row(
                 ApptId="2",
                 ApptDate=date(2026, 6, 2),
-                InsPaid=0,
-                FirstInsPayment=None,
+                InsBalance=50.0,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
             ),
             appt_row(
                 ApptId="3",
                 ApptDate=date(2026, 8, 20),
-                InsPaid=0,
-                FirstInsPayment=None,
+                InsBalance=999.0,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
             ),  # not yet 30 days before 2026-09-02
             appt_row(
                 ApptId="4",
                 ApptDate=date(2026, 6, 3),
+                InsBalance=0,
                 InsPaid=80,
                 FirstInsPayment=date(2026, 6, 20),
                 PrimaryPayorName="Beacon Plan",
-                Location="Site A",
+                LocationName="Site A",
             ),
         ],
     )
@@ -314,8 +328,11 @@ def test_ar_past_30_groups_by_payer_and_location(warehouse, as_of):
     assert len(result.value) == 1
     assert result.value[0]["payer"] == "Acme Health"
     assert result.value[0]["location"] == "Site B"
-    assert result.value[0]["unpaid_completes"] == 2
-    assert "not invented" in result.details["schema_gap"].lower() or "Dollar AR" in result.details["schema_gap"]
+    assert result.value[0]["claims"] == 2
+    assert result.value[0]["ins_balance"] == 150.0
+    assert "InsBalance" in result.details["uses"]
+    assert "Tableau NET AR" in result.details["not"]
+    assert "billed − paid" in result.details["not"]
 
 
 def test_ar_excludes_self_pay(warehouse, as_of):
@@ -325,21 +342,22 @@ def test_ar_excludes_self_pay(warehouse, as_of):
             appt_row(
                 ApptId="1",
                 ApptDate=date(2026, 6, 1),
-                InsPaid=0,
+                InsBalance=200.0,
                 PrimaryPayorName="Example Self-Pay",
-                Location="Site A",
+                LocationName="Site A",
             ),
             appt_row(
                 ApptId="2",
                 ApptDate=date(2026, 6, 1),
-                InsPaid=0,
+                InsBalance=80.0,
                 PrimaryPayorName="Acme Health",
-                Location="Site B",
+                LocationName="Site B",
             ),
         ],
     )
     result = ar_past_30_days(warehouse, as_of)
     assert [r["payer"] for r in result.value] == ["Acme Health"]
+    assert result.value[0]["ins_balance"] == 80.0
 
 
 def test_caseload_fill_uses_weekly_target_not_four_week_count(warehouse, as_of):

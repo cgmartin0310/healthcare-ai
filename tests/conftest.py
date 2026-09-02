@@ -46,7 +46,7 @@ def patient_row(**overrides) -> dict:
             "PatientId": "P1",
             "Company": "Example Clinic",
             "PatientActive": False,
-            "AgeGroup": "Adult",
+            "DOB": date(1988, 3, 1),
         }
     )
     row.update(overrides)
@@ -62,8 +62,8 @@ def referral_row(**overrides) -> dict:
             "Completed?": 0,
             "Company": "Example Clinic",
             "Discipline": "OT",
-            "Location": "Site A",
-            "ReferralSource": "Source X",
+            "LocationName": "Site A",
+            "Source": "Source X",
         }
     )
     row.update(overrides)

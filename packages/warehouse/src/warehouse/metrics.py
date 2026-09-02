@@ -7,7 +7,7 @@ refuse to compute a lookalike and say so.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from warehouse.dates import add_months, closed_months_back, last_closed_month, prior_closed_month
@@ -15,6 +15,7 @@ from warehouse.schema import (
     CANCELATION_DENOMINATOR,
     CANCELATION_NUMERATOR,
     STATUS_COMPLETE,
+    age_band_from_dob,
     qident,
     quoted_table,
 )
@@ -23,6 +24,21 @@ from warehouse.store import Warehouse
 
 def _in_list(values: tuple[str, ...]) -> str:
     return ", ".join("'" + v.replace("'", "''") + "'" for v in values)
+
+
+def _as_date(value: Any) -> date | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if hasattr(value, "to_pydatetime"):
+        try:
+            return value.to_pydatetime().date()
+        except Exception:
+            return None
+    return None
 
 
 @dataclass
@@ -63,7 +79,7 @@ def cancelation_rate(
         filters.append(f'{qident("Company")} = ?')
         params.append(company)
     if location:
-        filters.append(f'{qident("Location")} = ?')
+        filters.append(f'{qident("LocationName")} = ?')
         params.append(location)
     if discipline:
         filters.append(f'{qident("Discipline")} = ?')
@@ -376,7 +392,7 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
             v.company, v.discipline, v.patient_id,
             v.complete, v.cancelled, v.no_show,
             f.first_dos,
-            COALESCE(p.{qident("AgeGroup")}, 'Adult') AS age_group
+            p.{qident("DOB")} AS dob
         FROM visit_counts v
         JOIN first_dos f
           ON f.company = v.company AND f.discipline = v.discipline AND f.patient_id = v.patient_id
@@ -385,7 +401,7 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
     """
     frame = wh.fetch_df(sql, params)
     flagged: list[dict[str, Any]] = []
-    missing_age = 0
+    missing_dob = 0
     for rec in frame.to_dict(orient="records"):
         complete = int(rec["complete"] or 0)
         cancelled = int(rec["cancelled"] or 0)
@@ -394,17 +410,18 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
         if denom == 0:
             continue
         rate = (cancelled + no_show) / denom
-        first = rec["first_dos"]
-        if hasattr(first, "to_pydatetime"):
-            first = first.to_pydatetime().date()
-        elif hasattr(first, "date") and not isinstance(first, date):
-            first = first.date()
+        first = _as_date(rec["first_dos"])
+        if first is None:
+            continue
+        dob = _as_date(rec["dob"])
+        if dob is None:
+            missing_dob += 1
         tenure_months = (current_end.year - first.year) * 12 + (current_end.month - first.month)
         disc = str(rec["discipline"])
-        age = str(rec["age_group"] or "Adult")
-        if disc == "PT" or (disc in {"OT", "ST"} and age == "Adult"):
+        age_band = age_band_from_dob(dob, current_end)
+        if disc == "PT" or (disc in {"OT", "ST"} and age_band == "Adult"):
             bar = 3
-        elif disc in {"OT", "ST"} and age == "Child":
+        elif disc in {"OT", "ST"} and age_band == "Child":
             bar = 6
         else:
             bar = 3
@@ -414,7 +431,7 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
                 {
                     "patient_id": rec["patient_id"],
                     "discipline": disc,
-                    "age_group": age,
+                    "age_band": age_band,
                     "tenure_months": tenure_months,
                     "tenure_bar_months": bar,
                     "cancelation_rate": rate,
@@ -423,17 +440,10 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
                     "no_show": no_show,
                 }
             )
-    age_probe = wh.fetch_one(
-        f"SELECT COUNT(*) FROM {quoted_table('PATIENT')} WHERE {qident('AgeGroup')} IS NULL"
-    )
-    missing_age = int((age_probe or [0])[0] or 0)
-    note = None
-    if "AgeGroup" not in {c.name for c in []}:
-        pass
     return MetricResult(
         name="early_quit_watch",
         as_of=as_of,
-        grain_note="patient×discipline cancelation > 30% under locked tenure bar; DFlex is not used",
+        grain_note="patient×discipline cancelation > 30% under locked tenure bar; child vs adult from PATIENT.DOB; DFlex is not used",
         value=len(flagged),
         details={
             "flagged": flagged[:50],
@@ -443,10 +453,9 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
                 "adult_OT_ST": "< 3 months",
                 "child_OT_ST": "< 6 months",
             },
-            "age_group_column": "PATIENT.AgeGroup (inferred PREP landing name; see glossary)",
-            "patients_missing_age_group_defaulted_adult": missing_age,
+            "age_band_source": "derived from PATIENT.DOB (child = age < 18 at last closed month end); not a warehouse column",
+            "patients_missing_dob_defaulted_adult": missing_dob,
         },
-        unavailable=note,
     )
 
 
@@ -474,7 +483,7 @@ def referrals(wh: Warehouse, as_of: date, months: int = 1, *, company: str | Non
     by_source = wh.fetch_df(
         f"""
         SELECT
-            COALESCE({qident("ReferralSource")}, '(unknown)') AS source,
+            COALESCE(NULLIF(TRIM(CAST({qident("Source")} AS VARCHAR)), ''), '(blank)') AS source,
             COUNT(*) AS referrals,
             SUM(CASE WHEN {qident("Completed?")} = 1 THEN 1 ELSE 0 END) AS converted
         FROM {quoted_table("REFERRAL")}
@@ -768,24 +777,21 @@ def payments_total(wh: Warehouse, start: date, end: date, *, company: str | None
 
 
 def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -> MetricResult:
-    """Payers with AR sitting past 30 days, by location.
+    """Dollar AR aged > 30 days.
 
-    PREP as described has InsPaid / FirstInsPayment / TotalPaid, not a billed
-    charge. Dollar AR (billed − paid) cannot land without inventing a second
-    model.     This reports Completes with DOS > 30 days ago and no insurance
-    collection yet (InsPaid is null/0 or FirstInsPayment is null).
-    Self-pay payers are excluded — they are not insurance AR.
+    SUM(InsBalance) on Completes where InsBalance > 0 and ApptDate aged > 30 days,
+    split by PrimaryPayorName × LocationName. Insurance only.
+
+    Not billed − paid (there is no charge). Not PatBalance. Not Tableau NET AR.
+    Expected-recovery (InsPaid × open-claim count) is a separate question.
     """
     cutoff = as_of - timedelta(days=30)
     filters = [
         f'{qident("AppointmentStatus")} = ?',
         f'{qident("ApptDate")} <= ?',
-        f"""(
-            COALESCE({qident("InsPaid")}, 0) = 0
-            OR {qident("FirstInsPayment")} IS NULL
-        )""",
-        # InsPaid is insurance collections. Self-pay is not insurance AR.
+        f'{qident("InsBalance")} > 0',
         f"LOWER(COALESCE({qident('PrimaryPayorName')}, '')) NOT LIKE '%self%pay%'",
+        f"LOWER(COALESCE({qident('PrimaryPayorName')}, '')) NOT LIKE '%self pay%'",
     ]
     params: list[Any] = [STATUS_COMPLETE, cutoff]
     if company:
@@ -794,22 +800,22 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
     sql = f"""
         SELECT
             COALESCE({qident("PrimaryPayorName")}, '(unknown)') AS payer,
-            COALESCE({qident("Location")}, '(unknown)') AS location,
+            COALESCE({qident("LocationName")}, '(unknown)') AS location,
             COUNT(*) AS claims,
-            SUM(COALESCE({qident("InsPaid")}, 0)) AS ins_paid,
+            SUM({qident("InsBalance")}) AS ins_balance,
             AVG(DATEDIFF('day', {qident("ApptDate")}, DATE '{as_of.isoformat()}')) AS avg_age_days
         FROM {quoted_table("APPOINTMENT")}
         WHERE {" AND ".join(filters)}
         GROUP BY 1, 2
-        ORDER BY claims DESC
+        ORDER BY ins_balance DESC
     """
     frame = wh.fetch_df(sql, params)
     rows = [
         {
             "payer": rec["payer"],
             "location": rec["location"],
-            "unpaid_completes": int(rec["claims"]),
-            "ins_paid": float(rec["ins_paid"] or 0),
+            "claims": int(rec["claims"]),
+            "ins_balance": float(rec["ins_balance"] or 0),
             "avg_age_days": float(rec["avg_age_days"] or 0),
         }
         for rec in frame.to_dict(orient="records")
@@ -817,18 +823,19 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
     return MetricResult(
         name="ar_past_30_days",
         as_of=as_of,
-        grain_note="Completes aged >30 days with no/zero InsPaid or null FirstInsPayment; not billed-minus-paid",
+        grain_note="SUM(InsBalance) on Completes, InsBalance>0, ApptDate aged >30 days, PrimaryPayorName × LocationName; insurance only",
         value=rows,
         details={
             "cutoff": cutoff.isoformat(),
-            "uses": "InsPaid / FirstInsPayment",
-            "not": "TotalPaid",
-            "schema_gap": (
-                "No Charge/BilledAmount exists in the described PREP objects. "
-                "Dollar AR was not invented."
-            ),
+            "uses": "InsBalance",
+            "not": [
+                "billed − paid",
+                "PatBalance",
+                "Tableau NET AR",
+                "InsPaid × open-claim count (expected-recovery; separate question)",
+            ],
         },
-        unavailable=None if rows else "No Completes older than 30 days with unpaid insurance.",
+        unavailable=None if rows else "No Completes older than 30 days with InsBalance > 0.",
     )
 
 
@@ -876,7 +883,7 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
         WITH loc AS (
             SELECT
                 {qident("TherapistName")} AS therapist,
-                {qident("Location")} AS location,
+                {qident("LocationName")} AS location,
                 {qident("Discipline")} AS discipline,
                 COUNT(*) AS completes
             FROM {quoted_table("APPOINTMENT")}

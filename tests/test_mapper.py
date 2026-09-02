@@ -26,7 +26,9 @@ def test_layout_b_appointments_map_despite_different_headers():
     assert bound["patient_num"] == "PatientId"
     assert bound["insurance_name"] == "PrimaryPayorName"
     assert bound["insurance_paid"] == "InsPaid"
+    assert bound["insurance_balance"] == "InsBalance"
     assert bound["amount_paid"] == "TotalPaid"
+    assert bound["site"] == "LocationName"
     confirm_mapping(proposal)
 
 
@@ -36,15 +38,18 @@ def test_layout_b_referrals_map_completed_flag():
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
     assert bound["ref_created_at"] == "DateTimeCreated"
     assert bound["eval_completed"] == "Completed?"
+    assert bound["source"] == "Source"
+    assert bound["office"] == "LocationName"
     confirm_mapping(proposal)
 
 
-def test_layout_b_patients_map_active_and_age():
+def test_layout_b_patients_map_active_and_dob():
     path = FIXTURES / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv"
     proposal = propose_mapping(path, entity="PATIENT")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
     assert bound["is_active_flag"] == "PatientActive"
-    assert bound["age_band"] == "AgeGroup"
+    assert bound["dob"] == "DOB"
+    assert "AgeGroup" not in bound.values()
     confirm_mapping(proposal)
 
 

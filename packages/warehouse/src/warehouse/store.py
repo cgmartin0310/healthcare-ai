@@ -35,12 +35,30 @@ class Warehouse:
 
     def ensure_schema(self) -> None:
         for table in PREP_TABLES.values():
-            cols = ", ".join(
-                f"{qident(c.name)} {c.duckdb_type}" for c in table.columns
-            )
-            self.con.execute(
-                f"CREATE TABLE IF NOT EXISTS {quoted_table(table.name)} ({cols})"
-            )
+            expected = [c.name for c in table.columns]
+            existing = self._table_columns(table.name)
+            if existing is not None and existing != expected:
+                # Remaps (Location→LocationName, AgeGroup→DOB) cannot ALTER in place.
+                self.con.execute(f"DROP TABLE {quoted_table(table.name)}")
+                existing = None
+            if existing is None:
+                cols = ", ".join(
+                    f"{qident(c.name)} {c.duckdb_type}" for c in table.columns
+                )
+                self.con.execute(
+                    f"CREATE TABLE {quoted_table(table.name)} ({cols})"
+                )
+
+    def _table_columns(self, table_name: str) -> list[str] | None:
+        row = self.con.execute(
+            "SELECT COUNT(*) FROM information_schema.tables "
+            "WHERE table_name = ?",
+            [table_name],
+        ).fetchone()
+        if not row or int(row[0] or 0) == 0:
+            return None
+        described = self.con.execute(f"DESCRIBE {quoted_table(table_name)}").fetchall()
+        return [str(r[0]) for r in described]
 
     def replace_table(self, table_name: str, frame: pd.DataFrame) -> int:
         table = PREP_TABLES[table_name]

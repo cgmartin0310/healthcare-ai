@@ -41,7 +41,7 @@ def build() -> None:
     patients = []
     for i in range(1, 81):
         pid = f"P{1000 + i}"
-        age = "Child" if i % 3 == 0 else "Adult"
+        is_child = i % 3 == 0
         # PatientActive is deliberately NOT operationally active.
         active_flag = (i % 4 == 0)
         first_month = 1 if i <= 50 else (5 if i <= 65 else 7)
@@ -50,7 +50,8 @@ def build() -> None:
                 "PatientId": pid,
                 "Company": COMPANY,
                 "PatientActive": "true" if active_flag else "false",
-                "AgeGroup": age,
+                "DOB": (date(2018, 3, 1) if is_child else date(1988, 3, 1)).isoformat(),
+                "_child": is_child,
                 "_first_month": first_month,
                 "_disc": DISCIPLINES[i % 3],
             }
@@ -73,8 +74,11 @@ def build() -> None:
         total_paid: float | None,
         first_ins: date | None,
         tele: bool = False,
+        ins_balance: float | None = None,
     ) -> None:
         nonlocal appt_id
+        if ins_balance is None and status == "Complete" and payer != "Example Self-Pay":
+            ins_balance = 0.0 if (ins_paid or 0) > 0 else None
         appointments.append(
             {
                 "ApptId": f"A{appt_id:05d}",
@@ -84,9 +88,10 @@ def build() -> None:
                 "Discipline": patient["_disc"],
                 "PatientId": patient["PatientId"],
                 "TherapistName": therapist,
-                "Location": location,
+                "LocationName": location,
                 "PrimaryPayorName": payer,
                 "InsPaid": "" if ins_paid is None else f"{ins_paid:.2f}",
+                "InsBalance": "" if ins_balance is None else f"{ins_balance:.2f}",
                 "TotalPaid": "" if total_paid is None else f"{total_paid:.2f}",
                 "FirstInsPayment": first_ins.isoformat() if first_ins else "",
                 "Telehealth": "true" if tele else "false",
@@ -151,11 +156,24 @@ def build() -> None:
                     ins = 0.0
                     total = 0.0
                     first = None
+                    balance = 125.0
                 else:
                     ins = 90.0 if payer != "Example Self-Pay" else 0.0
                     total = ins + 10.0
                     first = day + timedelta(days=14 + (i % 20))
-                add_appt(day, status, patient, therapist, location, payer, ins_paid=ins, total_paid=total, first_ins=first)
+                    balance = 0.0 if payer != "Example Self-Pay" else 0.0
+                add_appt(
+                    day,
+                    status,
+                    patient,
+                    therapist,
+                    location,
+                    payer,
+                    ins_paid=ins,
+                    total_paid=total,
+                    first_ins=first,
+                    ins_balance=balance,
+                )
             else:
                 add_appt(day, status, patient, therapist, location, payer, ins_paid=None, total_paid=None, first_ins=None)
 
@@ -173,6 +191,7 @@ def build() -> None:
             ins_paid=0.0,
             total_paid=0.0,
             first_ins=None,
+            ins_balance=125.0,
         )
 
     # Therapist_RAMP: OT Completes ramping to 35/week by June, then stop so
@@ -198,7 +217,7 @@ def build() -> None:
                 )
 
     # Early-quit watch: child OT patients under 6 months tenure, high cancelation.
-    child_ot = [p for p in patients if p["AgeGroup"] == "Child" and p["_disc"] == "OT"][:3]
+    child_ot = [p for p in patients if p["_child"] and p["_disc"] == "OT"][:3]
     for p in child_ot:
         for i, status in enumerate(["Complete", "Cancelled", "Cancelled", "No Show", "Cancelled"] * 3):
             day = date(2026, 7, 1) + timedelta(days=i * 3)
@@ -248,8 +267,8 @@ def build() -> None:
                         "Completed?": str(converted),
                         "Company": COMPANY,
                         "Discipline": discs[i % 3],
-                        "Location": LOCATIONS[i % 2],
-                        "ReferralSource": source,
+                        "LocationName": LOCATIONS[i % 2],
+                        "Source": source if i != 3 else "",  # Source is often blank
                     }
                 )
                 ref_id += 1
@@ -265,9 +284,10 @@ def build() -> None:
             "Discipline",
             "PatientId",
             "TherapistName",
-            "Location",
+            "LocationName",
             "PrimaryPayorName",
             "InsPaid",
+            "InsBalance",
             "TotalPaid",
             "FirstInsPayment",
             "Telehealth",
@@ -276,13 +296,13 @@ def build() -> None:
     )
     write_csv(
         OUT_A / "SYNTHETIC_EXAMPLE_referrals.csv",
-        ["ReferralId", "DateTimeCreated", "Completed?", "Company", "Discipline", "Location", "ReferralSource"],
+        ["ReferralId", "DateTimeCreated", "Completed?", "Company", "Discipline", "LocationName", "Source"],
         referrals,
     )
     write_csv(
         OUT_A / "SYNTHETIC_EXAMPLE_patients.csv",
-        ["PatientId", "Company", "PatientActive", "AgeGroup"],
-        [{k: p[k] for k in ("PatientId", "Company", "PatientActive", "AgeGroup")} for p in patients],
+        ["PatientId", "Company", "PatientActive", "DOB"],
+        [{k: p[k] for k in ("PatientId", "Company", "PatientActive", "DOB")} for p in patients],
     )
 
     # Layout B: different export names / date format / status labels / 1-0 flags
@@ -305,9 +325,10 @@ def build() -> None:
                 "therapy_type": disc,
                 "patient_num": row["PatientId"],
                 "rendering_provider": row["TherapistName"],
-                "site": row["Location"],
+                "site": row["LocationName"],
                 "insurance_name": row["PrimaryPayorName"],
                 "insurance_paid": row["InsPaid"],
+                "insurance_balance": row["InsBalance"],
                 "amount_paid": row["TotalPaid"],
                 "first_ins_pmt_date": row["FirstInsPayment"],
                 "is_telehealth": "yes" if row["Telehealth"] == "true" else "no",
@@ -322,8 +343,8 @@ def build() -> None:
                 "eval_completed": "Y" if row["Completed?"] == "1" else "N",
                 "clinic_name": row["Company"],
                 "discipline_code": row["Discipline"],
-                "office": row["Location"],
-                "source": row["ReferralSource"],
+                "office": row["LocationName"],
+                "source": row["Source"],
             }
         )
     clients = [
@@ -331,7 +352,7 @@ def build() -> None:
             "patient_num": p["PatientId"],
             "clinic_name": p["Company"],
             "is_active_flag": "1" if p["PatientActive"] == "true" else "0",
-            "age_band": "pediatric" if p["AgeGroup"] == "Child" else "adult",
+            "dob": p["DOB"],
         }
         for p in patients
     ]
@@ -348,6 +369,7 @@ def build() -> None:
             "site",
             "insurance_name",
             "insurance_paid",
+            "insurance_balance",
             "amount_paid",
             "first_ins_pmt_date",
             "is_telehealth",
@@ -361,7 +383,7 @@ def build() -> None:
     )
     write_csv(
         OUT_B / "SYNTHETIC_EXAMPLE_clients.csv",
-        ["patient_num", "clinic_name", "is_active_flag", "age_band"],
+        ["patient_num", "clinic_name", "is_active_flag", "dob"],
         clients,
     )
     print(f"Wrote {len(appointments)} appointments, {len(referrals)} referrals, {len(patients)} patients")
