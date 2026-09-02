@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clinic Analyst</title>
+  <style>
+    :root { font-family: ui-sans-serif, system-ui, sans-serif; color: #102030; background: #f4f1ea; }
+    body { max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 .4rem; }
+    .banner { background: #1f3b4d; color: #f4f1ea; padding: .75rem 1rem; border-radius: 6px; margin: .75rem 0 1.25rem; }
+    section { background: #fff; border: 1px solid #d5cfc4; border-radius: 6px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+    label { display: block; font-size: .85rem; margin: .4rem 0 .2rem; }
+    input, select, textarea, button { font: inherit; }
+    textarea { width: 100%; min-height: 4.5rem; }
+    button { background: #1f3b4d; color: #fff; border: 0; padding: .4rem .8rem; border-radius: 4px; cursor: pointer; margin-right: .4rem; }
+    button.secondary { background: #5a6b75; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { text-align: left; border-bottom: 1px solid #eee; padding: .25rem .3rem; }
+    pre { white-space: pre-wrap; background: #f7f5f1; padding: .75rem; font-size: .85rem; overflow-x: auto; }
+    .muted { color: #5a6b75; font-size: .85rem; }
+    .err { color: #8b1e1e; }
+  </style>
+</head>
+<body>
+  <h1>Clinic Analyst</h1>
+  <p class="muted">File ingest → PREP DuckDB warehouse → grounded analyst. Ids only on this screen. Not a live schedule product.</p>
+  <div id="banner" class="banner">This product does not have a live future schedule or this-week book. Closed-month results are the truth grain.</div>
+
+  <section>
+    <h2>1. Map a billing/EHR export</h2>
+    <p class="muted">CSV or xlsx. Propose → confirm → load. No EHR login.</p>
+    <label>Entity
+      <select id="entity">
+        <option value="APPOINTMENT">APPOINTMENT</option>
+        <option value="REFERRAL">REFERRAL</option>
+        <option value="PATIENT">PATIENT</option>
+      </select>
+    </label>
+    <label>File <input id="file" type="file" accept=".csv,.xlsx,.xls,.txt" /></label>
+    <p>
+      <button type="button" id="propose">Propose mapping</button>
+      <button type="button" class="secondary" id="confirm" disabled>Confirm</button>
+      <button type="button" class="secondary" id="load" disabled>Load</button>
+    </p>
+    <div id="map-out" class="muted"></div>
+  </section>
+
+  <section>
+    <h2>2. Ask</h2>
+    <textarea id="question">Is cancelation over 25% in the last three months?</textarea>
+    <label>As-of <input id="asof" type="date" value="2026-09-02" /></label>
+    <p><button type="button" id="ask">Ask</button></p>
+    <pre id="ask-out"></pre>
+  </section>
+
+  <section>
+    <h2>3. Synthetic demo</h2>
+    <p class="muted">Loads the labeled example dump (no real clinic) into the DuckDB warehouse.</p>
+    <p><button type="button" id="demo">Run synthetic demo</button></p>
+    <pre id="demo-out"></pre>
+  </section>
+
+  <script>
+    const banner = document.getElementById("banner");
+    let uploadId = null;
+
+    function setBanner(text) { if (text) banner.textContent = text; }
+    function showErr(el, e) { el.innerHTML = '<span class="err">' + (e.message || e) + '</span>'; }
+
+    async function jsonFetch(url, opts) {
+      const res = await fetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || res.statusText);
+      return data;
+    }
+
+    document.getElementById("propose").onclick = async () => {
+      const out = document.getElementById("map-out");
+      const file = document.getElementById("file").files[0];
+      if (!file) return showErr(out, "Choose a CSV or xlsx file.");
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("entity", document.getElementById("entity").value);
+      try {
+        const data = await jsonFetch("/api/propose", { method: "POST", body: fd });
+        uploadId = data.upload_id;
+        setBanner(data.banner);
+        const rows = (data.mapping.columns || []).map(c =>
+          `<tr><td>${c.source}</td><td>${c.target_table || "—"}</td><td>${c.target_column || "unmapped"}</td><td>${c.confidence}</td></tr>`
+        ).join("");
+        out.innerHTML = `<p>Required unmapped: ${data.mapping.unmapped_required.join(", ") || "none"}</p>
+          <table><thead><tr><th>Source</th><th>Table</th><th>PREP column</th><th>Conf.</th></tr></thead><tbody>${rows}</tbody></table>`;
+        document.getElementById("confirm").disabled = data.mapping.unmapped_required.length > 0;
+        document.getElementById("load").disabled = true;
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("confirm").onclick = async () => {
+      const out = document.getElementById("map-out");
+      try {
+        const data = await jsonFetch("/api/confirm", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ upload_id: uploadId })
+        });
+        setBanner(data.banner);
+        out.insertAdjacentHTML("afterbegin", "<p>Mapping confirmed. Load when ready.</p>");
+        document.getElementById("load").disabled = false;
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("load").onclick = async () => {
+      const out = document.getElementById("map-out");
+      try {
+        const data = await jsonFetch("/api/load", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ upload_id: uploadId })
+        });
+        setBanner(data.banner);
+        out.insertAdjacentHTML("afterbegin", `<p>Loaded ${JSON.stringify(data.loaded)} into DuckDB.</p>`);
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("ask").onclick = async () => {
+      const out = document.getElementById("ask-out");
+      try {
+        const data = await jsonFetch("/api/ask", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            question: document.getElementById("question").value,
+            as_of: document.getElementById("asof").value || null
+          })
+        });
+        setBanner(data.banner);
+        out.textContent = [data.banner, "", data.answer, "",
+          (data.suggestions || []).map(s => "- " + s).join("\n")].join("\n");
+      } catch (e) { out.textContent = e.message || String(e); }
+    };
+
+    document.getElementById("demo").onclick = async () => {
+      const out = document.getElementById("demo-out");
+      out.textContent = "Running…";
+      try {
+        const data = await jsonFetch("/api/demo", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ as_of: document.getElementById("asof").value || "2026-09-02" })
+        });
+        setBanner(data.banner);
+        const blocks = (data.answers || []).map(a => "Q: " + a.question + "\n" + a.answer).join("\n\n");
+        out.textContent = data.note + "\n" + data.banner + "\n\n" + blocks;
+      } catch (e) { out.textContent = e.message || String(e); }
+    };
+  </script>
+</body>
+</html>

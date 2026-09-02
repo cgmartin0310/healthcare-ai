@@ -13,6 +13,8 @@ packages/
   analyst/              # grounded Q&A, alerts, scheduled-metric hooks
 ```
 
+`packages/web` is a thin HTTP adapter for Render (`web.app:app`). It is not a fourth analysis component.
+
 Closed-month results are the truth grain. Persistent banner:
 
 > This product does not have a live future schedule or this-week book. Closed-month results are the truth grain.
@@ -56,6 +58,27 @@ Tests:
 ```bash
 pytest -q
 ```
+
+## Web app (Render)
+
+A thin FastAPI wrapper (`web.app:app`) binds `0.0.0.0:$PORT` so Render can run the same three packages. It does not rebuild the analyst. The warehouse is still **DuckDB** (not Postgres, not Snowflake).
+
+Local:
+
+```bash
+pip install -e ".[web]"
+WAREHOUSE_PATH=./data/clinic.duckdb uvicorn web.app:app --host 0.0.0.0 --port 8000
+```
+
+Open http://127.0.0.1:8000 — upload a CSV (propose → confirm → load), ask a question, or run the synthetic demo. Persistent banner: no live future schedule / this-week book.
+
+### Deploy on Render
+
+1. Push this branch (`cursor/clinic-analyst-first-pass-5759`).
+2. Render Dashboard → **New** → **Blueprint** → this repo → **Apply**.
+3. `render.yaml` defines one web service: `uvicorn web.app:app --host 0.0.0.0 --port $PORT`, health check `/healthz`, disk `/data` with `WAREHOUSE_PATH=/data/clinic.duckdb`.
+
+No Snowflake credentials go in the Blueprint. DuckDB on `/data` is the warehouse.
 
 ## Environment
 
@@ -166,7 +189,9 @@ Payments stay `TotalPaid`. AR/collections stay `InsPaid` except the `InsBalance`
 packages/integration_engine/src/integration_engine/
 packages/warehouse/src/warehouse/
 packages/analyst/src/analyst/
+packages/web/src/web/            # FastAPI adapter (Render); not a fourth metric layer
 fixtures/synthetic/layout_a/     # PREP-like headers
 fixtures/synthetic/layout_b/     # different export headers
 tests/                           # locked-def tests + e2e mapper/analyst
+render.yaml                      # one web service, DuckDB on /data
 ```

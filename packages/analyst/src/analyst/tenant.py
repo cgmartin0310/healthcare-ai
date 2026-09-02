@@ -24,6 +24,10 @@ def tenant_dir(tenant_id: str) -> Path:
 
 
 def warehouse_path(tenant_id: str) -> Path:
+    """DuckDB path. WAREHOUSE_PATH (Render: /data/clinic.duckdb) wins when set."""
+    env = os.environ.get("WAREHOUSE_PATH")
+    if env:
+        return Path(env)
     return tenant_dir(tenant_id) / "warehouse.duckdb"
 
 
