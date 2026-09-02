@@ -141,7 +141,7 @@ No second metric model was invented. A few PREP column *names* are inferred beca
 - `PATIENT.AgeGroup` — child vs adult, required for the locked early-quit tenure bars. If Boom PREP uses another name, remap; do not change the bars.
 - `APPOINTMENT.Location`, `TherapistName`, `REFERRAL.ReferralSource` — required to answer AR-by-location, headcount, and referral-source drop-off.
 - `APPOINTMENT.Telehealth` is stored for schema fidelity. There is no locked telehealth metric, so none is computed.
-- **Dollar AR (billed − paid) cannot land.** PREP as described has `InsPaid` / `FirstInsPayment` / `TotalPaid`, not a charge. The analyst reports Completes aged > 30 days with unpaid insurance, by payer × location, and says so.
+- **Dollar AR (billed − paid) cannot land.** PREP as described has `InsPaid` / `FirstInsPayment` / `TotalPaid`, not a charge. The analyst reports Completes aged > 30 days with unpaid insurance, by payer × location, and says so. Self-pay is excluded (not insurance AR).
 - Payroll is not a PREP object. Therapist profitability after payroll is refused.
 
 ## Non-goals
