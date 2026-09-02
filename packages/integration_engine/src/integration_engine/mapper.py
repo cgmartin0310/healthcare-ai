@@ -269,7 +269,7 @@ def confirm_mapping(proposal: MappingProposal | dict[str, Any], *, confirmed_by:
             + ", ".join(proposal.unmapped_required)
         )
     proposal.confirmed = True
-    proposal.confirmed_at = datetime.utcnow().isoformat(timespec="seconds") + f"Z by {confirmed_by}"
+    proposal.confirmed_at = datetime.now().isoformat(timespec="seconds") + f" by {confirmed_by}"
     return proposal
 
 

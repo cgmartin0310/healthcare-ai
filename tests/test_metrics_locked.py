@@ -12,6 +12,7 @@ from warehouse.metrics import (
     avg_collections,
     avg_paid,
     cancelation_rate,
+    caseload_fill,
     churn,
     days_to_pay,
     early_quit_watch,
@@ -314,7 +315,59 @@ def test_ar_past_30_groups_by_payer_and_location(warehouse, as_of):
     assert result.value[0]["payer"] == "Acme Health"
     assert result.value[0]["location"] == "Site B"
     assert result.value[0]["unpaid_completes"] == 2
-    assert "not invented" in result.details["schema_gap"].lower() or "not invented" in result.details["schema_gap"]
+    assert "not invented" in result.details["schema_gap"].lower() or "Dollar AR" in result.details["schema_gap"]
+
+
+def test_ar_excludes_self_pay(warehouse, as_of):
+    load_appts(
+        warehouse,
+        [
+            appt_row(
+                ApptId="1",
+                ApptDate=date(2026, 6, 1),
+                InsPaid=0,
+                PrimaryPayorName="Example Self-Pay",
+                Location="Site A",
+            ),
+            appt_row(
+                ApptId="2",
+                ApptDate=date(2026, 6, 1),
+                InsPaid=0,
+                PrimaryPayorName="Acme Health",
+                Location="Site B",
+            ),
+        ],
+    )
+    result = ar_past_30_days(warehouse, as_of)
+    assert [r["payer"] for r in result.value] == ["Acme Health"]
+
+
+def test_caseload_fill_uses_weekly_target_not_four_week_count(warehouse, as_of):
+    # 10 Completes in a week is not a fill. 35 Completes in a later week is.
+    rows = [
+        appt_row(
+            ApptId=f"early{i}",
+            TherapistName="Therapist_RAMP",
+            Discipline="OT",
+            ApptDate=date(2026, 3, 1 + (i % 7)),
+            AppointmentStatus="Complete",
+        )
+        for i in range(10)
+    ] + [
+        appt_row(
+            ApptId=f"full{i}",
+            TherapistName="Therapist_RAMP",
+            Discipline="OT",
+            ApptDate=date(2026, 6, 1 + (i % 7)),
+            AppointmentStatus="Complete",
+        )
+        for i in range(35)
+    ]
+    load_appts(warehouse, rows)
+    result = caseload_fill(warehouse, as_of)
+    assert result.value
+    assert result.value[0]["months_to_fill"] == 3
+    assert result.value[0]["target_weekly"] == 35
 
 
 def test_staffing_demand_and_rounding_are_locked():

@@ -125,15 +125,15 @@ def build() -> None:
                     first = None
                 add_appt(day, status, patient, therapist, location, payer, ins_paid=ins, total_paid=total, first_ins=first)
 
-    # Jun–Aug: controlled mix so cancelation is clearly over 25%.
-    # Target per month: 70 Complete, 22 Cancelled, 10 No Show, 8 Pending = 32/102 = 31.4%
+    # Jun–Aug: controlled mix so cancelation stays over 25% after RAMP Completes.
+    # Per month: 70 Complete, 36 Cancelled, 14 No Show, 8 Pending/Waiting.
     late_patients = [p for p in patients if p["_first_month"] <= 8]
-    for month, extra_cancel in ((6, 0), (7, 0), (8, 2)):
+    for month, extra_cancel in ((6, 0), (7, 0), (8, 4)):
         days = month_days(2026, month)
         statuses: list[str] = (
             ["Complete"] * 70
-            + ["Cancelled"] * (22 + extra_cancel)
-            + ["No Show"] * 10
+            + ["Cancelled"] * (36 + extra_cancel)
+            + ["No Show"] * 14
             + ["Pending"] * 5
             + ["Waiting"] * 3
         )
@@ -175,25 +175,27 @@ def build() -> None:
             first_ins=None,
         )
 
-    # Therapist_RAMP: OT Completes ramping to 35/week by June.
+    # Therapist_RAMP: OT Completes ramping to 35/week by June, then stop so
+    # summer Completes do not dilute the locked cancelation window.
     ramp_patient_pool = [p for p in patients if p["_disc"] == "OT"]
-    for month, weekly in ((3, 10), (4, 18), (5, 28), (6, 36), (7, 36), (8, 36)):
+    for month, weekly in ((3, 10), (4, 18), (5, 28), (6, 36)):
         days = month_days(2026, month)
-        n = weekly * 4
-        for i in range(n):
-            day = days[i % len(days)]
-            patient = ramp_patient_pool[i % len(ramp_patient_pool)]
-            add_appt(
-                day,
-                "Complete",
-                {**patient, "_disc": "OT"},
-                "Therapist_RAMP",
-                "Site A",
-                "Beacon Plan",
-                ins_paid=95.0,
-                total_paid=110.0,
-                first_ins=day + timedelta(days=12),
-            )
+        for week in range(4):
+            week_start = min(week * 7, max(0, len(days) - 7))
+            for i in range(weekly):
+                day = days[week_start + (i % 7)]
+                patient = ramp_patient_pool[(week * weekly + i) % len(ramp_patient_pool)]
+                add_appt(
+                    day,
+                    "Complete",
+                    {**patient, "_disc": "OT"},
+                    "Therapist_RAMP",
+                    "Site A",
+                    "Beacon Plan",
+                    ins_paid=95.0,
+                    total_paid=110.0,
+                    first_ins=day + timedelta(days=12),
+                )
 
     # Early-quit watch: child OT patients under 6 months tenure, high cancelation.
     child_ot = [p for p in patients if p["AgeGroup"] == "Child" and p["_disc"] == "OT"][:3]

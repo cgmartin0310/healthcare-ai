@@ -10,7 +10,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, timedelta
 from typing import Any
 
-from warehouse.dates import add_months, closed_months_back, last_closed_month, month_bounds, prior_closed_month
+from warehouse.dates import add_months, closed_months_back, last_closed_month, prior_closed_month
 from warehouse.schema import (
     CANCELATION_DENOMINATOR,
     CANCELATION_NUMERATOR,
@@ -772,8 +772,9 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
 
     PREP as described has InsPaid / FirstInsPayment / TotalPaid, not a billed
     charge. Dollar AR (billed − paid) cannot land without inventing a second
-    model. This reports Completes with DOS > 30 days ago and no insurance
+    model.     This reports Completes with DOS > 30 days ago and no insurance
     collection yet (InsPaid is null/0 or FirstInsPayment is null).
+    Self-pay payers are excluded — they are not insurance AR.
     """
     cutoff = as_of - timedelta(days=30)
     filters = [
@@ -783,6 +784,8 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
             COALESCE({qident("InsPaid")}, 0) = 0
             OR {qident("FirstInsPayment")} IS NULL
         )""",
+        # InsPaid is insurance collections. Self-pay is not insurance AR.
+        f"LOWER(COALESCE({qident('PrimaryPayorName')}, '')) NOT LIKE '%self%pay%'",
     ]
     params: list[Any] = [STATUS_COMPLETE, cutoff]
     if company:
@@ -965,16 +968,22 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
             else:
                 dates.append(raw)
         reached = None
-        cursor = first_d + timedelta(days=27)
+        cursor = first_d + timedelta(days=6)
         last = dates[-1]
         while cursor <= last:
-            window_start = cursor - timedelta(days=27)
+            window_start = cursor - timedelta(days=6)
             n = sum(1 for d in dates if window_start <= d <= cursor)
             if n >= target:
                 months = (cursor.year - first_d.year) * 12 + (cursor.month - first_d.month)
-                reached = {"therapist": therapist, "discipline": disc, "months_to_fill": months, "target_weekly": target}
+                reached = {
+                    "therapist": therapist,
+                    "discipline": disc,
+                    "months_to_fill": months,
+                    "target_weekly": target,
+                    "trailing_7day_completes": n,
+                }
                 break
-            cursor += timedelta(days=7)
+            cursor += timedelta(days=1)
         if reached:
             filled.append(reached)
         else:
@@ -982,7 +991,7 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
     return MetricResult(
         name="caseload_fill",
         as_of=as_of,
-        grain_note="first Complete to first trailing-4-week window at OT/PT 35 or ST 70 Completes",
+        grain_note="first Complete to first trailing-7-day window at OT/PT 35 or ST 70 Completes/week",
         value=filled,
         details={"insufficient": insufficient, "n_filled": len(filled)},
         unavailable=None if filled else "Completes do not show any clinician reaching the staffing weekly-visit target.",
