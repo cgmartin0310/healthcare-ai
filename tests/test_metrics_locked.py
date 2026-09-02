@@ -37,6 +37,11 @@ def test_prep_column_remaps_are_locked():
     assert "Source" in referral
     assert "ReferralSource" not in referral
     assert "LocationName" in referral
+    from warehouse.schema import CLAIM_TXN
+
+    txn = {c.name for c in CLAIM_TXN.columns}
+    assert "TxnId" in txn
+    assert "PatBalance" not in txn
 
 
 def test_last_closed_month_mid_month():

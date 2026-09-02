@@ -26,7 +26,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p_propose = sub.add_parser("propose", help="Propose a column mapping for a CSV/xlsx file.")
     p_propose.add_argument("file")
-    p_propose.add_argument("--entity", choices=["APPOINTMENT", "REFERRAL", "PATIENT"])
+    p_propose.add_argument("--entity", choices=["APPOINTMENT", "REFERRAL", "PATIENT", "CLAIM_TXN"])
     p_propose.add_argument("--out", required=True, help="Write mapping JSON here.")
 
     p_confirm = sub.add_parser("confirm", help="Human-confirm a proposed mapping.")
@@ -142,6 +142,11 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
             "PATIENT",
             fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_patients.csv",
             fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv",
+        ),
+        (
+            "CLAIM_TXN",
+            fixtures / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv",
+            fixtures / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv",
         ),
     ]
     work = Path("./data/demo_mappings")

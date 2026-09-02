@@ -253,10 +253,104 @@ REFERRAL = Table(
     ),
 )
 
+CLAIM_TXN = Table(
+    name="CLAIM_TXN",
+    grain="one insurance claim transaction (optional payment source of truth)",
+    columns=(
+        Column(
+            "TxnId",
+            "VARCHAR",
+            True,
+            "Transaction key",
+            ("txn_id", "transaction_id", "payment_id", "line_id"),
+        ),
+        Column(
+            "ApptId",
+            "VARCHAR",
+            True,
+            "Visit key",
+            ("appt_id", "appointment_id", "visit_id", "encounter_id"),
+        ),
+        Column(
+            "PatientId",
+            "VARCHAR",
+            True,
+            "Patient key",
+            ("patient_id", "patient_num", "pt_id", "client_id"),
+        ),
+        Column(
+            "Company",
+            "VARCHAR",
+            True,
+            "Clinic / company",
+            ("company", "clinic", "clinic_name"),
+        ),
+        Column(
+            "PostedDate",
+            "DATE",
+            True,
+            "Date the txn posted",
+            ("posted_date", "posted_on", "post_date", "txn_date", "payment_date"),
+        ),
+        Column(
+            "Payer",
+            "VARCHAR",
+            True,
+            "Payer on the txn. Insurance only for InsPaid / InsBalance.",
+            ("payer", "payor", "payer_name", "insurance_name", "primary_payor_name"),
+        ),
+        Column(
+            "TxnType",
+            "VARCHAR",
+            True,
+            "charge | allowance | payment | adjustment | refund",
+            ("txn_type", "transaction_type", "type", "line_type"),
+        ),
+        Column(
+            "Amount",
+            "DOUBLE",
+            True,
+            "Signed-magnitude amount. Charge positive; others reduce balance unless refund.",
+            ("amount", "txn_amount", "payment_amount"),
+        ),
+        Column(
+            "LocationName",
+            "VARCHAR",
+            False,
+            "Site / office",
+            ("location_name", "location", "site", "office"),
+        ),
+        Column(
+            "Discipline",
+            "VARCHAR",
+            False,
+            "OT / PT / ST",
+            ("discipline", "therapy_type", "discipline_code"),
+        ),
+    ),
+)
+
 PREP_TABLES: dict[str, Table] = {
     APPOINTMENT.name: APPOINTMENT,
     PATIENT.name: PATIENT,
     REFERRAL.name: REFERRAL,
+    CLAIM_TXN.name: CLAIM_TXN,
+}
+
+TXN_TYPES = ("charge", "allowance", "payment", "adjustment", "refund")
+TXN_TYPE_ALIASES = {
+    "charge": "charge",
+    "chg": "charge",
+    "allowance": "allowance",
+    "contractual": "allowance",
+    "writeoff": "allowance",
+    "write off": "allowance",
+    "payment": "payment",
+    "pmt": "payment",
+    "paid": "payment",
+    "adjustment": "adjustment",
+    "adj": "adjustment",
+    "refund": "refund",
 }
 
 # Canonical appointment statuses stored in the warehouse.

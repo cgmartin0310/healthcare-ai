@@ -154,10 +154,12 @@ def _guess_entity(columns: list[str], filename: str) -> str | None:
         "APPOINTMENT": 0,
         "REFERRAL": 0,
         "PATIENT": 0,
+        "CLAIM_TXN": 0,
     }
     appt_hits = ("appt", "visit", "dos", "status", "payor", "payer", "ins paid", "therapist")
     ref_hits = ("referral", "referred", "datetime created", "completed", "eval completed", "source")
     pat_hits = ("patient active", "dob", "date of birth", "birth date", "is active")
+    txn_hits = ("txn", "transaction", "posted", "txn type", "transaction type", "charge", "allowance")
     for h in appt_hits:
         if h in blob:
             scores["APPOINTMENT"] += 1
@@ -167,8 +169,13 @@ def _guess_entity(columns: list[str], filename: str) -> str | None:
     for h in pat_hits:
         if h in blob:
             scores["PATIENT"] += 1
+    for h in txn_hits:
+        if h in blob:
+            scores["CLAIM_TXN"] += 1
     if "referral" in blob and scores["REFERRAL"] >= 1:
         return "REFERRAL"
+    if scores["CLAIM_TXN"] >= 2:
+        return "CLAIM_TXN"
     if scores["PATIENT"] >= 2 and scores["APPOINTMENT"] == 0:
         return "PATIENT"
     best = max(scores, key=scores.get)

@@ -47,6 +47,12 @@ clinic-analyst confirm /tmp/appt.json
 clinic-analyst --tenant example-clinic load \
   fixtures/synthetic/layout_a/SYNTHETIC_EXAMPLE_appointments.csv --mapping /tmp/appt.json
 
+clinic-analyst propose fixtures/synthetic/layout_payments/SYNTHETIC_EXAMPLE_transactions.csv \
+  --entity CLAIM_TXN --out /tmp/txn.json
+clinic-analyst confirm /tmp/txn.json
+clinic-analyst --tenant example-clinic load \
+  fixtures/synthetic/layout_payments/SYNTHETIC_EXAMPLE_transactions.csv --mapping /tmp/txn.json --mode append
+
 clinic-analyst --tenant example-clinic --as-of 2026-09-02 ask \
   "Is cancelation over 25% in the last three months?"
 clinic-analyst --tenant example-clinic --as-of 2026-09-02 alerts
@@ -61,24 +67,34 @@ pytest -q
 
 ## Web app (Render)
 
-A thin FastAPI wrapper (`web.app:app`) binds `0.0.0.0:$PORT` so Render can run the same three packages. It does not rebuild the analyst. The warehouse is still **DuckDB** (not Postgres, not Snowflake).
+A thin FastAPI wrapper (`web.app:app`) binds `0.0.0.0:$PORT`. Shared app, **isolated DuckDB per tenant** at `{CLINIC_ANALYST_DATA_DIR}/tenants/{tenant_id}/warehouse.duckdb`. Not Postgres. Not Snowflake.
+
+Login is required. Signup creates a new tenant + first owner. Email+password, bcrypt hashes, HTTP-only signed session cookie. Users live in `{CLINIC_ANALYST_DATA_DIR}/auth.sqlite` on the same disk.
+
+Documented **demo login** (PHI-free, not a production secret):
+
+- email: `demo@example.clinic`
+- password: `demo-clinic-2026`
+- tenant: `example-clinic`
+
+A second clinic can sign up and gets an empty warehouse that cannot see the demo tenant.
 
 Local:
 
 ```bash
 pip install -e ".[web]"
-WAREHOUSE_PATH=./data/clinic.duckdb uvicorn web.app:app --host 0.0.0.0 --port 8000
+CLINIC_ANALYST_DATA_DIR=./data uvicorn web.app:app --host 0.0.0.0 --port 8000
 ```
 
-Open http://127.0.0.1:8000 — upload a CSV (propose → confirm → load), ask a question, or run the synthetic demo. Persistent banner: no live future schedule / this-week book.
+Open http://127.0.0.1:8000 — log in, upload multiple files (visits, referrals, payments), confirm mappings, ask, or run the synthetic demo into *your* tenant. Persistent banner: no live future schedule / this-week book.
 
 ### Deploy on Render
 
 1. Push this branch (`cursor/clinic-analyst-first-pass-5759`).
 2. Render Dashboard → **New** → **Blueprint** → this repo → **Apply**.
-3. `render.yaml` defines one web service: `uvicorn web.app:app --host 0.0.0.0 --port $PORT`, health check `/healthz`, disk `/data` with `WAREHOUSE_PATH=/data/clinic.duckdb`.
+3. `render.yaml`: one web service, `uvicorn web.app:app --host 0.0.0.0 --port $PORT`, `/healthz`, disk `/data` (`CLINIC_ANALYST_DATA_DIR=/data`, generated `CLINIC_ANALYST_SECRET`).
 
-No Snowflake credentials go in the Blueprint. DuckDB on `/data` is the warehouse.
+No Snowflake credentials and no Postgres add-on. Users + tenant DuckDB files persist on `/data`.
 
 ## Environment
 
@@ -88,7 +104,7 @@ See `.env.example`. Local state is `CLINIC_ANALYST_DATA_DIR` (default `./data`).
 
 ### 1. Integration engine
 
-v1 is **one-time file ingest** (CSV/xlsx) with an agent in the loop: propose a column mapping onto PREP `APPOINTMENT` / `REFERRAL` / `PATIENT`, human confirm, then load.
+v1 is **one-time file ingest** (CSV/xlsx) with an agent in the loop: propose a column mapping onto PREP `APPOINTMENT` / `REFERRAL` / `PATIENT` / optional `CLAIM_TXN`, human confirm, then load. Multiple files per tenant (schedule, referrals, payments/aging). A tenant can load APPOINTMENT only.
 
 - Does **not** log into client EHRs, scrape portals, or run a live ongoing feed.
 - PHI stays out of the extract where possible. Default views use ids, not patient names, addresses, or claim lists.
@@ -100,7 +116,7 @@ Shaped after Clinic Analyst Snowflake `BOOMREPORTING.PREP` so locked metric defs
 
 Local/dev store is **DuckDB** (columnar, simple, fast). The same quoted identifiers are the documented path to Snowflake (`warehouse/snowflake.py` shows the cancelation SQL). Do not point a demo tenant at Boom live data.
 
-Core entities only: `APPOINTMENT`, `REFERRAL`, `PATIENT`. No extra warehouse objects beyond what locked metrics need.
+Core entities: `APPOINTMENT`, `REFERRAL`, `PATIENT`, plus optional `CLAIM_TXN` (payment source of truth). When `CLAIM_TXN` is present, locked money metrics derive `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used. If neither, the analyst says the data is not in the dump.
 
 Boom ClinicId → Company is for schema fidelity only and is **not** shown as the product: `8=CST`, `9=AOT`, `22=KID`, `24=PTA`. Demo tenants are generic clinics (`Example Clinic`).
 
@@ -166,6 +182,7 @@ Column remaps onto PREP (not new metrics):
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` — there is no `AgeGroup` warehouse column. Locked early-quit bars derive child vs adult from DOB (child = age < 18 at last closed month end): PT / adult OT-ST < 3 months; child OT-ST < 6. DOB is not shown on default screens.
 - `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.
+- Optional `CLAIM_TXN` (payment source of truth when present): required `TxnId`, `ApptId`, `PatientId`, `Company`, `PostedDate`, `Payer`, `TxnType` (`charge|allowance|payment|adjustment|refund`), `Amount`. Optional `LocationName`, `Discipline`. When present, locked money metrics **derive** `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used if present. If neither exists, the answer is that the data is not in the dump. Do not add `PatBalance`.
 - `APPOINTMENT.Telehealth` is stored for schema fidelity. There is no locked telehealth metric, so none is computed.
 - Payroll is not a PREP object. Therapist profitability after payroll is refused.
 
@@ -190,8 +207,9 @@ packages/integration_engine/src/integration_engine/
 packages/warehouse/src/warehouse/
 packages/analyst/src/analyst/
 packages/web/src/web/            # FastAPI adapter (Render); not a fourth metric layer
-fixtures/synthetic/layout_a/     # PREP-like headers
+fixtures/synthetic/layout_a/     # PREP-like visit/referral/patient headers
 fixtures/synthetic/layout_b/     # different export headers
-tests/                           # locked-def tests + e2e mapper/analyst
-render.yaml                      # one web service, DuckDB on /data
+fixtures/synthetic/layout_payments/  # CLAIM_TXN charge/payment rows
+tests/                           # locked-def, auth isolation, CLAIM_TXN, e2e
+render.yaml                      # one web service, DuckDB + users on /data
 ```

@@ -91,6 +91,8 @@ class Warehouse:
             combined = combined.drop_duplicates(subset=["Company", "PatientId"], keep="last")
         elif table_name == "REFERRAL" and "ReferralId" in combined.columns:
             key = "ReferralId"
+        elif table_name == "CLAIM_TXN" and "TxnId" in combined.columns:
+            key = "TxnId"
         if key:
             combined = combined.drop_duplicates(subset=[key], keep="last")
         return self.replace_table(table_name, combined)

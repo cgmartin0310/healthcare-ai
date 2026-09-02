@@ -11,6 +11,7 @@ from warehouse.schema import (
     BOOM_CLINIC_ID_TO_COMPANY,
     DISCIPLINE_ALIASES,
     STATUS_ALIASES,
+    TXN_TYPE_ALIASES,
 )
 
 
@@ -94,6 +95,12 @@ def normalize_timestamp(value: Any) -> Any:
     return ts.to_pydatetime()
 
 
+def normalize_txn_type(value: Any) -> Any:
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    return TXN_TYPE_ALIASES.get(_norm_key(value), str(value).strip().lower())
+
+
 def normalize_number(value: Any) -> Any:
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return None
@@ -121,4 +128,8 @@ NORMALIZERS = {
     "InsPaid": normalize_number,
     "InsBalance": normalize_number,
     "TotalPaid": normalize_number,
+    "Amount": normalize_number,
+    "PostedDate": normalize_date,
+    "TxnType": normalize_txn_type,
+    "Payer": lambda v: None if v is None or (isinstance(v, float) and pd.isna(v)) else str(v).strip(),
 }

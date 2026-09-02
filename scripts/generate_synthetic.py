@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Generate clearly labeled SYNTHETIC example dumps (two column layouts).
+"""Generate clearly labeled SYNTHETIC example dumps.
 
+Two visit-layout variants plus a third payments file that maps onto CLAIM_TXN.
 Tied to no real clinic. Id-only / obviously fake. Not Boom brands.
 """
 
@@ -15,6 +16,7 @@ import random
 ROOT = Path(__file__).resolve().parents[1]
 OUT_A = ROOT / "fixtures" / "synthetic" / "layout_a"
 OUT_B = ROOT / "fixtures" / "synthetic" / "layout_b"
+OUT_P = ROOT / "fixtures" / "synthetic" / "layout_payments"
 
 COMPANY = "Example Clinic"
 LOCATIONS = ["Site A", "Site B"]
@@ -386,9 +388,66 @@ def build() -> None:
         ["patient_num", "clinic_name", "is_active_flag", "dob"],
         clients,
     )
-    print(f"Wrote {len(appointments)} appointments, {len(referrals)} referrals, {len(patients)} patients")
+    txns = []
+    txn_id = 1
+    for row in appointments:
+        if row["AppointmentStatus"] != "Complete":
+            continue
+        ins = float(row["InsPaid"]) if row["InsPaid"] else 0.0
+        bal = float(row["InsBalance"]) if row.get("InsBalance") else 0.0
+        charge = ins + bal if (ins + bal) > 0 else 95.0
+        posted = row["FirstInsPayment"] or row["ApptDate"]
+        txns.append(
+            {
+                "txn_id": f"T{txn_id:05d}",
+                "visit_id": row["ApptId"],
+                "patient_num": row["PatientId"],
+                "clinic_name": row["Company"],
+                "posted_on": posted,
+                "payer_name": row["PrimaryPayorName"],
+                "txn_type": "charge",
+                "amount": f"{charge:.2f}",
+                "site": row["LocationName"],
+                "therapy_type": row["Discipline"],
+            }
+        )
+        txn_id += 1
+        if ins > 0:
+            txns.append(
+                {
+                    "txn_id": f"T{txn_id:05d}",
+                    "visit_id": row["ApptId"],
+                    "patient_num": row["PatientId"],
+                    "clinic_name": row["Company"],
+                    "posted_on": posted,
+                    "payer_name": row["PrimaryPayorName"],
+                    "txn_type": "payment",
+                    "amount": f"{ins:.2f}",
+                    "site": row["LocationName"],
+                    "therapy_type": row["Discipline"],
+                }
+            )
+            txn_id += 1
+    write_csv(
+        OUT_P / "SYNTHETIC_EXAMPLE_transactions.csv",
+        [
+            "txn_id",
+            "visit_id",
+            "patient_num",
+            "clinic_name",
+            "posted_on",
+            "payer_name",
+            "txn_type",
+            "amount",
+            "site",
+            "therapy_type",
+        ],
+        txns,
+    )
+    print(f"Wrote {len(appointments)} appointments, {len(referrals)} referrals, {len(patients)} patients, {len(txns)} claim txns")
     print(f"Layout A → {OUT_A}")
     print(f"Layout B → {OUT_B}")
+    print(f"Payments → {OUT_P}")
 
 
 if __name__ == "__main__":

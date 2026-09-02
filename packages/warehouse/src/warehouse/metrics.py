@@ -11,6 +11,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from warehouse.dates import add_months, closed_months_back, last_closed_month, prior_closed_month
+from warehouse.money import appointment_relation, money_source
 from warehouse.schema import (
     CANCELATION_DENOMINATOR,
     CANCELATION_NUMERATOR,
@@ -625,7 +626,7 @@ def avg_collections(wh: Warehouse, as_of: date, *, company: str | None = None) -
             COUNT(*) AS claims,
             AVG(COALESCE({qident("InsPaid")}, 0)) AS avg_ins_paid,
             SUM(COALESCE({qident("InsPaid")}, 0)) AS sum_ins_paid
-        FROM {quoted_table("APPOINTMENT")}
+        FROM {appointment_relation(wh)}
         WHERE {" AND ".join(filters)}
         GROUP BY 1
         ORDER BY avg_ins_paid DESC
@@ -640,6 +641,16 @@ def avg_collections(wh: Warehouse, as_of: date, *, company: str | None = None) -
         }
         for rec in frame.to_dict(orient="records")
     ]
+    src = money_source(wh)
+    if src == "none":
+        return MetricResult(
+            name="avg_collections",
+            as_of=as_of,
+            grain_note="InsPaid including zeros/partials; DOS=ApptDate; 60-day lag then 3 months back",
+            value=[],
+            details={"source": src},
+            unavailable="InsPaid is not in the dump (no CLAIM_TXN and no appointment rollup).",
+        )
     return MetricResult(
         name="avg_collections",
         as_of=as_of,
@@ -650,6 +661,7 @@ def avg_collections(wh: Warehouse, as_of: date, *, company: str | None = None) -
             "window_end": window_end.isoformat(),
             "uses": "InsPaid",
             "not": "TotalPaid",
+            "source": src,
         },
         unavailable=None if rows else "No Completes in the collections lag window.",
     )
@@ -673,7 +685,7 @@ def avg_paid(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metri
             COALESCE({qident("PrimaryPayorName")}, '(unknown)') AS payer,
             COUNT(*) AS claims,
             AVG({qident("InsPaid")}) AS avg_ins_paid
-        FROM {quoted_table("APPOINTMENT")}
+        FROM {appointment_relation(wh)}
         WHERE {" AND ".join(filters)}
         GROUP BY 1
         ORDER BY avg_ins_paid DESC
@@ -687,12 +699,22 @@ def avg_paid(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metri
         }
         for rec in frame.to_dict(orient="records")
     ]
+    src = money_source(wh)
+    if src == "none":
+        return MetricResult(
+            name="avg_paid",
+            as_of=as_of,
+            grain_note="InsPaid>0 only; last 3 months through as_of",
+            value=[],
+            details={"source": src},
+            unavailable="InsPaid is not in the dump (no CLAIM_TXN and no appointment rollup).",
+        )
     return MetricResult(
         name="avg_paid",
         as_of=as_of,
         grain_note="InsPaid>0 only; last 3 months through as_of",
         value=rows,
-        details={"window_start": window_start.isoformat(), "window_end": as_of.isoformat(), "uses": "InsPaid"},
+        details={"window_start": window_start.isoformat(), "window_end": as_of.isoformat(), "uses": "InsPaid", "source": src},
         unavailable=None if rows else "No Completes with InsPaid>0 in the last 3 months.",
     )
 
@@ -717,12 +739,22 @@ def days_to_pay(wh: Warehouse, as_of: date, *, company: str | None = None) -> Me
             COALESCE({qident("PrimaryPayorName")}, '(unknown)') AS payer,
             COUNT(*) AS claims,
             AVG(DATEDIFF('day', {qident("ApptDate")}, {qident("FirstInsPayment")})) AS avg_days
-        FROM {quoted_table("APPOINTMENT")}
+        FROM {appointment_relation(wh)}
         WHERE {" AND ".join(filters)}
           AND DATEDIFF('day', {qident("ApptDate")}, {qident("FirstInsPayment")}) >= 0
         GROUP BY 1
         ORDER BY avg_days DESC
     """
+    src = money_source(wh)
+    if src == "none":
+        return MetricResult(
+            name="days_to_pay",
+            as_of=as_of,
+            grain_note="Completes with InsPaid>0; exclude negative datediff; min 20 claims",
+            value=[],
+            details={"source": src},
+            unavailable="FirstInsPayment is not in the dump (no CLAIM_TXN and no appointment rollup).",
+        )
     frame = wh.fetch_df(sql, params)
     rows = []
     insufficient = []
@@ -754,11 +786,21 @@ def payments_total(wh: Warehouse, start: date, end: date, *, company: str | None
     if company:
         filters.append(f'{qident("Company")} = ?')
         params.append(company)
+    src = money_source(wh)
+    if src == "none":
+        return MetricResult(
+            name="payments_total",
+            as_of=end,
+            grain_note="Payments = SUM(TotalPaid) on Completes. InsPaid is shown only as a non-mixed contrast.",
+            value=None,
+            details={"source": src, "do_not_mix": True},
+            unavailable="TotalPaid is not in the dump (no CLAIM_TXN and no appointment rollup).",
+        )
     sql = f"""
         SELECT
             SUM(COALESCE({qident("TotalPaid")}, 0)) AS total_paid,
             SUM(COALESCE({qident("InsPaid")}, 0)) AS ins_paid
-        FROM {quoted_table("APPOINTMENT")}
+        FROM {appointment_relation(wh)}
         WHERE {" AND ".join(filters)}
           AND {qident("AppointmentStatus")} = '{STATUS_COMPLETE}'
     """
@@ -772,6 +814,7 @@ def payments_total(wh: Warehouse, start: date, end: date, *, company: str | None
             "total_paid": float((row or [0])[0] or 0),
             "ins_paid_contrast_only": float((row or [0, 0])[1] or 0),
             "do_not_mix": True,
+            "source": src,
         },
     )
 
@@ -804,7 +847,7 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
             COUNT(*) AS claims,
             SUM({qident("InsBalance")}) AS ins_balance,
             AVG(DATEDIFF('day', {qident("ApptDate")}, DATE '{as_of.isoformat()}')) AS avg_age_days
-        FROM {quoted_table("APPOINTMENT")}
+        FROM {appointment_relation(wh)}
         WHERE {" AND ".join(filters)}
         GROUP BY 1, 2
         ORDER BY ins_balance DESC
@@ -828,6 +871,7 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
         details={
             "cutoff": cutoff.isoformat(),
             "uses": "InsBalance",
+            "source": money_source(wh),
             "not": [
                 "billed − paid",
                 "PatBalance",
@@ -835,7 +879,11 @@ def ar_past_30_days(wh: Warehouse, as_of: date, *, company: str | None = None) -
                 "InsPaid × open-claim count (expected-recovery; separate question)",
             ],
         },
-        unavailable=None if rows else "No Completes older than 30 days with InsBalance > 0.",
+        unavailable=(
+            "InsBalance is not in the dump (no CLAIM_TXN and no appointment rollup)."
+            if money_source(wh) == "none"
+            else (None if rows else "No Completes older than 30 days with InsBalance > 0.")
+        ),
     )
 
 

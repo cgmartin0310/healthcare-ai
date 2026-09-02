@@ -13,21 +13,28 @@ from warehouse.store import Warehouse
 DEFAULT_TENANT = "example-clinic"
 
 
+def sanitize_tenant_id(tenant_id: str) -> str:
+    cleaned = "".join(ch for ch in tenant_id.lower() if ch.isalnum() or ch in "-_")
+    if not cleaned or cleaned in {".", ".."}:
+        raise ValueError("invalid tenant_id")
+    return cleaned
+
+
 def data_dir() -> Path:
-    return Path(os.environ.get("CLINIC_ANALYST_DATA_DIR", "./data")).resolve()
+    raw = os.environ.get("CLINIC_ANALYST_DATA_DIR", "./data")
+    path = Path(raw).resolve()
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def tenant_dir(tenant_id: str) -> Path:
-    path = data_dir() / "tenants" / tenant_id
+    path = data_dir() / "tenants" / sanitize_tenant_id(tenant_id)
     path.mkdir(parents=True, exist_ok=True)
     return path
 
 
 def warehouse_path(tenant_id: str) -> Path:
-    """DuckDB path. WAREHOUSE_PATH (Render: /data/clinic.duckdb) wins when set."""
-    env = os.environ.get("WAREHOUSE_PATH")
-    if env:
-        return Path(env)
+    """One DuckDB file per clinic: {data_dir}/tenants/{tenant_id}/warehouse.duckdb."""
     return tenant_dir(tenant_id) / "warehouse.duckdb"
 
 
