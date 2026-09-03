@@ -215,6 +215,27 @@ def test_primary_payer_is_latest_complete(warehouse):
     assert result.value == [{"payer": "New Payer", "patients": 1}]
 
 
+def test_secondary_payor_does_not_change_locked_primary_payer(warehouse):
+    load_appts(
+        warehouse,
+        [
+            appt_row(
+                ApptId="1",
+                PatientId="P",
+                ApptDate=date(2026, 8, 20),
+                PrimaryPayorName="Acme Health",
+                SecondaryPayorName="Beacon Plan",
+            )
+        ],
+    )
+    result = primary_payer_patient_level(warehouse, date(2026, 8, 1), date(2026, 8, 31))
+    assert result.value == [{"payer": "Acme Health", "patients": 1}]
+    from warehouse.schema import PREP_TABLES
+
+    assert "COVERAGE" not in PREP_TABLES
+    assert "CurrentPayer" not in {c.name for c in APPOINTMENT.columns}
+
+
 def test_avg_collections_includes_zeros_and_uses_lag_window(warehouse, as_of):
     # Window end = 2026-07-04 (as_of - 60d), start = 2026-04-04.
     load_appts(

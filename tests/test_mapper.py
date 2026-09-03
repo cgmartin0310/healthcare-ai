@@ -58,6 +58,21 @@ def test_layout_b_patients_map_active_and_dob():
     confirm_mapping(proposal)
 
 
+def test_secondary_payor_maps_and_is_not_current_payer(tmp_path):
+    src = tmp_path / "visits_cob.csv"
+    src.write_text(
+        "visit_id,date_of_service,visit_status,clinic_name,therapy_type,patient_num,"
+        "insurance_name,secondary_payer\n"
+        "A1,2026-08-10,Complete,Example Clinic,OT,P1,Acme Health,Beacon Plan\n"
+    )
+    proposal = propose_mapping(src, entity="APPOINTMENT")
+    bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
+    assert bound["insurance_name"] == "PrimaryPayorName"
+    assert bound["secondary_payer"] == "SecondaryPayorName"
+    assert "CurrentPayer" not in bound.values()
+    confirm_mapping(proposal)
+
+
 def test_status_and_discipline_aliases():
     assert normalize_status("canceled") == "Cancelled"
     assert normalize_status("no-show") == "No Show"
