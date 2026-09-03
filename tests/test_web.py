@@ -38,6 +38,10 @@ def test_index_shows_banner_and_login():
         assert "not a legal determination" in res.text
         assert "HIPAA compliant" not in res.text
         assert "no HIPAA data" not in res.text.lower()
+        assert "CLAIM_TXN (charges / payments)" in res.text
+        assert "charges, payments, adjustments, aging" in res.text
+        assert "CLAIM_TXN (payments)</option>" not in res.text
+        assert "payments/aging" not in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):

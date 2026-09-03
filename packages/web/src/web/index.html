@@ -56,13 +56,13 @@
 
     <section>
       <h2>1. Map files (one export at a time)</h2>
-      <p class="muted">Schedule, referrals, payments/aging — each file maps onto one PREP table. Missing REFERRAL or CLAIM_TXN is fine. Load appends into your tenant only. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
+      <p class="muted">Schedule, referrals, charges, payments, adjustments, aging — each file maps onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Load appends into your tenant only. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
       <label>Entity
         <select id="entity">
           <option value="APPOINTMENT">APPOINTMENT (visits)</option>
           <option value="REFERRAL">REFERRAL</option>
           <option value="PATIENT">PATIENT</option>
-          <option value="CLAIM_TXN">CLAIM_TXN (payments)</option>
+          <option value="CLAIM_TXN">CLAIM_TXN (charges / payments)</option>
         </select>
       </label>
       <label>File <input id="file" type="file" accept=".csv,.xlsx,.xls,.txt" /></label>

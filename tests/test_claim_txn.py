@@ -1,4 +1,4 @@
-"""CLAIM_TXN is the payment source of truth when present. Fallback to appointment rollups."""
+"""CLAIM_TXN is the claim ledger (charges / payments) when present. Fallback to appointment rollups."""
 
 from __future__ import annotations
 

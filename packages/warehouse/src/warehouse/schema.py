@@ -317,14 +317,14 @@ REFERRAL = Table(
 
 CLAIM_TXN = Table(
     name="CLAIM_TXN",
-    grain="one insurance claim transaction (optional payment source of truth)",
+    grain="one claim-ledger row (charge, allowance, payment, adjustment, or refund). Optional money source of truth. Not a separate CHARGES table.",
     columns=(
         Column(
             "TxnId",
             "VARCHAR",
             True,
             "Transaction key",
-            ("txn_id", "transaction_id", "payment_id", "line_id"),
+            ("txn_id", "transaction_id", "payment_id", "charge_id", "line_id"),
         ),
         Column(
             "ApptId",
@@ -387,14 +387,14 @@ CLAIM_TXN = Table(
             "VARCHAR",
             True,
             "charge | allowance | payment | adjustment | refund",
-            ("txn_type", "transaction_type", "type", "line_type"),
+            ("txn_type", "transaction_type", "type", "line_type", "charge_type"),
         ),
         Column(
             "Amount",
             "DOUBLE",
             True,
             "Signed-magnitude amount. Charge positive; others reduce balance unless refund.",
-            ("amount", "txn_amount", "payment_amount"),
+            ("amount", "txn_amount", "payment_amount", "charge_amount", "billed_amount"),
         ),
         Column(
             "LocationName",

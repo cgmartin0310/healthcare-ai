@@ -6,12 +6,16 @@ be treated as a client billing extract.
 
 Two visit-layout variants of the same semantic tenant exist so the integration
 engine can prove mapping onto PREP `APPOINTMENT`, `REFERRAL`, and `PATIENT`. A
-third **payments** file maps onto optional `CLAIM_TXN`. A tenant can load visits
-only; missing REFERRAL or CLAIM_TXN is not a failed load.
+third **claim-ledger** file maps onto optional `CLAIM_TXN` (charges / payments /
+allowances / adjustments / refunds — not payments-only). Charge files map onto
+`CLAIM_TXN` the same as payment files; there is no separate `CHARGES` table. A
+tenant can load visits only; missing REFERRAL or CLAIM_TXN is not a failed load.
 
 - `layout_a/` — PREP-like headers (`ApptDate`, `LocationName`, `InsBalance`, `Source`, `DOB`)
 - `layout_b/` — a different export shape (`date_of_service`, `site`, `insurance_balance`, `source`, `dob`)
-- `layout_payments/` — charge/payment rows (`txn_id`, `visit_id`, `posted_on`, `txn_type`, `amount`) → `CLAIM_TXN`
+- `layout_payments/` — claim-ledger rows (`txn_id`, `visit_id`, `posted_on`, `txn_type`, `amount`) → `CLAIM_TXN`
+
+`TxnType` stays `charge|allowance|payment|adjustment|refund`.
 
 When `CLAIM_TXN` is loaded, locked money metrics derive `TotalPaid` / `InsPaid` /
 `InsBalance` / `FirstInsPayment` from those rows. When it is absent, appointment

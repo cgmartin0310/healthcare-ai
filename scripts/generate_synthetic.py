@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate clearly labeled SYNTHETIC example dumps.
 
-Two visit-layout variants plus a third payments file that maps onto CLAIM_TXN.
+Two visit-layout variants plus a third claim-ledger file that maps onto CLAIM_TXN
+(charges / payments — not payments-only).
 Tied to no real clinic. Id-only / obviously fake. Not Boom brands.
 """
 

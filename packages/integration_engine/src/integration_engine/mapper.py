@@ -168,7 +168,20 @@ def _guess_entity(columns: list[str], filename: str) -> str | None:
     appt_hits = ("appt", "visit", "dos", "status", "payor", "payer", "ins paid", "therapist")
     ref_hits = ("referral", "referred", "datetime created", "completed", "eval completed", "source")
     pat_hits = ("patient active", "dob", "date of birth", "birth date", "is active")
-    txn_hits = ("txn", "transaction", "posted", "txn type", "transaction type", "charge", "allowance")
+    txn_hits = (
+        "txn",
+        "transaction",
+        "posted",
+        "txn type",
+        "transaction type",
+        "charge",
+        "allowance",
+        "adjustment",
+        "refund",
+        "ledger",
+        "claim txn",
+        "billed",
+    )
     for h in appt_hits:
         if h in blob:
             scores["APPOINTMENT"] += 1
@@ -214,6 +227,12 @@ def propose_mapping(
         "Default mapped tables do not require patient names, addresses, or claim lists on screen.",
         "Human confirm is required before load. The server re-runs de-id on ingest.",
     ]
+    if entity_guess == "CLAIM_TXN":
+        notes.append(
+            "CLAIM_TXN is the claim ledger: charges, payments, allowances, adjustments, refunds. "
+            "There is no separate CHARGES table. Charge files map here the same as payment files. "
+            "TxnType stays charge|allowance|payment|adjustment|refund."
+        )
     synthetic = "synthetic" in path.as_posix().lower() or "example" in path.name.lower()
     if synthetic:
         notes.append("Source path is labeled synthetic/example — not a real clinic dump.")

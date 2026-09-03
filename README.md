@@ -113,7 +113,7 @@ pip install -e ".[web]"
 CLINIC_ANALYST_DATA_DIR=./data uvicorn web.app:app --host 0.0.0.0 --port 8000
 ```
 
-Open http://127.0.0.1:8000 — log in, upload multiple files (visits, referrals, payments), then **talk to the analyst** in the chat thread. Suggested chips are optional. Persistent banner: no live future schedule / this-week book.
+Open http://127.0.0.1:8000 — log in, upload multiple files (visits, referrals, claim ledger), then **talk to the analyst** in the chat thread. Suggested chips are optional. Persistent banner: no live future schedule / this-week book.
 
 ### Chat (Grok tools)
 
@@ -125,7 +125,7 @@ After login the user types any ops/billing question. The analyst is this clinic'
 
 Set the key in the Render dashboard (Blueprint prompts for `XAI_API_KEY` because `sync: false`). Do not commit the key.
 
-Synthetic demo data (not Boom): Example Clinic, ~1800 visits, 80 patients, ~200 referrals, plus `CLAIM_TXN` payment rows. Tied to no real clinic.
+Synthetic demo data (not Boom): Example Clinic, ~1800 visits, 80 patients, ~200 referrals, plus `CLAIM_TXN` claim-ledger rows (charges / payments). Tied to no real clinic.
 
 ### Deploy on Render
 
@@ -143,7 +143,7 @@ See `.env.example`. Local state is `CLINIC_ANALYST_DATA_DIR` (default `./data`).
 
 ### 1. Integration engine
 
-v1 is **one-time file ingest** (CSV/xlsx) with an agent in the loop: propose a column mapping onto PREP `APPOINTMENT` / `REFERRAL` / `PATIENT` / optional `CLAIM_TXN`, human confirm, then load. Multiple files per tenant (schedule, referrals, payments/aging). A tenant can load APPOINTMENT only.
+v1 is **one-time file ingest** (CSV/xlsx) with an agent in the loop: propose a column mapping onto PREP `APPOINTMENT` / `REFERRAL` / `PATIENT` / optional `CLAIM_TXN` (claim ledger), human confirm, then load. Multiple files per tenant (schedule, referrals, charges, payments, adjustments, aging). Charge files map onto `CLAIM_TXN` the same as payment files — there is no separate `CHARGES` table. A tenant can load APPOINTMENT only.
 
 - Does **not** log into client EHRs, scrape portals, or run a live ongoing feed.
 - Every CSV/xlsx goes through a **de-identification gate** before confirm/load (and again on ingest). See below.
@@ -155,7 +155,7 @@ Shaped after Clinic Analyst Snowflake `BOOMREPORTING.PREP` so locked metric defs
 
 Local/dev store is **DuckDB** (columnar, simple, fast). The same quoted identifiers are the documented path to Snowflake (`warehouse/snowflake.py` shows the cancelation SQL). Do not point a demo tenant at Boom live data.
 
-Core entities: `APPOINTMENT`, `REFERRAL`, `PATIENT`, plus optional `CLAIM_TXN` (payment source of truth). When `CLAIM_TXN` is present, locked money metrics derive `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it (do not require mapping `FirstInsPayment`). When absent, appointment rollup columns are used. If neither, the analyst says the data is not in the dump. Rendering clinician is `ProviderId` / `ProviderName`.
+Core entities: `APPOINTMENT`, `REFERRAL`, `PATIENT`, plus optional `CLAIM_TXN` (claim ledger: charges / payments / allowances / adjustments / refunds; money source of truth when present). When `CLAIM_TXN` is present, locked money metrics derive `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it (do not require mapping `FirstInsPayment`). When absent, appointment rollup columns are used. If neither, the analyst says the data is not in the dump. Rendering clinician is `ProviderId` / `ProviderName`.
 
 Boom ClinicId → Company is for schema fidelity only and is **not** shown as the product: `8=CST`, `9=AOT`, `22=KID`, `24=PTA`. Demo tenants are generic clinics (`Example Clinic`).
 
@@ -222,7 +222,7 @@ Column remaps onto PREP (not new metrics):
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` is **not stored**. At import, DOB (if present) becomes optional `AgeBand` (`Child` / `Adult`, child = age < 18 at as-of). There is no `AgeGroup` warehouse column. Locked early-quit bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.
 - `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.
-- Optional `CLAIM_TXN` (payment source of truth when present): required `TxnId`, `ApptId`, `PatientId`, `Company`, `PostedDate`, `Payer`, `TxnType` (`charge|allowance|payment|adjustment|refund`), `Amount`. Optional `LocationName`, `Discipline`. When present, locked money metrics **derive** `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used if present. If neither exists, the answer is that the data is not in the dump. Do not add `PatBalance`.
+- Optional `CLAIM_TXN` (claim ledger when present — not payments-only; no separate `CHARGES` table): required `TxnId`, `ApptId`, `PatientId`, `Company`, `PostedDate`, `Payer`, `TxnType` (`charge|allowance|payment|adjustment|refund`), `Amount`. Optional `LocationName`, `Discipline`. Charge files map here the same as payment files. When present, locked money metrics **derive** `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used if present. If neither exists, the answer is that the data is not in the dump. Do not add `PatBalance`.
 - `APPOINTMENT.Telehealth` is stored for schema fidelity. There is no locked telehealth metric, so none is computed.
 - Payroll is not a PREP object. Therapist profitability after payroll is refused.
 
@@ -249,7 +249,7 @@ packages/analyst/src/analyst/
 packages/web/src/web/            # FastAPI adapter (Render); not a fourth metric layer
 fixtures/synthetic/layout_a/     # PREP-like visit/referral/patient headers
 fixtures/synthetic/layout_b/     # different export headers
-fixtures/synthetic/layout_payments/  # CLAIM_TXN charge/payment rows
+fixtures/synthetic/layout_payments/  # CLAIM_TXN claim-ledger rows (charges / payments)
 tests/                           # locked-def, auth isolation, CLAIM_TXN, e2e
 render.yaml                      # one web service, DuckDB + users on /data
 ```

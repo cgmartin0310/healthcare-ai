@@ -88,6 +88,28 @@ def test_status_and_discipline_aliases():
     assert normalize_discipline("Speech") == "ST"
 
 
+def test_charge_file_maps_onto_claim_txn_not_a_charges_table(tmp_path):
+    from warehouse.schema import PREP_TABLES
+
+    assert "CHARGES" not in PREP_TABLES
+    src = tmp_path / "charges.csv"
+    src.write_text(
+        "line_id,posted_on,payer_name,txn_type,charge_amount,patient_num,clinic_name\n"
+        "C1,2026-08-10,Acme Health,charge,95.00,P1,Example Clinic\n"
+    )
+    proposal = propose_mapping(src)
+    assert proposal.entity_guess == "CLAIM_TXN"
+    assert any("claim ledger" in n.lower() for n in proposal.notes)
+    assert any("no separate charges table" in n.lower() for n in proposal.notes)
+    bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
+    assert bound["line_id"] == "TxnId"
+    assert bound["posted_on"] == "PostedDate"
+    assert bound["txn_type"] == "TxnType"
+    assert bound["charge_amount"] == "Amount"
+    assert bound["payer_name"] == "Payer"
+    confirm_mapping(proposal)
+
+
 def test_confirm_rejects_missing_required(tmp_path):
     # A file that cannot map AppointmentStatus
     src = tmp_path / "emptyish.csv"

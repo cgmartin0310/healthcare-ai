@@ -31,7 +31,11 @@ def main(argv: list[str] | None = None) -> int:
 
     p_propose = sub.add_parser("propose", help="Propose a column mapping for a CSV/xlsx file.")
     p_propose.add_argument("file")
-    p_propose.add_argument("--entity", choices=["APPOINTMENT", "REFERRAL", "PATIENT", "CLAIM_TXN"])
+    p_propose.add_argument(
+        "--entity",
+        choices=["APPOINTMENT", "REFERRAL", "PATIENT", "CLAIM_TXN"],
+        help="CLAIM_TXN is the claim ledger (charges / payments), not payments-only.",
+    )
     p_propose.add_argument("--out", required=True, help="Write mapping JSON here.")
 
     p_confirm = sub.add_parser("confirm", help="Human-confirm a proposed mapping.")

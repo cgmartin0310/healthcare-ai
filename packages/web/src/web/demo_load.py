@@ -65,7 +65,7 @@ def load_synthetic_demo(
         )
         mapped.append(
             {
-                "layout": "A" if entity != "CLAIM_TXN" else "payments",
+                "layout": "A" if entity != "CLAIM_TXN" else "ledger",
                 "entity": entity,
                 "columns": sum(1 for c in proposal.columns if c.target_column),
                 "loaded": counts,

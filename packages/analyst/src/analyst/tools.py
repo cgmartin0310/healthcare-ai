@@ -40,7 +40,7 @@ Locked metric definitions (do not redefine; do not invent a lookalike):
 - Avg Collections = InsPaid by payer, DOS=ApptDate, 60-day lag then 3 months back, includes zeros/partials.
 - Avg Paid = InsPaid>0 only, last 3 months through as-of.
 - Days to pay = DATEDIFF(day, ApptDate, FirstInsPayment) on Completes with InsPaid>0, exclude negatives, min 20 claims.
-- When CLAIM_TXN is present, derive TotalPaid / InsPaid / InsBalance / FirstInsPayment from it. Else appointment rollups. If neither, say the data is not in the dump.
+- When CLAIM_TXN (claim ledger: charges / payments / allowances / adjustments / refunds) is present, derive TotalPaid / InsPaid / InsBalance / FirstInsPayment from it. Else appointment rollups. If neither, say the data is not in the dump. There is no separate CHARGES table.
 - Headcount = unique ProviderId (fallback ProviderName) with ≥1 Complete in last closed month.
 - Payroll is not a PREP object. Do not invent profitability.
 """.strip()
