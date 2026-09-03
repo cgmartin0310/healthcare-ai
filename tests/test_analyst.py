@@ -88,7 +88,7 @@ def test_analyst_refuses_payroll_invention(warehouse, as_of):
 def test_analyst_caseload_without_fill_says_data_not_there(warehouse, as_of):
     load_appts(
         warehouse,
-        [appt_row(ApptId="1", TherapistName="Therapist_01", ApptDate=date(2026, 8, 1))],
+        [appt_row(ApptId="1", ProviderName="Therapist_01", ApptDate=date(2026, 8, 1))],
     )
     out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask(
         "How long does a new clinician take to fill a caseload?"

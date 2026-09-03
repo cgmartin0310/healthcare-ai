@@ -33,12 +33,41 @@ def apply_mapping(frame: pd.DataFrame, proposal: MappingProposal) -> dict[str, p
     return out
 
 
+def _empty_company(value: Any) -> bool:
+    try:
+        if pd.isna(value):
+            return True
+    except (TypeError, ValueError):
+        pass
+    if value is None:
+        return True
+    return str(value).strip() in {"", "nan", "None", "<NA>"}
+
+
+def stamp_and_derive(tables: dict[str, pd.DataFrame], *, tenant_company: str | None) -> None:
+    """Fill Company from the tenant; derive REFERRAL.Completed? from EvalDate when needed."""
+    company = (tenant_company or "").strip() or None
+    for table_name, mapped in tables.items():
+        if company and "Company" in mapped.columns:
+            missing = mapped["Company"].map(_empty_company)
+            if missing.any():
+                mapped.loc[missing, "Company"] = company
+        if table_name == "REFERRAL" and "EvalDate" in mapped.columns:
+            derived = mapped["EvalDate"].notna().map(lambda ok: 1 if ok else 0)
+            if "Completed?" not in mapped.columns:
+                mapped["Completed?"] = derived
+            else:
+                need = mapped["Completed?"].map(_empty_company)
+                mapped.loc[need, "Completed?"] = derived[need]
+
+
 def load_mapped_file(
     warehouse: Warehouse,
     path: str | Path,
     proposal: MappingProposal | dict[str, Any],
     *,
     tenant_id: str,
+    tenant_company: str | None = None,
     mode: str = "replace",
     manifest_path: Path | None = None,
 ) -> dict[str, int]:
@@ -48,6 +77,7 @@ def load_mapped_file(
         raise ValueError("Mapping is not confirmed. Human confirm is required before load.")
     frame = read_tabular(path)
     tables = apply_mapping(frame, proposal)
+    stamp_and_derive(tables, tenant_company=tenant_company)
     counts: dict[str, int] = {}
     for table_name, mapped in tables.items():
         if mode == "append":

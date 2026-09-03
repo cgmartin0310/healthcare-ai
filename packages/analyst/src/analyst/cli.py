@@ -9,7 +9,7 @@ from pathlib import Path
 
 from analyst.banner import PRODUCT_BANNER
 from analyst.engine import Analyst
-from analyst.tenant import DEFAULT_TENANT, open_warehouse, parse_as_of, write_tenant_config
+from analyst.tenant import DEFAULT_TENANT, open_warehouse, parse_as_of, tenant_company, write_tenant_config
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, load_mapping_json, propose_mapping, save_mapping_json
 
@@ -79,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.file,
                 proposal,
                 tenant_id=args.tenant,
+                tenant_company=tenant_company(args.tenant),
                 mode=args.mode,
                 manifest_path=Path(args.mapping).with_suffix(".manifest.json"),
             )
@@ -156,6 +157,7 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
         {
             "tenant_id": tenant_id,
             "display_name": "Example Clinic (synthetic)",
+            "company": "Example Clinic",
             "synthetic_example": True,
         },
     )
@@ -164,7 +166,15 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
     tenants = {0: tenant_id, 1: tenant_id + "-layout-b"}
     for layout_idx in (0, 1):
         tid = tenants[layout_idx]
-        write_tenant_config(tid, {"tenant_id": tid, "display_name": "Example Clinic (synthetic)", "synthetic_example": True})
+        write_tenant_config(
+            tid,
+            {
+                "tenant_id": tid,
+                "display_name": "Example Clinic (synthetic)",
+                "company": "Example Clinic",
+                "synthetic_example": True,
+            },
+        )
         with open_warehouse(tid) as wh:
             for entity, path_a, path_b in pairs:
                 src = path_a if layout_idx == 0 else path_b
@@ -176,7 +186,13 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
                 confirmed = confirm_mapping(proposal)
                 save_mapping_json(confirmed, mapping_path)
                 counts = load_mapped_file(
-                    wh, src, confirmed, tenant_id=tid, mode="replace", manifest_path=mapping_path.with_suffix(".manifest.json")
+                    wh,
+                    src,
+                    confirmed,
+                    tenant_id=tid,
+                    tenant_company=tenant_company(tid, fallback="Example Clinic"),
+                    mode="replace",
+                    manifest_path=mapping_path.with_suffix(".manifest.json"),
                 )
                 mapped = [c for c in confirmed.columns if c.target_column]
                 print(

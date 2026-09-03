@@ -18,7 +18,7 @@ from typing import Any
 
 import pandas as pd
 
-from warehouse.schema import PREP_TABLES, Table
+from warehouse.schema import PREP_TABLES, Table, mapping_required_missing
 
 
 def _norm(name: str) -> str:
@@ -238,9 +238,7 @@ def propose_mapping(path: str | Path, *, entity: str | None = None) -> MappingPr
     required = []
     if entity_guess in PREP_TABLES:
         mapped = {c.target_column for c in proposals if c.target_table == entity_guess}
-        for col in PREP_TABLES[entity_guess].required_columns:
-            if col.name not in mapped:
-                required.append(f"{entity_guess}.{col.name}")
+        required = mapping_required_missing(PREP_TABLES[entity_guess], mapped)
 
     return MappingProposal(
         source_path=str(path.resolve()),

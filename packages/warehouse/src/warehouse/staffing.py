@@ -87,7 +87,9 @@ def forecast(wh: Warehouse, as_of: date, *, company: str | None = None, rounding
         raw_fte = dem / monthly_capacity if monthly_capacity else 0
         fte = round_fte(raw_fte, rounding)
         therapists = [
-            t for t in hc.details["therapists"] if t["primary_discipline"] == discipline
+            t
+            for t in hc.details.get("providers") or hc.details.get("therapists") or []
+            if t["primary_discipline"] == discipline
         ]
         lines.append(
             {

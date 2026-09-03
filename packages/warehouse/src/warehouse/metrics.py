@@ -27,6 +27,14 @@ def _in_list(values: tuple[str, ...]) -> str:
     return ", ".join("'" + v.replace("'", "''") + "'" for v in values)
 
 
+def _provider_key_sql() -> str:
+    """Prefer ProviderId; fall back to ProviderName. Not TherapistId."""
+    return (
+        f"COALESCE(NULLIF(TRIM(CAST({qident('ProviderId')} AS VARCHAR)), ''), "
+        f"NULLIF(TRIM(CAST({qident('ProviderName')} AS VARCHAR)), ''))"
+    )
+
+
 def _as_date(value: Any) -> date | None:
     if value is None:
         return None
@@ -915,13 +923,14 @@ def completes_in_month(
 
 
 def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> MetricResult:
-    """Unique TherapistName with ≥1 Complete in last closed month; one primary location."""
+    """Unique ProviderId (else ProviderName) with ≥1 Complete in last closed month; one primary location."""
     start, end = last_closed_month(as_of)
+    provider = _provider_key_sql()
     filters = [
         f'{qident("AppointmentStatus")} = ?',
         f'{qident("ApptDate")} >= ?',
         f'{qident("ApptDate")} <= ?',
-        f'{qident("TherapistName")} IS NOT NULL',
+        f"{provider} IS NOT NULL",
     ]
     params: list[Any] = [STATUS_COMPLETE, start, end]
     if company:
@@ -930,7 +939,7 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
     sql = f"""
         WITH loc AS (
             SELECT
-                {qident("TherapistName")} AS therapist,
+                {provider} AS provider,
                 {qident("LocationName")} AS location,
                 {qident("Discipline")} AS discipline,
                 COUNT(*) AS completes
@@ -940,18 +949,18 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
         ),
         ranked AS (
             SELECT *,
-                ROW_NUMBER() OVER (PARTITION BY therapist ORDER BY completes DESC, location) AS rn
+                ROW_NUMBER() OVER (PARTITION BY provider ORDER BY completes DESC, location) AS rn
             FROM loc
         )
-        SELECT therapist, location, discipline, completes
+        SELECT provider, location, discipline, completes
         FROM ranked
         WHERE rn = 1
-        ORDER BY therapist
+        ORDER BY provider
     """
     frame = wh.fetch_df(sql, params)
     rows = [
         {
-            "therapist": rec["therapist"],
+            "provider": rec["provider"],
             "primary_location": rec["location"],
             "primary_discipline": rec["discipline"],
             "completes": int(rec["completes"]),
@@ -961,9 +970,9 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
     return MetricResult(
         name="headcount",
         as_of=as_of,
-        grain_note="unique TherapistName with ≥1 Complete in last closed month; one primary location",
+        grain_note="unique ProviderId (fallback ProviderName) with ≥1 Complete in last closed month; one primary location",
         value=len(rows),
-        details={"month_start": start.isoformat(), "month_end": end.isoformat(), "therapists": rows},
+        details={"month_start": start.isoformat(), "month_end": end.isoformat(), "providers": rows},
     )
 
 
@@ -975,7 +984,8 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
     """
     from warehouse.staffing import VISITS_PER_WEEK_FTE
 
-    filters = [f'{qident("AppointmentStatus")} = ?', f'{qident("TherapistName")} IS NOT NULL']
+    provider = _provider_key_sql()
+    filters = [f'{qident("AppointmentStatus")} = ?', f"{provider} IS NOT NULL"]
     params: list[Any] = [STATUS_COMPLETE]
     if company:
         filters.append(f'{qident("Company")} = ?')
@@ -983,7 +993,7 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
     visits = wh.fetch_df(
         f"""
         SELECT
-            {qident("TherapistName")} AS therapist,
+            {provider} AS provider,
             {qident("Discipline")} AS discipline,
             {qident("ApptDate")} AS appt_date
         FROM {quoted_table("APPOINTMENT")}
@@ -999,11 +1009,11 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
             as_of=as_of,
             grain_note="derived from Completes only",
             value=[],
-            unavailable="No Completes with TherapistName. Cannot measure caseload fill.",
+            unavailable="No Completes with ProviderId or ProviderName. Cannot measure caseload fill.",
         )
     filled = []
     insufficient = []
-    for therapist, grp in visits.groupby("therapist"):
+    for therapist, grp in visits.groupby("provider"):
         grp = grp.sort_values("appt_date")
         first = grp["appt_date"].iloc[0]
         if hasattr(first, "to_pydatetime"):

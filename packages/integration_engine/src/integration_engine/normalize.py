@@ -124,6 +124,8 @@ NORMALIZERS = {
     "ApptDate": normalize_date,
     "FirstInsPayment": normalize_date,
     "DOB": normalize_date,
+    "EvalDate": normalize_date,
+    "DOS": normalize_date,
     "DateTimeCreated": normalize_timestamp,
     "InsPaid": normalize_number,
     "InsBalance": normalize_number,

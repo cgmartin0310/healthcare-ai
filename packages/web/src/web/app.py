@@ -213,6 +213,7 @@ def api_load(body: LoadBody, user: User = Depends(current_user)) -> dict[str, An
             rec["path"],
             mapping,
             tenant_id=user.tenant_id,
+            tenant_company=user.tenant_name,
             mode=mode,
         )
     return {
@@ -266,7 +267,12 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
                 continue
             proposal = confirm_mapping(propose_mapping(path, entity=entity))
             counts = load_mapped_file(
-                wh, path, proposal, tenant_id=user.tenant_id, mode=mode
+                wh,
+                path,
+                proposal,
+                tenant_id=user.tenant_id,
+                tenant_company=user.tenant_name,
+                mode=mode,
             )
             mapped.append(
                 {

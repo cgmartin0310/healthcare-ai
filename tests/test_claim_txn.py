@@ -17,7 +17,10 @@ from warehouse.schema import CLAIM_TXN
 def test_claim_txn_is_optional_prep_table():
     names = {c.name for c in CLAIM_TXN.columns}
     assert {"TxnId", "ApptId", "PatientId", "Company", "PostedDate", "Payer", "TxnType", "Amount"} <= names
+    assert {"ClaimId", "DOS", "DenialCode"} <= names
+    assert CLAIM_TXN.column("ApptId").required is False
     assert "PatBalance" not in names
+    assert "FirstInsPayment" not in names
 
 
 def test_appointment_fallback_when_no_claim_txn(warehouse, as_of):

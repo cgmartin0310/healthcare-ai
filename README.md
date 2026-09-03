@@ -116,7 +116,7 @@ Shaped after Clinic Analyst Snowflake `BOOMREPORTING.PREP` so locked metric defs
 
 Local/dev store is **DuckDB** (columnar, simple, fast). The same quoted identifiers are the documented path to Snowflake (`warehouse/snowflake.py` shows the cancelation SQL). Do not point a demo tenant at Boom live data.
 
-Core entities: `APPOINTMENT`, `REFERRAL`, `PATIENT`, plus optional `CLAIM_TXN` (payment source of truth). When `CLAIM_TXN` is present, locked money metrics derive `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used. If neither, the analyst says the data is not in the dump.
+Core entities: `APPOINTMENT`, `REFERRAL`, `PATIENT`, plus optional `CLAIM_TXN` (payment source of truth). When `CLAIM_TXN` is present, locked money metrics derive `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it (do not require mapping `FirstInsPayment`). When absent, appointment rollup columns are used. If neither, the analyst says the data is not in the dump. Rendering clinician is `ProviderId` / `ProviderName`.
 
 Boom ClinicId → Company is for schema fidelity only and is **not** shown as the product: `8=CST`, `9=AOT`, `22=KID`, `24=PTA`. Demo tenants are generic clinics (`Example Clinic`).
 
@@ -171,14 +171,15 @@ Staffing working model (when the analyst forecasts FTE):
 - Rounding is a tenant setting; default nearest 0.5, min 1
 - Thin-data churn plugs: prior-active < 20 → OT/ST 10%, PT 20%
 - Demand next month = last closed month Completes × (1 − clinic monthly churn) + (refs/mo × 50% conversion × 52/12 × visits-per-new)
-- Headcount = unique `TherapistName` with ≥1 Complete in last closed month, one primary location
+- Headcount = unique `ProviderId` (fallback `ProviderName`) with ≥1 Complete in last closed month, one primary location. Boom `TherapistName` maps onto `ProviderName`. There is no `TherapistId`.
 - Forecast churn is clinic×discipline, not therapist-level
 
 ## Schema notes (no full DDL dump)
 
 Column remaps onto PREP (not new metrics):
 
-- `APPOINTMENT.LocationName` (not `Location`). `TherapistName` is already on `APPOINTMENT`.
+- `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName` (Boom `TherapistName` is a synonym for `ProviderName`). Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
+- Company is stamped from the logged-in tenant when an upload omits it. Do not require `Company` in every file.
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` — there is no `AgeGroup` warehouse column. Locked early-quit bars derive child vs adult from DOB (child = age < 18 at last closed month end): PT / adult OT-ST < 3 months; child OT-ST < 6. DOB is not shown on default screens.
 - `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.

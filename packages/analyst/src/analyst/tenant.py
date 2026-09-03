@@ -53,3 +53,20 @@ def write_tenant_config(tenant_id: str, payload: dict[str, Any]) -> Path:
     path = tenant_dir(tenant_id) / "tenant.json"
     path.write_text(json.dumps(payload, indent=2) + "\n")
     return path
+
+
+def tenant_company(tenant_id: str, fallback: str | None = None) -> str:
+    """Company stamp for uploads that omit Company. Never mix tenants."""
+    path = tenant_dir(tenant_id) / "tenant.json"
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text())
+            for key in ("company", "display_name"):
+                value = payload.get(key)
+                if value:
+                    return str(value)
+        except (OSError, json.JSONDecodeError):
+            pass
+    if fallback:
+        return fallback
+    return tenant_id

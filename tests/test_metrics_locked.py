@@ -32,11 +32,20 @@ def test_prep_column_remaps_are_locked():
     assert "Location" not in appt
     assert "InsBalance" in appt
     assert "PatBalance" not in appt
+    assert "ProviderId" in appt
+    assert "ProviderName" in appt
+    assert "TherapistName" not in appt
+    assert "TherapistId" not in appt
+    assert "SecondaryPayorName" in appt
+    assert "CurrentPayer" not in appt
+    assert "CPT" in appt
     assert "DOB" in patient
     assert "AgeGroup" not in patient
     assert "Source" in referral
     assert "ReferralSource" not in referral
     assert "LocationName" in referral
+    assert "EvalDate" in referral
+    assert "PatientId" in referral
     from warehouse.schema import CLAIM_TXN
 
     txn = {c.name for c in CLAIM_TXN.columns}
@@ -370,7 +379,7 @@ def test_caseload_fill_uses_weekly_target_not_four_week_count(warehouse, as_of):
     rows = [
         appt_row(
             ApptId=f"early{i}",
-            TherapistName="Therapist_RAMP",
+            ProviderName="Therapist_RAMP",
             Discipline="OT",
             ApptDate=date(2026, 3, 1 + (i % 7)),
             AppointmentStatus="Complete",
@@ -379,7 +388,7 @@ def test_caseload_fill_uses_weekly_target_not_four_week_count(warehouse, as_of):
     ] + [
         appt_row(
             ApptId=f"full{i}",
-            TherapistName="Therapist_RAMP",
+            ProviderName="Therapist_RAMP",
             Discipline="OT",
             ApptDate=date(2026, 6, 1 + (i % 7)),
             AppointmentStatus="Complete",

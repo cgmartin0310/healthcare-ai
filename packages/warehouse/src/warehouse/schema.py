@@ -98,11 +98,36 @@ APPOINTMENT = Table(
             ("patient_id", "patient_num", "pt_id", "client_id"),
         ),
         Column(
-            "TherapistName",
+            "ProviderId",
             "VARCHAR",
             False,
-            "Rendering clinician (id-like display name, not a patient)",
-            ("therapist_name", "therapist", "rendering_provider", "clinician", "provider"),
+            "Rendering clinician id. Headcount prefers this over display name.",
+            ("provider_id", "providerid", "npi", "clinician_id"),
+            "Not TherapistId. Boom TherapistName does not map here.",
+        ),
+        Column(
+            "ProviderName",
+            "VARCHAR",
+            False,
+            "Rendering clinician display name. Boom TherapistName maps here.",
+            (
+                "provider_name",
+                "providername",
+                "therapist_name",
+                "therapistname",
+                "therapist",
+                "rendering_provider",
+                "clinician",
+                "provider",
+            ),
+            "Synonym for Boom TherapistName. Do not add a TherapistId column.",
+        ),
+        Column(
+            "CPT",
+            "VARCHAR",
+            False,
+            "Procedure code on the visit. Optional.",
+            ("cpt", "cpt_code", "procedure_code", "proc_code"),
         ),
         Column(
             "LocationName",
@@ -115,8 +140,22 @@ APPOINTMENT = Table(
             "PrimaryPayorName",
             "VARCHAR",
             False,
-            "Visit-level primary payer",
+            "Visit-level primary payer. Locked primary-payer grain stays here.",
             ("primary_payor_name", "primary_payer_name", "payer", "payor", "insurance_name", "primary_payer"),
+        ),
+        Column(
+            "SecondaryPayorName",
+            "VARCHAR",
+            False,
+            "COB secondary payer on the visit. Not CurrentPayer. No coverage table.",
+            (
+                "secondary_payor_name",
+                "secondary_payer_name",
+                "secondary_payer",
+                "secondary_payor",
+                "cob_payer",
+            ),
+            "CLAIM_TXN.Payer remains the payer on each transaction (primary or secondary).",
         ),
         Column(
             "InsPaid",
@@ -218,8 +257,22 @@ REFERRAL = Table(
             "Completed?",
             "INTEGER",
             True,
-            "Converted = 1 (eval date populated). Not EVAL notes.",
+            "Converted = 1 (eval date populated). Not EVAL notes. Derived from EvalDate when that column is mapped.",
             ("completed?", "eval_completed", "converted", "completed", "is_converted"),
+        ),
+        Column(
+            "PatientId",
+            "VARCHAR",
+            False,
+            "Optional patient key on the referral row",
+            ("patient_id", "patient_num", "pt_id", "client_id"),
+        ),
+        Column(
+            "EvalDate",
+            "DATE",
+            False,
+            "Eval date. When present, Completed? is 1 if EvalDate is populated.",
+            ("eval_date", "evaldate", "evaluation_date", "date_of_eval"),
         ),
         Column(
             "Company",
@@ -267,9 +320,16 @@ CLAIM_TXN = Table(
         Column(
             "ApptId",
             "VARCHAR",
-            True,
-            "Visit key",
+            False,
+            "Visit key when the dump has one. Kept when present; not required to load.",
             ("appt_id", "appointment_id", "visit_id", "encounter_id"),
+        ),
+        Column(
+            "ClaimId",
+            "VARCHAR",
+            False,
+            "Optional claim key",
+            ("claim_id", "claimid", "claim_number"),
         ),
         Column(
             "PatientId",
@@ -282,7 +342,7 @@ CLAIM_TXN = Table(
             "Company",
             "VARCHAR",
             True,
-            "Clinic / company",
+            "Clinic / company. Stamped from the logged-in tenant when the file omits it.",
             ("company", "clinic", "clinic_name"),
         ),
         Column(
@@ -293,11 +353,25 @@ CLAIM_TXN = Table(
             ("posted_date", "posted_on", "post_date", "txn_date", "payment_date"),
         ),
         Column(
+            "DOS",
+            "DATE",
+            False,
+            "Optional date of service on the txn",
+            ("dos", "date_of_service", "service_date"),
+        ),
+        Column(
             "Payer",
             "VARCHAR",
             True,
-            "Payer on the txn. Insurance only for InsPaid / InsBalance.",
+            "Payer on this txn (primary or secondary). Not visit CurrentPayer.",
             ("payer", "payor", "payer_name", "insurance_name", "primary_payor_name"),
+        ),
+        Column(
+            "DenialCode",
+            "VARCHAR",
+            False,
+            "Optional denial / remark code",
+            ("denial_code", "denialcode", "remark_code", "carc"),
         ),
         Column(
             "TxnType",
@@ -336,6 +410,23 @@ PREP_TABLES: dict[str, Table] = {
     REFERRAL.name: REFERRAL,
     CLAIM_TXN.name: CLAIM_TXN,
 }
+
+# Filled at load from the logged-in tenant. Do not require these in every upload.
+STAMPED_FROM_TENANT = frozenset({"Company"})
+
+
+def mapping_required_missing(table: Table, mapped_names: set[str]) -> list[str]:
+    """Required warehouse fields still unmapped after tenant stamps / derivations."""
+    missing: list[str] = []
+    for col in table.required_columns:
+        if col.name in mapped_names:
+            continue
+        if col.name in STAMPED_FROM_TENANT:
+            continue
+        if table.name == "REFERRAL" and col.name == "Completed?" and "EvalDate" in mapped_names:
+            continue
+        missing.append(f"{table.name}.{col.name}")
+    return missing
 
 TXN_TYPES = ("charge", "allowance", "payment", "adjustment", "refund")
 TXN_TYPE_ALIASES = {
