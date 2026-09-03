@@ -1,8 +1,8 @@
-"""Load synthetic demo files into a warehouse.
+"""Load synthetic demo profiles into a warehouse.
 
-``seed_demo()`` uses this only for the ``example-clinic`` tenant when
-APPOINTMENT is empty. ``POST /api/demo`` reuses the same file list so a
-user can still load the labeled dump into their own tenant on purpose.
+``seed_demo()`` uses this only for the ``example-clinic`` tenant when the
+warehouse is empty or still on the old layout. ``POST /api/demo`` loads the
+chosen profile into the signed-in tenant.
 """
 
 from __future__ import annotations
@@ -15,28 +15,29 @@ from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, propose_mapping
 from warehouse.metrics import NO_PROVIDER_CASELOAD, caseload_fill
 from warehouse.store import Warehouse
+from web.profiles import DEFAULT_PROFILE, PROFILES, fixtures_root, profile_files
 
 DEMO_TENANT_ID = "example-clinic"
 DEMO_TENANT_COMPANY = "Example Clinic (synthetic)"
-# Synthetic files are generated through 2026-08; this as-of keeps August closed.
 DEMO_DEFAULT_AS_OF = "2026-09-02"
+# Distinctive site from the Harbor profile — used to detect a stale pre-profile dump.
+DEMO_MARKER_LOCATION = "Harbor East"
 
 
 def fixtures_dir() -> Path:
-    cwd = Path.cwd() / "fixtures" / "synthetic"
-    if cwd.exists():
-        return cwd
-    return Path(__file__).resolve().parents[4] / "fixtures" / "synthetic"
+    return fixtures_root()
 
 
-def demo_file_jobs() -> list[tuple[str, Path, str]]:
-    root = fixtures_dir()
-    return [
-        ("APPOINTMENT", root / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv", "replace"),
-        ("REFERRAL", root / "layout_a" / "SYNTHETIC_EXAMPLE_referrals.csv", "replace"),
-        ("PATIENT", root / "layout_a" / "SYNTHETIC_EXAMPLE_patients.csv", "replace"),
-        ("CLAIM_TXN", root / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv", "replace"),
-    ]
+def resolve_profile(profile_id: str | None) -> str:
+    pid = (profile_id or DEFAULT_PROFILE).strip().lower()
+    if pid not in PROFILES:
+        raise ValueError(f"Unknown clinic profile: {profile_id}")
+    return pid
+
+
+def demo_file_jobs(profile_id: str | None = None) -> list[tuple[str, Path, str]]:
+    pid = resolve_profile(profile_id)
+    return [(entity, path, "replace") for entity, path in profile_files(pid)]
 
 
 def load_synthetic_demo(
@@ -44,12 +45,14 @@ def load_synthetic_demo(
     *,
     tenant_id: str,
     tenant_company: str,
+    profile_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Map and load layout_a visits/referrals/patients + layout_payments CLAIM_TXN."""
+    """Map and load one synthetic clinic profile (visits, referrals, patients, ledger)."""
+    pid = resolve_profile(profile_id)
     mapped: list[dict[str, Any]] = []
-    jobs = [(entity, path, mode) for entity, path, mode in demo_file_jobs() if path.exists()]
+    jobs = [(entity, path, mode) for entity, path, mode in demo_file_jobs(pid) if path.exists()]
     if not jobs:
-        raise FileNotFoundError(f"Synthetic fixtures not found at {fixtures_dir()}")
+        raise FileNotFoundError(f"Synthetic fixtures not found for profile {pid} at {fixtures_dir()}")
     for entity, path, mode in jobs:
         as_of = date.fromisoformat(DEMO_DEFAULT_AS_OF)
         if mode == "replace":
@@ -66,8 +69,10 @@ def load_synthetic_demo(
         )
         mapped.append(
             {
-                "layout": "A" if entity != "CLAIM_TXN" else "ledger",
+                "profile": pid,
+                "layout": pid,
                 "entity": entity,
+                "source": path.name,
                 "columns": sum(1 for c in proposal.columns if c.target_column),
                 "loaded": counts,
             }
@@ -76,7 +81,7 @@ def load_synthetic_demo(
 
 
 def demo_caseload_readiness(wh: Warehouse, as_of: date) -> dict[str, Any]:
-    """Counts Christopher needs after Run synthetic demo. Used to fail a green-looking empty demo."""
+    """Counts required after Run synthetic demo. Used to fail a green-looking empty demo."""
     row = wh.fetch_one(
         """
         SELECT
@@ -103,12 +108,18 @@ def demo_caseload_readiness(wh: Warehouse, as_of: date) -> dict[str, Any]:
     result = caseload_fill(wh, as_of, company=None)
     filled = result.value if isinstance(result.value, list) else []
     n_filled = sum(1 for rec in filled if rec.get("months_to_fill") is not None)
+    n_ramped = sum(
+        1
+        for rec in filled
+        if rec.get("months_to_fill") is not None and 1 <= int(rec["months_to_fill"]) <= 6
+    )
     return {
         "appointment_rows": int((row or [0])[0] or 0),
         "completes": int((row or [0, 0])[1] or 0),
         "completes_with_provider": int((row or [0, 0, 0])[2] or 0),
         "distinct_company": companies,
         "caseload_n_filled": n_filled,
+        "caseload_n_ramped_1_to_6": n_ramped,
         "caseload_unavailable": result.unavailable,
     }
 
@@ -118,13 +129,15 @@ def demo_not_ready(stats: dict[str, Any]) -> bool:
         return True
     if stats.get("caseload_unavailable") == NO_PROVIDER_CASELOAD:
         return True
-    if int(stats.get("caseload_n_filled") or 0) == 0:
+    if int(stats.get("caseload_n_filled") or 0) < 3:
+        return True
+    if int(stats.get("caseload_n_ramped_1_to_6") or 0) < 1:
         return True
     return False
 
 
 def _demo_needs_reload(wh: Warehouse) -> bool:
-    """Reload when empty, old TherapistName schema, Completes have no provider, or Company is stale."""
+    """Reload when empty, old schema, no provider, stale Company, or pre-profile dump."""
     if wh.count("APPOINTMENT") == 0:
         return True
     cols = wh._table_columns("APPOINTMENT") or []
@@ -149,19 +162,26 @@ def _demo_needs_reload(wh: Warehouse) -> bool:
         )
         if int((stamped or [0])[0] or 0) == 0:
             return True
+    if "LocationName" in cols:
+        marker = wh.fetch_one(
+            'SELECT COUNT(*) FROM "APPOINTMENT" WHERE "LocationName" = ?',
+            [DEMO_MARKER_LOCATION],
+        )
+        if int((marker or [0])[0] or 0) == 0:
+            return True
     return False
 
 
 def ensure_demo_warehouse_seeded(wh: Warehouse, tenant_id: str) -> bool:
-    """If this is the demo tenant and visits are missing or unusable, load synthetic CSVs.
-
-    Idempotent when Completes already have ProviderId/ProviderName and Company
-    matches the demo tenant display name. Never loads into other tenants.
-    Replace-load so an old TherapistName schema or CSV Company cannot linger.
-    """
+    """If this is the demo tenant and visits are missing or stale, load Harbor."""
     if tenant_id != DEMO_TENANT_ID:
         return False
     if not _demo_needs_reload(wh):
         return False
-    load_synthetic_demo(wh, tenant_id=tenant_id, tenant_company=DEMO_TENANT_COMPANY)
+    load_synthetic_demo(
+        wh,
+        tenant_id=tenant_id,
+        tenant_company=DEMO_TENANT_COMPANY,
+        profile_id=DEFAULT_PROFILE,
+    )
     return True

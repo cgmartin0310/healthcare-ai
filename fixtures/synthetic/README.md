@@ -1,33 +1,26 @@
 # SYNTHETIC example dumps
 
-These files are **example data, tied to no real clinic**. They contain id-only
-or obviously fake values. They are not Boom CST/AOT/KID/PTA data and must not
-be treated as a client billing extract.
+These files are **example data, tied to no real clinic**. They are labeled
+`SYNTHETIC_EXAMPLE`. They are not Boom CST/AOT/KID/PTA extracts.
 
-Two visit-layout variants of the same semantic tenant exist so the integration
-engine can prove mapping onto PREP `APPOINTMENT`, `REFERRAL`, and `PATIENT`. A
-third **claim-ledger** file maps onto optional `CLAIM_TXN` (charges / payments /
-allowances / adjustments / refunds — not payments-only). Charge files map onto
-`CLAIM_TXN` the same as payment files; there is no separate `CHARGES` table. A
-tenant can load visits only; missing REFERRAL or CLAIM_TXN is not a failed load.
+Three clinic profiles, each in a different export dialect (never warehouse
+headers). Each profile has visits, referrals, patients, and a claim ledger
+(charges **and** payments in one `CLAIM_TXN`-shaped file):
 
-- `layout_a/` — PREP-like headers (`ApptDate`, `LocationName`, `InsBalance`, `Source`, `DOB`)
-- `layout_b/` — a different export shape (`date_of_service`, `site`, `insurance_balance`, `source`, `dob`)
-- `layout_payments/` — claim-ledger rows (`txn_id`, `visit_id`, `posted_on`, `txn_type`, `amount`) → `CLAIM_TXN`
+- `profiles/harbor_pediatric/` — Harbor Pediatric Therapy (peds OT/ST, 2 sites)
+- `profiles/riverbend_pt/` — Riverbend Physical Therapy (adult PT, 3 sites)
+- `profiles/northside_bh/` — Northside Behavioral Health (telehealth-heavy)
+
+Raw files include fake names, DOB, phone, email, address, MRN, and member id
+so the Safe Harbor import gate has something to drop. After load the warehouse
+holds ids only. This is not a legal HIPAA determination.
 
 `TxnType` stays `charge|allowance|payment|adjustment|refund`.
 
-When `CLAIM_TXN` is loaded, locked money metrics derive `TotalPaid` / `InsPaid` /
-`InsBalance` / `FirstInsPayment` from those rows. When it is absent, appointment
-rollup columns are used. Cancelation, churn, and conversion stay on raw
-`APPOINTMENT` / `REFERRAL` and do not change.
-
-Documented demo login (PHI-free, not a production secret): `demo@example.clinic`
-/ `demo-clinic-2026` → tenant `example-clinic`. A second clinic can sign up and
-gets an empty isolated warehouse.
-
-Regenerate with:
+Regenerate (parameterized — edit `PROFILES` in the script to retune volumes):
 
 ```bash
 python scripts/generate_synthetic.py
 ```
+
+Schema reference (not a sample file): `SCHEMA.md`.

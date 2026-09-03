@@ -39,7 +39,7 @@ def normalize_completed(value: Any) -> Any:
     key = _norm_key(value)
     if key in {"1", "true", "yes", "y", "converted", "complete", "completed"}:
         return 1
-    if key in {"0", "false", "no", "n"}:
+    if key in {"0", "false", "no", "n", "open", "pending"}:
         return 0
     try:
         return 1 if int(float(value)) == 1 else 0

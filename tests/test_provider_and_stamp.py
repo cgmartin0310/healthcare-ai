@@ -103,10 +103,10 @@ def test_headcount_prefers_provider_id_over_name(warehouse, as_of):
 
 
 def _load_layout_a_appointments(tmp_path, monkeypatch, as_of, *, tenant_company: str):
-    from tests.conftest import FIXTURES
-
     monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
-    path = FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"
+    from web.profiles import profile_files
+
+    path = dict(profile_files("harbor"))["APPOINTMENT"]
     proposal = propose_mapping(path, entity="APPOINTMENT", tenant_id="clinic-a", as_of=as_of)
     confirmed = confirm_mapping(proposal)
     wh = Warehouse(tmp_path / "caseload.duckdb")
@@ -145,7 +145,7 @@ def test_stamp_overwrites_csv_company_with_tenant(tmp_path, warehouse):
 
 
 def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
-    """layout_a TherapistName + ProviderId must produce months-to-fill, not the empty-provider message."""
+    """Harbor clinician display + ProviderId must produce months-to-fill, including a 1-6 month ramp."""
     from analyst.engine import Analyst
     from warehouse.metrics import caseload_fill
 
@@ -153,17 +153,18 @@ def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
         tmp_path, monkeypatch, as_of, tenant_company="Example Clinic"
     )
     by_source = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert by_source["TherapistName"] == "ProviderName"
-    assert "TherapistName" not in (proposal.deid_receipt or {}).get("columns_dropped", [])
+    assert by_source["Clinician"] == "ProviderName"
+    assert "Clinician" not in (proposal.deid_receipt or {}).get("columns_dropped", [])
     frame = wh.fetch_table("APPOINTMENT")
     completes = frame[frame["AppointmentStatus"] == "Complete"]
     assert completes["ProviderName"].notna().all()
     assert completes["ProviderId"].notna().all()
-    assert "Therapist_RAMP" in set(frame["ProviderName"].dropna().astype(str))
     result = caseload_fill(wh, as_of, company=None)
     assert result.unavailable != "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
     assert result.value
-    assert any(r.get("months_to_fill") is not None for r in result.value)
+    filled = [r for r in result.value if r.get("months_to_fill") is not None]
+    assert len(filled) >= 3
+    assert any(1 <= int(r["months_to_fill"]) <= 6 for r in filled)
     out = Analyst(wh, tenant_id="clinic-a", as_of=as_of).ask(
         "How long does a new clinician take to fill a caseload?"
     )

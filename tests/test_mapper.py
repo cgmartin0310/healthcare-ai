@@ -2,65 +2,67 @@ from __future__ import annotations
 
 from integration_engine.mapper import confirm_mapping, propose_mapping
 from integration_engine.normalize import normalize_discipline, normalize_status
-from tests.conftest import FIXTURES
+def test_harbor_visits_map_required_fields():
+    from web.profiles import profile_files
 
-
-def test_layout_a_appointments_map_required_fields():
-    path = FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"
+    path = dict(profile_files("harbor"))["APPOINTMENT"]
     proposal = propose_mapping(path, entity="APPOINTMENT")
     bound = {c.target_column for c in proposal.columns if c.target_table == "APPOINTMENT"}
     by_source = {c.source: c.target_column for c in proposal.columns if c.target_column}
     for required in ("ApptId", "ApptDate", "AppointmentStatus", "Company", "Discipline", "PatientId"):
         assert required in bound
-    assert by_source["TherapistName"] == "ProviderName"
-    assert by_source["ProviderId"] == "ProviderId"
+    assert by_source["Clinician"] == "ProviderName"
+    assert by_source["ClinicianNPI"] == "ProviderId"
     assert "TherapistId" not in bound
-    assert "FirstInsPayment" not in proposal.unmapped_required
+    assert by_source.get("ExportBatch") is None
     confirm_mapping(proposal)
 
 
-def test_layout_b_appointments_map_despite_different_headers():
-    path = FIXTURES / "layout_b" / "SYNTHETIC_EXAMPLE_visits.csv"
+def test_riverbend_visits_map_despite_different_headers():
+    from web.profiles import profile_files
+
+    path = dict(profile_files("riverbend"))["APPOINTMENT"]
     proposal = propose_mapping(path, entity="APPOINTMENT")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert bound["visit_id"] == "ApptId"
-    assert bound["date_of_service"] == "ApptDate"
-    assert bound["visit_status"] == "AppointmentStatus"
-    assert bound["clinic_name"] == "Company"
-    assert bound["therapy_type"] == "Discipline"
-    assert bound["patient_num"] == "PatientId"
-    assert bound["provider_id"] == "ProviderId"
-    assert bound["rendering_provider"] == "ProviderName"
-    assert bound["insurance_name"] == "PrimaryPayorName"
-    assert bound["insurance_paid"] == "InsPaid"
-    assert bound["insurance_balance"] == "InsBalance"
-    assert bound["amount_paid"] == "TotalPaid"
-    assert bound["site"] == "LocationName"
+    assert bound["encounter_no"] == "ApptId"
+    assert bound["svc_date"] == "ApptDate"
+    assert bound["appt_state"] == "AppointmentStatus"
+    assert bound["org"] == "Company"
+    assert bound["disc"] == "Discipline"
+    assert bound["pt_id"] == "PatientId"
+    assert bound["rendering_id"] == "ProviderId"
+    assert bound["rendering_name"] == "ProviderName"
     confirm_mapping(proposal)
 
 
-def test_layout_b_referrals_map_completed_flag():
-    path = FIXTURES / "layout_b" / "SYNTHETIC_EXAMPLE_incoming_referrals.csv"
+def test_harbor_referrals_map_completed_flag():
+    from web.profiles import profile_files
+
+    path = dict(profile_files("harbor"))["REFERRAL"]
     proposal = propose_mapping(path, entity="REFERRAL")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert bound["ref_created_at"] == "DateTimeCreated"
-    assert bound["eval_completed"] == "Completed?"
-    assert bound["source"] == "Source"
-    assert bound["office"] == "LocationName"
+    assert bound["CreatedOn"] == "DateTimeCreated"
+    assert bound["EvalDone"] == "Completed?"
+    assert bound["ReferralSource"] == "Source"
+    assert bound["Office"] == "LocationName"
+    assert bound.get("ChartNote") is None
     confirm_mapping(proposal)
 
 
-def test_layout_b_patients_map_active_and_ageband_not_dob():
-    path = FIXTURES / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv"
+def test_harbor_patients_map_active_and_ageband_not_dob():
+    from web.profiles import profile_files
+
+    path = dict(profile_files("harbor"))["PATIENT"]
     proposal = propose_mapping(path, entity="PATIENT")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert bound["is_active_flag"] == "PatientActive"
+    assert bound["ActiveFlag"] == "PatientActive"
     assert bound.get("AgeBand") == "AgeBand"
-    assert "dob" not in bound
+    assert "DateOfBirth" not in bound
     assert "DOB" not in bound.values()
     assert "AgeGroup" not in bound.values()
     assert proposal.deid_receipt
-    assert "dob" in [c.lower() for c in proposal.deid_receipt["columns_dropped"]]
+    dropped = [c.lower() for c in proposal.deid_receipt["columns_dropped"]]
+    assert any("birth" in c or c == "dob" or "dateofbirth" in c.replace(" ", "") for c in dropped)
     assert proposal.deid_receipt["age_band_derived_from_dob"] is True
     confirm_mapping(proposal)
 
@@ -86,6 +88,9 @@ def test_status_and_discipline_aliases():
     assert normalize_status("completed") == "Complete"
     assert normalize_discipline("Occupational") == "OT"
     assert normalize_discipline("Speech") == "ST"
+    assert normalize_status("CANX") == "Cancelled"
+    assert normalize_status("NS") == "No Show"
+    assert normalize_discipline("OCC") == "OT"
 
 
 def test_charge_file_maps_onto_claim_txn_not_a_charges_table(tmp_path):

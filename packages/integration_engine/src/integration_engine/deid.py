@@ -35,19 +35,131 @@ SAFE_HARBOR_NOTICE = (
 _PREVIEW_SECRET = b"clinic-analyst-deid-preview-not-a-tenant-secret"
 
 HASH_TARGETS = {
-    "PatientId": ("patientid", "patient id", "patient_id", "patient num", "patient_num", "pt id", "pt_id", "client id", "client_id"),
-    "ProviderId": ("providerid", "provider id", "provider_id", "npi", "clinician id", "clinician_id"),
-    "ApptId": ("apptid", "appt id", "appt_id", "appointment id", "appointment_id", "visit id", "visit_id", "encounter id", "encounter_id"),
-    "ReferralId": ("referralid", "referral id", "referral_id", "ref id", "ref_id"),
-    "TxnId": ("txnid", "txn id", "txn_id", "transaction id", "transaction_id", "payment id", "payment_id", "line id", "line_id"),
+    "PatientId": (
+        "patientid",
+        "patient id",
+        "patient_id",
+        "patient num",
+        "patient_num",
+        "pt id",
+        "pt_id",
+        "client id",
+        "client_id",
+        "clientid",
+        "member key",
+        "member_key",
+        "memberkey",
+    ),
+    "ProviderId": (
+        "providerid",
+        "provider id",
+        "provider_id",
+        "npi",
+        "clinician id",
+        "clinician_id",
+        "clinician npi",
+        "clinician_npi",
+        "staff id",
+        "staff_id",
+        "staffid",
+        "rendering id",
+        "rendering_id",
+    ),
+    "ApptId": (
+        "apptid",
+        "appt id",
+        "appt_id",
+        "appointment id",
+        "appointment_id",
+        "visit id",
+        "visit_id",
+        "encounter id",
+        "encounter_id",
+        "encounterid",
+        "encounter no",
+        "encounter_no",
+        "session id",
+        "session_id",
+        "sessionid",
+    ),
+    "ReferralId": (
+        "referralid",
+        "referral id",
+        "referral_id",
+        "ref id",
+        "ref_id",
+        "incoming ref id",
+        "incoming_ref_id",
+        "incomingrefid",
+    ),
+    "TxnId": (
+        "txnid",
+        "txn id",
+        "txn_id",
+        "transaction id",
+        "transaction_id",
+        "payment id",
+        "payment_id",
+        "line id",
+        "line_id",
+        "lineid",
+    ),
     "ClaimId": ("claimid", "claim id", "claim_id", "claim number", "claim_number"),
 }
 
 DATE_TARGETS = {
-    "ApptDate": ("apptdate", "appt date", "appt_date", "date of service", "date_of_service", "visit date", "visit_date", "appointment date", "appointment_date", "service date", "service_date"),
-    "PostedDate": ("posteddate", "posted date", "posted_date", "posted on", "posted_on", "post date", "post_date", "txn date", "txn_date", "payment date", "payment_date"),
+    "ApptDate": (
+        "apptdate",
+        "appt date",
+        "appt_date",
+        "date of service",
+        "date_of_service",
+        "visit date",
+        "visit_date",
+        "appointment date",
+        "appointment_date",
+        "service date",
+        "service_date",
+        "svc date",
+        "svc_date",
+        "session date",
+        "session_date",
+        "sessiondate",
+        "svc day",
+        "svc_day",
+        "svcday",
+    ),
+    "PostedDate": (
+        "posteddate",
+        "posted date",
+        "posted_date",
+        "posted on",
+        "posted_on",
+        "post date",
+        "post_date",
+        "postdate",
+        "txn date",
+        "txn_date",
+        "payment date",
+        "payment_date",
+    ),
     "DOS": ("dos",),
-    "DateTimeCreated": ("datetimecreated", "datetime created", "datetime_created", "ref created at", "ref_created_at", "created at", "created_at", "referral date", "referral_date", "date created", "date_created"),
+    "DateTimeCreated": (
+        "datetimecreated",
+        "datetime created",
+        "datetime_created",
+        "ref created at",
+        "ref_created_at",
+        "created at",
+        "created_at",
+        "created on",
+        "created_on",
+        "createdon",
+        "referral date",
+        "referral_date",
+        "date created",
+        "date_created",
+    ),
 }
 
 DOB_HEADERS = frozenset({"dob", "date of birth", "date_of_birth", "birth date", "birth_date", "birthdate"})
@@ -111,6 +223,14 @@ _DROP_EXACT = frozenset(
         "policy number",
         "policy id",
         "policyid",
+        "given name",
+        "givenname",
+        "family name",
+        "familyname",
+        "pt first",
+        "pt last",
+        "pt_first",
+        "pt_last",
     }
 )
 
@@ -129,6 +249,10 @@ _KEEP_NAME_TOKENS = frozenset(
         "primary",
         "secondary",
         "clinic",
+        "staff",
+        "rendering",
+        "practice",
+        "org",
     }
 )
 
@@ -142,7 +266,11 @@ CLINICIAN_DISPLAY_HEADERS = frozenset(
         "providername",
         "provider",
         "rendering provider",
+        "rendering name",
+        "renderingname",
         "clinician",
+        "staff name",
+        "staffname",
     }
 )
 
@@ -246,13 +374,16 @@ def _is_date_header(norm: str) -> bool:
     if compact == "dos" or norm == "dos":
         return True
     for target, syns in DATE_TARGETS.items():
-        if norm == _norm(target) or compact == target.lower() or norm in syns:
+        syn_norms = {_norm(s) for s in syns} | {_norm(target)}
+        syn_compacts = {s.replace(" ", "") for s in syn_norms}
+        if norm in syn_norms or compact in syn_compacts or compact == target.lower():
             return True
     return False
 
 
 def _is_dob_header(norm: str) -> bool:
-    return norm in DOB_HEADERS
+    compact = norm.replace(" ", "")
+    return norm in DOB_HEADERS or compact in {s.replace(" ", "").replace("_", "") for s in DOB_HEADERS} or compact == "dateofbirth"
 
 
 def is_clinician_display_header(name: str) -> bool:

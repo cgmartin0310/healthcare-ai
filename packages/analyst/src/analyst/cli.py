@@ -155,31 +155,11 @@ def format_answer(payload: dict) -> str:
 
 
 def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
-    """Prove both synthetic layouts map and load; answer the locked sample questions."""
+    """Prove each synthetic clinic profile maps and loads; answer locked sample questions."""
+    from web.profiles import PROFILES, profile_files
+
     print(PRODUCT_BANNER)
     print("SYNTHETIC EXAMPLE DATA — tied to no real clinic.\n")
-    pairs = [
-        (
-            "APPOINTMENT",
-            fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv",
-            fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_visits.csv",
-        ),
-        (
-            "REFERRAL",
-            fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_referrals.csv",
-            fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_incoming_referrals.csv",
-        ),
-        (
-            "PATIENT",
-            fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_patients.csv",
-            fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv",
-        ),
-        (
-            "CLAIM_TXN",
-            fixtures / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv",
-            fixtures / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv",
-        ),
-    ]
     work = Path("./data/demo_mappings")
     work.mkdir(parents=True, exist_ok=True)
     write_tenant_config(
@@ -187,27 +167,24 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
         {
             "tenant_id": tenant_id,
             "display_name": "Example Clinic (synthetic)",
-            "company": "Example Clinic",
+            "company": "Example Clinic (synthetic)",
             "synthetic_example": True,
         },
     )
 
-    # Layout B is mapped into a second tenant to prove a differently-shaped dump loads.
-    tenants = {0: tenant_id, 1: tenant_id + "-layout-b"}
-    for layout_idx in (0, 1):
-        tid = tenants[layout_idx]
+    for pid, spec in PROFILES.items():
+        tid = tenant_id if pid == "harbor" else f"{tenant_id}-{pid}"
         write_tenant_config(
             tid,
             {
                 "tenant_id": tid,
-                "display_name": "Example Clinic (synthetic)",
-                "company": "Example Clinic",
+                "display_name": spec["name"],
+                "company": spec["name"],
                 "synthetic_example": True,
             },
         )
         with open_warehouse(tid) as wh:
-            for entity, path_a, path_b in pairs:
-                src = path_a if layout_idx == 0 else path_b
+            for entity, src in profile_files(pid):
                 mapping_path = work / f"{tid}_{entity}.json"
                 proposal = propose_mapping(src, entity=entity, tenant_id=tid, as_of=as_of)
                 if proposal.unmapped_required:
@@ -220,16 +197,13 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
                     src,
                     confirmed,
                     tenant_id=tid,
-                    tenant_company=tenant_company(tid, fallback="Example Clinic"),
+                    tenant_company=tenant_company(tid, fallback=spec["name"]),
                     mode="replace",
                     manifest_path=mapping_path.with_suffix(".manifest.json"),
                     as_of=as_of,
                 )
                 mapped = [c for c in confirmed.columns if c.target_column]
-                print(
-                    f"Layout {'A' if layout_idx == 0 else 'B'} {entity}: "
-                    f"proposed {len(mapped)} columns, loaded {counts}"
-                )
+                print(f"{spec['name']} {entity}: proposed {len(mapped)} columns, loaded {counts}")
 
     questions = [
         "Is cancelation over 25% in the last three months?",
@@ -241,7 +215,7 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
     ]
     with open_warehouse(tenant_id) as wh:
         analyst = Analyst(wh, tenant_id=tenant_id, as_of=as_of)
-        print("\n=== Sample questions (layout A tenant) ===\n")
+        print("\n=== Sample questions (Harbor Pediatric / demo tenant) ===\n")
         for q in questions:
             print(f"Q: {q}")
             print(format_answer(analyst.ask(q)))

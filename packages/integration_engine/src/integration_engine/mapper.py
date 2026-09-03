@@ -148,7 +148,20 @@ def _looks_like_numbers(samples: list[str]) -> bool:
 
 
 def _looks_like_status(samples: list[str]) -> bool:
-    tokens = {"complete", "completed", "cancelled", "canceled", "no show", "noshow", "pending", "waiting"}
+    tokens = {
+        "complete",
+        "completed",
+        "cancelled",
+        "canceled",
+        "cancel",
+        "canx",
+        "no show",
+        "noshow",
+        "no-show",
+        "ns",
+        "pending",
+        "waiting",
+    }
     return any(_norm(s) in tokens for s in samples)
 
 

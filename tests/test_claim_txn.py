@@ -8,7 +8,7 @@ import pandas as pd
 
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, propose_mapping
-from tests.conftest import FIXTURES, appt_row, load_appts
+from tests.conftest import appt_row, load_appts
 from warehouse.metrics import ar_past_30_days, cancelation_rate, payments_total
 from warehouse.money import money_source
 from warehouse.schema import CLAIM_TXN
@@ -100,23 +100,23 @@ def test_claim_txn_derives_ins_paid_balance_total(warehouse, as_of):
 
 
 def test_payments_layout_maps_to_claim_txn():
-    path = FIXTURES / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv"
+    from web.profiles import profile_files
+
+    path = dict(profile_files("harbor"))["CLAIM_TXN"]
     proposal = propose_mapping(path, entity="CLAIM_TXN")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert bound["txn_id"] == "TxnId"
-    assert bound["visit_id"] == "ApptId"
-    assert bound["txn_type"] == "TxnType"
-    assert bound["amount"] == "Amount"
-    assert bound["posted_on"] == "PostedDate"
+    assert bound["LineID"] == "TxnId"
+    assert bound["EncounterID"] == "ApptId"
+    assert bound["TxnKind"] == "TxnType"
+    assert bound["Amt"] == "Amount"
+    assert bound["PostDate"] == "PostedDate"
     confirm_mapping(proposal)
 
 
 def test_multi_file_visits_referrals_txns(warehouse):
-    files = [
-        ("APPOINTMENT", FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"),
-        ("REFERRAL", FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_referrals.csv"),
-        ("CLAIM_TXN", FIXTURES / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv"),
-    ]
+    from web.profiles import profile_files
+
+    files = [(entity, path) for entity, path in profile_files("harbor") if entity != "PATIENT"]
     for entity, path in files:
         load_mapped_file(
             warehouse,
@@ -132,7 +132,9 @@ def test_multi_file_visits_referrals_txns(warehouse):
 
 
 def test_appointment_only_load_is_not_a_failed_load(warehouse, as_of):
-    path = FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"
+    from web.profiles import profile_files
+
+    path = dict(profile_files("harbor"))["APPOINTMENT"]
     load_mapped_file(
         warehouse,
         path,

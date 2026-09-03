@@ -55,8 +55,17 @@
     </p>
 
     <section>
-      <h2>1. Map files (one export at a time)</h2>
-      <p class="muted">Schedule, referrals, charges, payments, adjustments, aging — each file maps onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Load appends into your tenant only. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
+      <h2>1. Download sample files, then map (one export at a time)</h2>
+      <p class="muted">These are SYNTHETIC / EXAMPLE practice-management exports — not warehouse headers, tied to no real clinic. Download a clinic profile, then upload a file so the mapper has to propose columns. Schedule, referrals, charges, payments, adjustments, aging each map onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
+      <label>Clinic profile
+        <select id="profile">
+          <option value="harbor">Harbor Pediatric Therapy</option>
+          <option value="riverbend">Riverbend Physical Therapy</option>
+          <option value="northside">Northside Behavioral Health</option>
+        </select>
+      </label>
+      <p class="muted" id="profile-blurb"></p>
+      <p><button type="button" class="secondary" id="download-samples">Download sample files (zip)</button></p>
       <label>Entity
         <select id="entity">
           <option value="APPOINTMENT">APPOINTMENT (visits)</option>
@@ -93,7 +102,7 @@
 
     <section>
       <h2>3. Synthetic demo (this tenant only)</h2>
-      <p class="muted">The example-clinic demo tenant is preloaded on startup. This button reloads the labeled dump into <em>your</em> DuckDB only. Does not mix clinics. Signup tenants stay empty until you upload or run this.</p>
+      <p class="muted">The example-clinic demo tenant is preloaded on startup with Harbor Pediatric. This button reloads the selected profile into <em>your</em> DuckDB only. Does not mix clinics. Signup tenants stay empty until you upload or run this.</p>
       <p><button type="button" id="demo">Run synthetic demo</button></p>
       <pre id="demo-out"></pre>
     </section>
@@ -104,12 +113,17 @@
     let uploadId = null;
     const CHIPS = [
       "Is cancelation over 25% in the last three months?",
-      "Why is Site B's AR high?",
+      "Which payers have AR sitting past 30 days, by location?",
       "Referral-source drop-off — does volume support another therapist?",
       "How long does a new clinician take to fill a caseload?",
-      "Which therapists are profitable after payroll?",
-      "What can I do to improve my business?"
+      "What is churn for the last closed month?",
+      "Which therapists are profitable after payroll?"
     ];
+    const PROFILE_BLURB = {
+      harbor: "Peds OT/ST, two sites, school-year seasonality.",
+      riverbend: "Adult PT, three sites, higher visits per patient.",
+      northside: "Mental-health group, telehealth-heavy, different payer mix."
+    };
 
     function renderChips() {
       document.getElementById("chips").innerHTML = CHIPS.map((q, i) =>
@@ -169,7 +183,11 @@
     async function jsonFetch(url, opts) {
       const res = await fetch(url, opts);
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.detail || res.statusText);
+      if (!res.ok) {
+        const detail = data.detail;
+        const msg = typeof detail === "string" ? detail : (detail && detail.error) || res.statusText;
+        throw new Error(msg);
+      }
       return data;
     }
 
@@ -245,11 +263,11 @@
         uploadId = data.upload_id;
         setBanner(data.banner);
         const rows = (data.mapping.columns || []).map(c =>
-          `<tr><td>${c.source}</td><td>${c.target_table || "—"}</td><td>${c.target_column || "unmapped"}</td><td>${c.confidence}</td></tr>`
+          `<tr><td>${escapeHtml(c.source)}</td><td>${escapeHtml(c.target_table || "—")}</td><td>${escapeHtml(c.target_column || "unmapped")}</td><td>${c.confidence}</td><td>${escapeHtml(c.rationale || "")}</td></tr>`
         ).join("");
         out.innerHTML = renderReceipt(data.deid_receipt) +
-          `<p>Required unmapped: ${data.mapping.unmapped_required.join(", ") || "none"}</p>
-          <table><thead><tr><th>Source</th><th>Table</th><th>PREP column</th><th>Conf.</th></tr></thead><tbody>${rows}</tbody></table>`;
+          `<p>Required unmapped: ${escapeHtml((data.mapping.unmapped_required || []).join(", ") || "none")}</p>
+          <table><thead><tr><th>Source</th><th>Table</th><th>PREP column</th><th>Conf.</th><th>Rationale</th></tr></thead><tbody>${rows}</tbody></table>`;
         document.getElementById("confirm").disabled = data.mapping.unmapped_required.length > 0;
         document.getElementById("load").disabled = true;
       } catch (e) { showErr(out, e); }
@@ -319,13 +337,25 @@
       try {
         const data = await jsonFetch("/api/demo", {
           method: "POST", headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ as_of: document.getElementById("asof").value || "2026-09-02" })
+          body: JSON.stringify({
+            as_of: document.getElementById("asof").value || "2026-09-02",
+            profile: document.getElementById("profile").value
+          })
         });
         setBanner(data.banner);
         applyWarehouseEmpty(data.warehouse_empty);
         const blocks = (data.answers || []).map(a => "Q: " + a.question + "\n" + a.answer).join("\n\n");
         out.textContent = data.note + "\n" + data.banner + "\n\n" + blocks;
       } catch (e) { out.textContent = e.message || String(e); }
+    };
+
+    document.getElementById("profile").onchange = () => {
+      document.getElementById("profile-blurb").textContent = PROFILE_BLURB[document.getElementById("profile").value] || "";
+    };
+    document.getElementById("profile").onchange();
+    document.getElementById("download-samples").onclick = () => {
+      const pid = document.getElementById("profile").value;
+      window.location.href = "/api/samples/" + encodeURIComponent(pid) + "/zip";
     };
 
     renderChips();

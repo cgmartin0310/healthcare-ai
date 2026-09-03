@@ -1,0 +1,565 @@
+IncomingRefID,CreatedOn,EvalDone,PracticeName,TherapyType,Office,ReferralSource,EvalOn,ClientID,ChartNote
+R0001,11/01/2025 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0002,11/02/2025 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0003,11/03/2025 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,2025-11-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0004,11/04/2025 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,11/12/2025,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0005,11/05/2025 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,11/13/2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0006,2025-11-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0007,2025-11-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0008,2025-11-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,16-Nov-2025,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0009,11/09/2025 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,17-Nov-2025,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0010,11/10/2025 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,18-Nov-2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0011,11/11/2025 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0012,2025-11-12 09:11:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0013,2025-11-13 09:12:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2025-11-21,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0014,11/14/2025 09:13,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,11/22/2025,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0015,2025-11-15 09:14:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,23-Nov-2025,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0016,11/16/2025 09:15,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0017,2025-11-17 09:16:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0018,2025-11-18 09:17:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,26-Nov-2025,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0019,11/19/2025 09:18,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,11/27/2025,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0020,2025-11-20 09:19:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2025-11-28,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0021,2025-11-21 09:20:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0022,11/22/2025 09:21,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0023,11/01/2025 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0024,11/02/2025 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0025,11/03/2025 09:02,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,11/11/2025,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0026,2025-11-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,2025-11-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0027,2025-11-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,13-Nov-2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0028,2025-11-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0029,11/07/2025 09:06,N,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0030,11/08/2025 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,16-Nov-2025,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0031,11/09/2025 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Nov-2025,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0032,11/10/2025 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,11/18/2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0033,2025-11-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0034,11/12/2025 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0035,11/01/2025 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0036,11/02/2025 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0037,11/03/2025 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,11/11/2025,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0038,2025-11-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,11/12/2025,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0039,2025-11-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2025-11-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0040,11/06/2025 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0041,11/07/2025 09:06,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0042,2025-11-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,2025-11-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0043,2025-11-09 09:08:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,2025-11-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0044,11/10/2025 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,11/18/2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0045,2025-11-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0046,11/12/2025 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0047,2025-11-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0048,2025-11-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0049,2025-11-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,11/11/2025,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0050,11/04/2025 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,2025-11-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0051,2025-11-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,13-Nov-2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0052,11/06/2025 09:05,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0053,2025-11-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0054,11/08/2025 09:07,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,2025-11-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0055,2025-11-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2025-11-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0056,2025-11-10 09:09:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,11/18/2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0057,11/11/2025 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0058,2025-11-12 09:11:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0059,12/01/2025 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0060,12/02/2025 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0061,2025-12-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,12/11/2025,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0062,12/04/2025 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2025-12-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0063,12/05/2025 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,12/13/2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0064,2025-12-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0065,2025-12-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0066,2025-12-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2025-12-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0067,12/09/2025 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,12/17/2025,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0068,2025-12-10 09:09:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,12/18/2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0069,12/11/2025 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0070,12/12/2025 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0071,12/13/2025 09:12,Y,Harbor Pediatric Therapy,OT,Harbor East,,21-Dec-2025,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0072,2025-12-14 09:13:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,12/22/2025,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0073,12/15/2025 09:14,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,2025-12-23,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0074,2025-12-16 09:15:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0075,12/17/2025 09:16,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0076,2025-12-18 09:17:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2025-12-26,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0077,12/19/2025 09:18,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,12/27/2025,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0078,12/20/2025 09:19,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,28-Dec-2025,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0079,12/21/2025 09:20,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0080,2025-12-22 09:21:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0081,2025-12-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0082,12/02/2025 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0083,12/03/2025 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,2025-12-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0084,12/04/2025 09:03,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,2025-12-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0085,12/05/2025 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,12/13/2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0086,12/06/2025 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0087,2025-12-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0088,12/08/2025 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,12/16/2025,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0089,12/09/2025 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,12/17/2025,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0090,12/10/2025 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,12/18/2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0091,12/11/2025 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0092,2025-12-12 09:11:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0093,2025-12-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0094,12/02/2025 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0095,12/03/2025 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,11-Dec-2025,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0096,12/04/2025 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,12/12/2025,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0097,12/05/2025 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,12/13/2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0098,2025-12-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0099,2025-12-07 09:06:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0100,12/08/2025 09:07,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,2025-12-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0101,2025-12-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2025-12-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0102,12/10/2025 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,18-Dec-2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0103,12/11/2025 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0104,12/12/2025 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0105,12/01/2025 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0106,2025-12-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0107,12/03/2025 09:02,Y,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,2025-12-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0108,12/04/2025 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,12/12/2025,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0109,12/05/2025 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,12/13/2025,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0110,12/06/2025 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0111,2025-12-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0112,12/08/2025 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,2025-12-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0113,12/09/2025 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,12/17/2025,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0114,2025-12-10 09:09:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,18-Dec-2025,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0115,2025-12-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0116,2025-12-12 09:11:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0117,01/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0118,01/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0119,2026-01-03 09:02:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0120,2026-01-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,12-Jan-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0121,2026-01-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,13-Jan-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0122,01/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0123,2026-01-07 09:06:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0124,01/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,16-Jan-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0125,01/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-01-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0126,2026-01-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,18-Jan-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0127,01/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0128,01/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0129,2026-01-13 09:12:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,21-Jan-2026,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0130,2026-01-14 09:13:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-01-22,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0131,2026-01-15 09:14:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,23-Jan-2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0132,01/16/2026 09:15,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0133,2026-01-17 09:16:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0134,2026-01-18 09:17:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-01-26,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0135,2026-01-19 09:18:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,01/27/2026,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0136,2026-01-20 09:19:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,01/28/2026,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0137,2026-01-21 09:20:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0138,01/22/2026 09:21,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0139,2026-01-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0140,01/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0141,01/03/2026 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0142,01/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,2026-01-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0143,2026-01-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-01-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0144,2026-01-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0145,2026-01-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0146,2026-01-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,01/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0147,01/09/2026 09:08,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-01-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0148,01/10/2026 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,2026-01-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0149,2026-01-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0150,01/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0151,01/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0152,01/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0153,2026-01-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0154,2026-01-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,12-Jan-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0155,2026-01-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Jan-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0156,01/06/2026 09:05,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0157,01/07/2026 09:06,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0158,01/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,16-Jan-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0159,01/09/2026 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,01/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0160,01/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,18-Jan-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0161,2026-01-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0162,01/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0163,2026-01-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0164,01/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0165,2026-01-03 09:02:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0166,2026-01-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,12-Jan-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0167,01/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Jan-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0168,2026-01-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0169,2026-01-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0170,2026-01-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,16-Jan-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0171,01/09/2026 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-01-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0172,2026-01-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,18-Jan-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0173,01/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0174,2026-01-12 09:11:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0175,2026-02-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0176,2026-02-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0177,02/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,2026-02-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0178,2026-02-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,12-Feb-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0179,2026-02-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-02-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0180,2026-02-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0181,02/07/2026 09:06,N,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0182,02/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,02/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0183,02/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Feb-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0184,2026-02-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,18-Feb-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0185,2026-02-11 09:10:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0186,02/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0187,02/13/2026 09:12,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-02-21,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0188,02/14/2026 09:13,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,2026-02-22,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0189,2026-02-15 09:14:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,02/23/2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0190,2026-02-16 09:15:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0191,02/17/2026 09:16,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0192,02/18/2026 09:17,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,26-Feb-2026,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0193,02/19/2026 09:18,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,02/27/2026,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0194,2026-02-20 09:19:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-02-28,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0195,02/21/2026 09:20,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0196,2026-02-22 09:21:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0197,2026-02-01 09:00:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0198,02/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0199,02/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,02/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0200,2026-02-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,12-Feb-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0201,02/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-02-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0202,2026-02-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0203,02/07/2026 09:06,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0204,02/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,2026-02-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0205,2026-02-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Feb-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0206,02/10/2026 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,2026-02-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0207,02/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0208,2026-02-12 09:11:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0209,02/01/2026 09:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0210,2026-02-02 09:01:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0211,2026-02-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,2026-02-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0212,02/04/2026 09:03,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,2026-02-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0213,2026-02-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Feb-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0214,2026-02-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0215,2026-02-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0216,02/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,2026-02-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0217,2026-02-09 09:08:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,02/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0218,02/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,02/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0219,02/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0220,2026-02-12 09:11:00,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0221,02/01/2026 09:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0222,02/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0223,2026-02-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,2026-02-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0224,2026-02-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,02/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0225,02/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,13-Feb-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0226,2026-02-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0227,02/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0228,2026-02-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,16-Feb-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0229,2026-02-09 09:08:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,02/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0230,2026-02-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,18-Feb-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0231,2026-02-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0232,02/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0233,03/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0234,03/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0235,2026-03-03 09:02:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,2026-03-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0236,03/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-03-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0237,03/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,03/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0238,03/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0239,2026-03-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0240,2026-03-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,16-Mar-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0241,03/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,03/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0242,03/10/2026 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,03/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0243,2026-03-11 09:10:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0244,03/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0245,03/13/2026 09:12,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-03-21,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0246,2026-03-14 09:13:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,22-Mar-2026,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0247,03/15/2026 09:14,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,03/23/2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0248,2026-03-16 09:15:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0249,2026-03-17 09:16:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0250,2026-03-18 09:17:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,2026-03-26,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0251,2026-03-19 09:18:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,27-Mar-2026,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0252,03/20/2026 09:19,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-03-28,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0253,2026-03-21 09:20:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0254,2026-03-22 09:21:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0255,03/01/2026 09:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0256,2026-03-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0257,2026-03-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,2026-03-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0258,03/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,03/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0259,2026-03-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,03/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0260,2026-03-06 09:05:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0261,2026-03-07 09:06:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0262,03/08/2026 09:07,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,16-Mar-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0263,2026-03-09 09:08:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-03-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0264,03/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,18-Mar-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0265,2026-03-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0266,03/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0267,03/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0268,03/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0269,2026-03-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,2026-03-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0270,03/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,2026-03-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0271,2026-03-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-03-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0272,2026-03-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0273,2026-03-07 09:06:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0274,2026-03-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,03/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0275,2026-03-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Mar-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0276,2026-03-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,2026-03-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0277,03/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0278,2026-03-12 09:11:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0279,03/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0280,2026-03-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0281,2026-03-03 09:02:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,03/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0282,03/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,03/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0283,03/05/2026 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,03/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0284,2026-03-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0285,03/07/2026 09:06,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0286,03/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,16-Mar-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0287,03/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-03-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0288,2026-03-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,2026-03-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0289,03/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0290,2026-03-12 09:11:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0291,2026-04-01 09:00:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0292,04/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0293,2026-04-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,04/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0294,04/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-04-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0295,2026-04-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,04/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0296,2026-04-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0297,2026-04-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0298,2026-04-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-04-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0299,2026-04-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-04-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0300,2026-04-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0301,04/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0302,04/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0303,2026-04-13 09:12:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,04/21/2026,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0304,04/14/2026 09:13,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,2026-04-22,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0305,2026-04-15 09:14:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,04/23/2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0306,2026-04-16 09:15:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0307,04/17/2026 09:16,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0308,04/18/2026 09:17,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,26-Apr-2026,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0309,2026-04-19 09:18:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,2026-04-27,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0310,2026-04-20 09:19:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,28-Apr-2026,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0311,04/21/2026 09:20,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0312,2026-04-22 09:21:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0313,04/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0314,2026-04-02 09:01:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0315,04/03/2026 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,11-Apr-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0316,2026-04-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,2026-04-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0317,04/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-04-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0318,04/06/2026 09:05,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0319,04/07/2026 09:06,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0320,04/08/2026 09:07,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,2026-04-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0321,2026-04-09 09:08:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,04/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0322,2026-04-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0323,2026-04-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0324,04/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0325,04/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0326,2026-04-02 09:01:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0327,04/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,04/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0328,04/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,12-Apr-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0329,04/05/2026 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-04-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0330,04/06/2026 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0331,2026-04-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0332,2026-04-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,2026-04-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0333,04/09/2026 09:08,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-04-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0334,2026-04-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0335,04/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0336,2026-04-12 09:11:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0337,04/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0338,2026-04-02 09:01:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0339,2026-04-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,11-Apr-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0340,2026-04-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,04/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0341,04/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-04-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0342,04/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0343,2026-04-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0344,2026-04-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,16-Apr-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0345,04/09/2026 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-04-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0346,04/10/2026 09:09,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,04/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0347,04/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0348,04/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0349,2026-05-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0350,05/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0351,2026-05-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,05/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0352,05/04/2026 09:03,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-05-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0353,2026-05-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,2026-05-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0354,2026-05-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0355,05/07/2026 09:06,N,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0356,05/08/2026 09:07,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,05/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0357,2026-05-09 09:08:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,05/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0358,2026-05-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,18-May-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0359,05/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0360,2026-05-12 09:11:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0361,05/13/2026 09:12,Y,Harbor Pediatric Therapy,OT,Harbor East,,21-May-2026,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0362,05/14/2026 09:13,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,22-May-2026,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0363,2026-05-15 09:14:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,05/23/2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0364,05/16/2026 09:15,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0365,2026-05-17 09:16:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0366,2026-05-18 09:17:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-05-26,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0367,05/19/2026 09:18,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,2026-05-27,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0368,05/20/2026 09:19,Y,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,2026-05-28,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0369,05/21/2026 09:20,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0370,2026-05-22 09:21:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0371,2026-05-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0372,2026-05-02 09:01:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0373,05/03/2026 09:02,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,11-May-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0374,2026-05-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,05/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0375,2026-05-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,05/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0376,05/06/2026 09:05,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0377,2026-05-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0378,2026-05-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,05/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0379,05/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,05/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0380,2026-05-10 09:09:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,05/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0381,05/11/2026 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0382,05/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0383,05/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0384,05/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0385,2026-05-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,2026-05-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0386,05/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,05/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0387,05/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-05-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0388,05/06/2026 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0389,05/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0390,2026-05-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,2026-05-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0391,05/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-May-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0392,2026-05-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,18-May-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0393,2026-05-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0394,05/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0395,05/01/2026 09:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0396,2026-05-02 09:01:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0397,05/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,2026-05-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0398,05/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,05/12/2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0399,05/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,05/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0400,2026-05-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0401,05/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0402,2026-05-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,16-May-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0403,2026-05-09 09:08:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,05/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0404,2026-05-10 09:09:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,18-May-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0405,2026-05-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0406,05/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0407,2026-06-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0408,06/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0409,06/03/2026 09:02,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,06/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0410,2026-06-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-06-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0411,06/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Jun-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0412,2026-06-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0413,2026-06-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0414,2026-06-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,06/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0415,06/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-06-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0416,06/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-06-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0417,06/11/2026 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0418,2026-06-12 09:11:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0419,2026-06-13 09:12:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,06/21/2026,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0420,06/14/2026 09:13,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,06/22/2026,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0421,06/15/2026 09:14,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,2026-06-23,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0422,2026-06-16 09:15:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0423,2026-06-17 09:16:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0424,2026-06-18 09:17:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,06/26/2026,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0425,06/19/2026 09:18,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,27-Jun-2026,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0426,2026-06-20 09:19:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,28-Jun-2026,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0427,06/21/2026 09:20,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2020,SYNTHETIC_EXAMPLE internal note — do not map
+R0428,2026-06-22 09:21:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2021,SYNTHETIC_EXAMPLE internal note — do not map
+R0429,2026-06-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0430,06/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0431,06/03/2026 09:02,Y,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,2026-06-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0432,2026-06-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,12-Jun-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0433,2026-06-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,13-Jun-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0434,06/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0435,2026-06-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0436,2026-06-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,06/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0437,06/09/2026 09:08,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,06/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0438,06/10/2026 09:09,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,18-Jun-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0439,06/11/2026 09:10,N,Harbor Pediatric Therapy,OCC,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0440,2026-06-12 09:11:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0441,2026-06-01 09:00:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0442,2026-06-02 09:01:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0443,06/03/2026 09:02,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,06/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0444,06/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,12-Jun-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0445,06/05/2026 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,2026-06-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0446,06/06/2026 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0447,06/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0448,2026-06-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,2026-06-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0449,06/09/2026 09:08,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,06/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0450,2026-06-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,2026-06-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0451,2026-06-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0452,06/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0453,06/01/2026 09:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0454,06/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0455,2026-06-03 09:02:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,06/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0456,06/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,12-Jun-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0457,06/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Jun-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0458,2026-06-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0459,06/07/2026 09:06,N,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0460,2026-06-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,2026-06-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0461,2026-06-09 09:08:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,06/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0462,06/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,06/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0463,06/11/2026 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0464,06/12/2026 09:11,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0465,2026-07-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0466,07/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0467,07/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Lakeside School District,11-Jul-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0468,2026-07-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-07-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0469,07/05/2026 09:04,Y,Harbor Pediatric Therapy,OCC,Harbor East,,07/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0470,07/06/2026 09:05,N,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0471,2026-07-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0472,2026-07-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,07/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0473,2026-07-09 09:08:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,17-Jul-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0474,2026-07-10 09:09:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0475,07/11/2026 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0476,07/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0477,07/13/2026 09:12,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-07-21,P2012,SYNTHETIC_EXAMPLE internal note — do not map
+R0478,2026-07-14 09:13:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,22-Jul-2026,P2013,SYNTHETIC_EXAMPLE internal note — do not map
+R0479,07/15/2026 09:14,Y,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,23-Jul-2026,P2014,SYNTHETIC_EXAMPLE internal note — do not map
+R0480,07/16/2026 09:15,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2015,SYNTHETIC_EXAMPLE internal note — do not map
+R0481,2026-07-17 09:16:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2016,SYNTHETIC_EXAMPLE internal note — do not map
+R0482,2026-07-18 09:17:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-07-26,P2017,SYNTHETIC_EXAMPLE internal note — do not map
+R0483,2026-07-19 09:18:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,27-Jul-2026,P2018,SYNTHETIC_EXAMPLE internal note — do not map
+R0484,07/20/2026 09:19,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,28-Jul-2026,P2019,SYNTHETIC_EXAMPLE internal note — do not map
+R0485,2026-07-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0486,07/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0487,07/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,2026-07-11,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0488,07/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,2026-07-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0489,2026-07-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-07-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0490,2026-07-06 09:05:00,N,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0491,2026-07-07 09:06:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0492,07/08/2026 09:07,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,2026-07-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0493,07/09/2026 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-07-17,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0494,07/10/2026 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0495,2026-07-11 09:10:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0496,07/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0497,07/01/2026 09:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0498,07/02/2026 09:01,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0499,2026-07-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,07/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0500,2026-07-04 09:03:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,12-Jul-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0501,2026-07-05 09:04:00,Y,Harbor Pediatric Therapy,OT,Harbor East,,07/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0502,2026-07-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0503,2026-07-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0504,07/08/2026 09:07,Y,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,16-Jul-2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0505,07/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,07/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0506,07/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0507,2026-07-11 09:10:00,N,Harbor Pediatric Therapy,OCC,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0508,2026-07-12 09:11:00,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0509,07/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0510,07/02/2026 09:01,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0511,2026-07-03 09:02:00,Y,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,11-Jul-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0512,2026-07-04 09:03:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,2026-07-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0513,2026-07-05 09:04:00,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,13-Jul-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0514,07/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0515,2026-07-07 09:06:00,N,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0516,2026-07-08 09:07:00,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,07/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0517,07/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Jul-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0518,07/10/2026 09:09,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0519,07/11/2026 09:10,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0520,2026-07-12 09:11:00,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0521,2026-08-01 09:00:00,N,Harbor Pediatric Therapy,OT,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0522,2026-08-02 09:01:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0523,2026-08-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,Lakeside School District,11-Aug-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0524,08/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,Lakeside School District,2026-08-12,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0525,08/05/2026 09:04,Y,Harbor Pediatric Therapy,Occupational,Harbor East,,08/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0526,2026-08-06 09:05:00,N,Harbor Pediatric Therapy,ST,Harbor West,Lakeside School District,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0527,08/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,Lakeside School District,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0528,08/08/2026 09:07,Y,Harbor Pediatric Therapy,SLP,Harbor West,Lakeside School District,2026-08-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0529,2026-08-01 09:00:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0530,2026-08-02 09:01:00,N,Harbor Pediatric Therapy,Speech,Harbor West,Bay Pediatrics Group,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0531,08/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,11-Aug-2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0532,08/04/2026 09:03,Y,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,12-Aug-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0533,08/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,08/13/2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0534,08/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0535,2026-08-07 09:06:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,Bay Pediatrics Group,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0536,2026-08-08 09:07:00,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,08/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0537,08/09/2026 09:08,Y,Harbor Pediatric Therapy,OT,Harbor East,,08/17/2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0538,08/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Bay Pediatrics Group,08/18/2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0539,2026-08-11 09:10:00,N,Harbor Pediatric Therapy,OT,Harbor East,Bay Pediatrics Group,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0540,08/12/2026 09:11,N,Harbor Pediatric Therapy,ST,Harbor West,Bay Pediatrics Group,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0541,2026-08-01 09:00:00,N,Harbor Pediatric Therapy,OCC,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0542,08/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0543,08/03/2026 09:02,Y,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,08/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0544,2026-08-04 09:03:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,12-Aug-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0545,2026-08-05 09:04:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,13-Aug-2026,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0546,08/06/2026 09:05,N,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0547,08/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,Parent / Self,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0548,2026-08-08 09:07:00,Y,Harbor Pediatric Therapy,ST,Harbor West,Parent / Self,2026-08-16,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0549,2026-08-09 09:08:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Aug-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0550,08/10/2026 09:09,Y,Harbor Pediatric Therapy,SLP,Harbor West,Parent / Self,2026-08-18,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0551,08/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,Parent / Self,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0552,08/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,Parent / Self,,P2011,SYNTHETIC_EXAMPLE internal note — do not map
+R0553,08/01/2026 09:00,N,Harbor Pediatric Therapy,Occupational,Harbor East,,,P2000,SYNTHETIC_EXAMPLE internal note — do not map
+R0554,08/02/2026 09:01,N,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,,P2001,SYNTHETIC_EXAMPLE internal note — do not map
+R0555,2026-08-03 09:02:00,Y,Harbor Pediatric Therapy,OCC,Harbor East,County Early Start,08/11/2026,P2002,SYNTHETIC_EXAMPLE internal note — do not map
+R0556,08/04/2026 09:03,Y,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,12-Aug-2026,P2003,SYNTHETIC_EXAMPLE internal note — do not map
+R0557,08/05/2026 09:04,Y,Harbor Pediatric Therapy,OT,Harbor East,,2026-08-13,P2004,SYNTHETIC_EXAMPLE internal note — do not map
+R0558,08/06/2026 09:05,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2005,SYNTHETIC_EXAMPLE internal note — do not map
+R0559,08/07/2026 09:06,N,Harbor Pediatric Therapy,Occupational,Harbor East,County Early Start,,P2006,SYNTHETIC_EXAMPLE internal note — do not map
+R0560,08/08/2026 09:07,Y,Harbor Pediatric Therapy,SLP,Harbor West,County Early Start,08/16/2026,P2007,SYNTHETIC_EXAMPLE internal note — do not map
+R0561,08/09/2026 09:08,Y,Harbor Pediatric Therapy,OCC,Harbor East,,17-Aug-2026,P2008,SYNTHETIC_EXAMPLE internal note — do not map
+R0562,2026-08-10 09:09:00,Y,Harbor Pediatric Therapy,ST,Harbor West,County Early Start,18-Aug-2026,P2009,SYNTHETIC_EXAMPLE internal note — do not map
+R0563,08/11/2026 09:10,N,Harbor Pediatric Therapy,OT,Harbor East,County Early Start,,P2010,SYNTHETIC_EXAMPLE internal note — do not map
+R0564,08/12/2026 09:11,N,Harbor Pediatric Therapy,Speech,Harbor West,County Early Start,,P2011,SYNTHETIC_EXAMPLE internal note — do not map

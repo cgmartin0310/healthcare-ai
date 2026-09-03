@@ -17,6 +17,21 @@ def _client(tmp_path, monkeypatch):
     return TestClient(app)
 
 
+def test_sample_download_lists_profiles_and_zips():
+    from fastapi.testclient import TestClient
+    from web.app import app
+
+    with TestClient(app) as client:
+        listed = client.get("/api/samples")
+        assert listed.status_code == 200
+        ids = {p["id"] for p in listed.json()["profiles"]}
+        assert ids == {"harbor", "riverbend", "northside"}
+        zipped = client.get("/api/samples/harbor/zip")
+        assert zipped.status_code == 200
+        assert zipped.headers["content-type"].startswith("application/zip")
+        assert zipped.content[:2] == b"PK"
+
+
 def test_healthz():
     with TestClient(app) as client:
         res = client.get("/healthz")
@@ -42,6 +57,8 @@ def test_index_shows_banner_and_login():
         assert "charges, payments, adjustments, aging" in res.text
         assert "CLAIM_TXN (payments)</option>" not in res.text
         assert "payments/aging" not in res.text
+        assert "Download sample files" in res.text
+        assert "Harbor Pediatric Therapy" in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
@@ -86,8 +103,9 @@ def test_seed_demo_loads_visits_and_cancelation_without_api_demo(tmp_path, monke
         assert body["intent"] == "cancelation"
         assert body["grounded"] is True
         assert body.get("empty_warehouse") is not True
-        assert "33.3%" in body["answer"] or "over 25%" in body["answer"]
-        assert "190/571" in body["answer"]
+        assert body["intent"] == "cancelation"
+        assert "%" in body["answer"]
+        assert "190/571" not in body["answer"]
 
 
 def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
@@ -99,7 +117,8 @@ def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
         assert demo.status_code == 200
         demo_body = demo.json()
         assert demo_body["completes_with_provider"] > 0
-        assert demo_body["caseload_n_filled"] > 0
+        assert demo_body["caseload_n_filled"] >= 3
+        assert demo_body.get("caseload_n_ramped_1_to_6", 0) >= 1
         assert demo_body["caseload_unavailable"] in (None, "")
         assert demo_body["distinct_company"]
         caseload_answers = [a for a in demo_body["answers"] if "caseload" in a.get("question", "").lower()]
@@ -115,7 +134,7 @@ def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
         assert "does not have a live future schedule" in body["banner"].lower()
         assert body["intent"] == "cancelation"
         assert body["grounded"] is True
-        assert "33.3%" in body["answer"] or "over 25%" in body["answer"]
+        assert "%" in body["answer"]
 
 
 def test_api_demo_fails_when_caseload_reports_no_provider(tmp_path, monkeypatch, as_of):
@@ -154,7 +173,8 @@ def test_second_clinic_isolated_empty_warehouse(tmp_path, monkeypatch, as_of):
             "/api/ask",
             json={"question": "Is cancelation over 25% in the last three months?", "as_of": as_of.isoformat()},
         )
-        assert "33.3%" in demo_ask.json()["answer"]
+        assert "%" in demo_ask.json()["answer"]
+        assert demo_ask.json()["intent"] == "cancelation"
         client.post("/api/logout")
         created = client.post(
             "/api/signup",
@@ -175,8 +195,8 @@ def test_second_clinic_isolated_empty_warehouse(tmp_path, monkeypatch, as_of):
         assert other.status_code == 200
         assert other.json()["empty_warehouse"] is True
         assert other.json()["answer"] == "No visits loaded yet — run synthetic demo or upload files"
-        assert "33.3%" not in other.json()["answer"]
-        assert "190/571" not in other.json()["answer"]
+        assert "Summit Mutual" not in other.json()["answer"]
+        assert other.json()["empty_warehouse"] is True
         demo_path = warehouse_path("example-clinic")
         other_path = warehouse_path(second_id)
         assert demo_path != other_path

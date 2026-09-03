@@ -30,29 +30,29 @@ pip install -e ".[dev]"
 cp .env.example .env
 ```
 
-Synthetic example dumps (two column layouts, PHI-free, tied to no real clinic) already live under `fixtures/synthetic/`. Regenerate with `python scripts/generate_synthetic.py`.
+Synthetic example dumps (three clinic profiles, export dialects, fake identifiers for the de-id gate) live under `fixtures/synthetic/profiles/`. Regenerate with `python scripts/generate_synthetic.py`.
 
 Map, confirm, load, ask (as-of 2026-09-02 matches the fixture calendar):
 
 ```bash
-clinic-analyst --tenant example-clinic deid fixtures/synthetic/layout_a/SYNTHETIC_EXAMPLE_appointments.csv
+clinic-analyst --tenant example-clinic deid fixtures/synthetic/profiles/harbor_pediatric/SYNTHETIC_EXAMPLE_visits.csv
 clinic-analyst --as-of 2026-09-02 demo
 ```
 
 Or step by step:
 
 ```bash
-clinic-analyst propose fixtures/synthetic/layout_a/SYNTHETIC_EXAMPLE_appointments.csv \
+clinic-analyst propose fixtures/synthetic/profiles/harbor_pediatric/SYNTHETIC_EXAMPLE_visits.csv \
   --entity APPOINTMENT --out /tmp/appt.json
 clinic-analyst confirm /tmp/appt.json
 clinic-analyst --tenant example-clinic load \
-  fixtures/synthetic/layout_a/SYNTHETIC_EXAMPLE_appointments.csv --mapping /tmp/appt.json
+  fixtures/synthetic/profiles/harbor_pediatric/SYNTHETIC_EXAMPLE_visits.csv --mapping /tmp/appt.json
 
-clinic-analyst propose fixtures/synthetic/layout_payments/SYNTHETIC_EXAMPLE_transactions.csv \
+clinic-analyst propose fixtures/synthetic/profiles/harbor_pediatric/SYNTHETIC_EXAMPLE_ledger.csv \
   --entity CLAIM_TXN --out /tmp/txn.json
 clinic-analyst confirm /tmp/txn.json
 clinic-analyst --tenant example-clinic load \
-  fixtures/synthetic/layout_payments/SYNTHETIC_EXAMPLE_transactions.csv --mapping /tmp/txn.json --mode append
+  fixtures/synthetic/profiles/harbor_pediatric/SYNTHETIC_EXAMPLE_ledger.csv --mapping /tmp/txn.json --mode append
 
 clinic-analyst --tenant example-clinic --as-of 2026-09-02 ask \
   "Is cancelation over 25% in the last three months?"
@@ -102,7 +102,7 @@ Documented **demo login** (PHI-free, not a production secret):
 - password: `demo-clinic-2026`
 - tenant: `example-clinic`
 
-On startup, `seed_demo()` creates that user and, if the example-clinic warehouse has no APPOINTMENT rows, loads layout_a visits/referrals/patients plus layout_payments `CLAIM_TXN`. Idempotent. Demo chat works after login without clicking **Run synthetic demo**. When the client omits `as_of` for the demo tenant, the server uses **2026-09-02** (synthetic calendar; August stays closed). Other tenants still default to today / `CLINIC_ANALYST_AS_OF`. The as-of date field is on the chat form.
+On startup, `seed_demo()` creates that user and, if the example-clinic warehouse is empty or stale, loads the Harbor Pediatric profile (visits, referrals, patients, claim ledger). Idempotent. Demo chat works after login without clicking **Run synthetic demo**. When the client omits `as_of` for the demo tenant, the server uses **2026-09-02** (synthetic calendar; August stays closed). Other tenants still default to today / `CLINIC_ANALYST_AS_OF`. The as-of date field is on the chat form.
 
 A second clinic can sign up and gets an empty warehouse that cannot see the demo tenant. If a tenant has no visits, the UI and analyst show: “No visits loaded yet — run synthetic demo or upload files”.
 
@@ -125,7 +125,7 @@ After login the user types any ops/billing question. The analyst is this clinic'
 
 Set the key in the Render dashboard (Blueprint prompts for `XAI_API_KEY` because `sync: false`). Do not commit the key.
 
-Synthetic demo data (not Boom): Example Clinic, ~1800 visits, 80 patients, ~200 referrals, plus `CLAIM_TXN` claim-ledger rows (charges / payments). Tied to no real clinic.
+Synthetic demo data (not Boom): three clinic profiles (Harbor Pediatric, Riverbend PT, Northside Behavioral). Download the raw exports from the UI, then re-upload to demo mapping + de-id. Tied to no real clinic.
 
 ### Deploy on Render
 
@@ -217,7 +217,7 @@ Staffing working model (when the analyst forecasts FTE):
 
 Column remaps onto PREP (not new metrics):
 
-- `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName`. Synthetic layout_a includes `ProviderId` (PRV01…) and keeps `TherapistName` as the display synonym that maps to `ProviderName` — it is not dropped as patient PHI. Opening a warehouse copies leftover `TherapistName` into `ProviderName` and adds `ProviderId` if missing. Demo reload replace-drops tables so an old schema cannot linger. Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
+- `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName`. Shipped sample files use export dialects (`Clinician` / `rendering_name` / `StaffName`), never warehouse headers. Clinician display names are not dropped as patient PHI. Opening a warehouse copies leftover `TherapistName` into `ProviderName` and adds `ProviderId` if missing. Demo reload replace-drops tables so an old schema cannot linger. Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
 - Company is stamped from the logged-in tenant on every row (overwrite). Do not require `Company` in every file. The demo tenant display name is `Example Clinic (synthetic)`; that is the warehouse Company after load.
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` is **not stored**. At import, DOB (if present) becomes optional `AgeBand` (`Child` / `Adult`, child = age < 18 at as-of). There is no `AgeGroup` warehouse column. Locked early-quit bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.
@@ -247,9 +247,7 @@ packages/integration_engine/src/integration_engine/
 packages/warehouse/src/warehouse/
 packages/analyst/src/analyst/
 packages/web/src/web/            # FastAPI adapter (Render); not a fourth metric layer
-fixtures/synthetic/layout_a/     # PREP-like visit/referral/patient headers
-fixtures/synthetic/layout_b/     # different export headers
-fixtures/synthetic/layout_payments/  # CLAIM_TXN claim-ledger rows (charges / payments)
+fixtures/synthetic/profiles/     # three clinic-export dialects (never warehouse headers)
 tests/                           # locked-def, auth isolation, CLAIM_TXN, e2e
 render.yaml                      # one web service, DuckDB + users on /data
 ```

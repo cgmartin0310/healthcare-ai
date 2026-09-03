@@ -10,7 +10,7 @@ from typing import Any
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field
 
 from analyst.banner import PRODUCT_BANNER
@@ -37,7 +37,9 @@ from web.demo_load import (
     demo_not_ready,
     fixtures_dir,
     load_synthetic_demo,
+    resolve_profile,
 )
+from web.profiles import DEFAULT_PROFILE, list_profiles, profile_dir, profile_files
 
 INDEX_HTML = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
 SAMPLE_QUESTIONS = [
@@ -129,6 +131,38 @@ def healthz() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/api/samples")
+def api_samples() -> dict[str, Any]:
+    return {
+        "note": "SYNTHETIC EXAMPLE files — tied to no real clinic. Safe Harbor identifiers are present on purpose so the import gate has something to strip.",
+        "default": DEFAULT_PROFILE,
+        "profiles": list_profiles(),
+    }
+
+
+@app.get("/api/samples/{profile_id}/zip")
+def api_sample_zip(profile_id: str) -> Response:
+    import io
+    import zipfile
+
+    try:
+        pid = resolve_profile(profile_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    buf = io.BytesIO()
+    root = profile_dir(pid)
+    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for _entity, path in profile_files(pid):
+            if not path.exists():
+                raise HTTPException(500, f"Sample file missing: {path.name}")
+            zf.write(path, arcname=f"{root.name}/{path.name}")
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="SYNTHETIC_EXAMPLE_{pid}.zip"'},
+    )
+
+
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     return INDEX_HTML
@@ -161,6 +195,7 @@ class LoadBody(BaseModel):
 
 class DemoBody(BaseModel):
     as_of: str | None = None
+    profile: str | None = None
 
 
 @app.post("/api/signup")
@@ -310,30 +345,23 @@ def api_chat_clear(user: User = Depends(current_user)) -> dict[str, Any]:
 @app.post("/api/demo")
 def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -> dict[str, Any]:
     as_of = parse_as_of((body.as_of if body else None) or DEMO_DEFAULT_AS_OF, tenant_id=user.tenant_id)
+    try:
+        profile_id = resolve_profile((body.profile if body else None) or DEFAULT_PROFILE)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
     fixtures = fixtures_dir()
     if not fixtures.exists():
         raise HTTPException(500, f"Synthetic fixtures not found at {fixtures}")
-    layout_b = {
-        "APPOINTMENT": fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_visits.csv",
-        "REFERRAL": fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_incoming_referrals.csv",
-        "PATIENT": fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv",
-    }
     mapped: list[dict[str, Any]] = []
-    for entity, path in layout_b.items():
-        if path.exists():
-            proposal = propose_mapping(path, entity=entity)
-            mapped.append(
-                {
-                    "layout": "B",
-                    "entity": entity,
-                    "columns": sum(1 for c in proposal.columns if c.target_column),
-                    "loaded": False,
-                }
-            )
     try:
         with open_wh(user.tenant_id) as wh:
             mapped.extend(
-                load_synthetic_demo(wh, tenant_id=user.tenant_id, tenant_company=user.tenant_name)
+                load_synthetic_demo(
+                    wh,
+                    tenant_id=user.tenant_id,
+                    tenant_company=user.tenant_name,
+                    profile_id=profile_id,
+                )
             )
             readiness = demo_caseload_readiness(wh, as_of)
             if demo_not_ready(readiness):
@@ -356,6 +384,7 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
         "note": "SYNTHETIC EXAMPLE DATA — tied to no real clinic. Loaded only into your tenant DuckDB.",
         "warehouse": str(warehouse_path(user.tenant_id)),
         "as_of": as_of.isoformat(),
+        "profile": profile_id,
         "mapped": mapped,
         "answers": answers,
         "warehouse_empty": False,
