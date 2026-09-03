@@ -401,7 +401,8 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
             v.company, v.discipline, v.patient_id,
             v.complete, v.cancelled, v.no_show,
             f.first_dos,
-            p.{qident("DOB")} AS dob
+            p.{qident("DOB")} AS dob,
+            p.{qident("AgeBand")} AS age_band
         FROM visit_counts v
         JOIN first_dos f
           ON f.company = v.company AND f.discipline = v.discipline AND f.patient_id = v.patient_id
@@ -422,12 +423,16 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
         first = _as_date(rec["first_dos"])
         if first is None:
             continue
-        dob = _as_date(rec["dob"])
-        if dob is None:
-            missing_dob += 1
+        stored_band = rec.get("age_band")
+        if stored_band in {"Child", "Adult"}:
+            age_band = stored_band
+        else:
+            dob = _as_date(rec["dob"])
+            if dob is None:
+                missing_dob += 1
+            age_band = age_band_from_dob(dob, current_end)
         tenure_months = (current_end.year - first.year) * 12 + (current_end.month - first.month)
         disc = str(rec["discipline"])
-        age_band = age_band_from_dob(dob, current_end)
         if disc == "PT" or (disc in {"OT", "ST"} and age_band == "Adult"):
             bar = 3
         elif disc in {"OT", "ST"} and age_band == "Child":
@@ -452,7 +457,7 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
     return MetricResult(
         name="early_quit_watch",
         as_of=as_of,
-        grain_note="patient×discipline cancelation > 30% under locked tenure bar; child vs adult from PATIENT.DOB; DFlex is not used",
+        grain_note="patient×discipline cancelation > 30% under locked tenure bar; child vs adult from PATIENT.AgeBand (import-time, from DOB); DFlex is not used",
         value=len(flagged),
         details={
             "flagged": flagged[:50],
@@ -462,7 +467,7 @@ def early_quit_watch(wh: Warehouse, as_of: date, *, company: str | None = None) 
                 "adult_OT_ST": "< 3 months",
                 "child_OT_ST": "< 6 months",
             },
-            "age_band_source": "derived from PATIENT.DOB (child = age < 18 at last closed month end); not a warehouse column",
+            "age_band_source": "PATIENT.AgeBand at import (child = age < 18). DOB is not stored. Not AgeGroup. Locked bars unchanged.",
             "patients_missing_dob_defaulted_adult": missing_dob,
         },
     )

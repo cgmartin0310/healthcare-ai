@@ -196,7 +196,8 @@ APPOINTMENT = Table(
     ),
 )
 
-# Early-quit child vs adult is derived from PATIENT.DOB. Do not store AgeGroup.
+# Early-quit child vs adult is AgeBand at import (from DOB), not a warehouse AgeGroup.
+# DOB is never persisted. Locked bars are unchanged.
 CHILD_AGE_YEARS = 18
 
 PATIENT = Table(
@@ -228,9 +229,17 @@ PATIENT = Table(
             "DOB",
             "DATE",
             False,
-            "Date of birth. Early-quit bars derive child vs adult from this.",
+            "Not persisted. De-id derives AgeBand from DOB at import, then drops DOB.",
             ("dob", "date_of_birth", "birth_date", "birthdate"),
-            "Not shown on default screens. Child = age < 18 at last closed month end.",
+            "Never stored in DuckDB. Not AgeGroup.",
+        ),
+        Column(
+            "AgeBand",
+            "VARCHAR",
+            False,
+            "Child or Adult at import as-of (child = age < 18). Early-quit bars only. Not AgeGroup.",
+            ("age_band", "ageband"),
+            "Optional. Locked tenure bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.",
         ),
     ),
 )

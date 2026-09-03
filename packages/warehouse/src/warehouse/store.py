@@ -38,9 +38,17 @@ class Warehouse:
             expected = [c.name for c in table.columns]
             existing = self._table_columns(table.name)
             if existing is not None and existing != expected:
-                # Remaps (Location→LocationName, AgeGroup→DOB) cannot ALTER in place.
-                self.con.execute(f"DROP TABLE {quoted_table(table.name)}")
-                existing = None
+                if existing == expected[: len(existing)] and len(expected) > len(existing):
+                    for col in table.columns[len(existing) :]:
+                        self.con.execute(
+                            f"ALTER TABLE {quoted_table(table.name)} "
+                            f"ADD COLUMN {qident(col.name)} {col.duckdb_type}"
+                        )
+                    existing = expected
+                else:
+                    # Remaps (Location→LocationName, AgeGroup→DOB) cannot ALTER in place.
+                    self.con.execute(f"DROP TABLE {quoted_table(table.name)}")
+                    existing = None
             if existing is None:
                 cols = ", ".join(
                     f"{qident(c.name)} {c.duckdb_type}" for c in table.columns
@@ -48,6 +56,32 @@ class Warehouse:
                 self.con.execute(
                     f"CREATE TABLE {quoted_table(table.name)} ({cols})"
                 )
+        self._scrub_stored_dob()
+
+    def _scrub_stored_dob(self) -> None:
+        """DOB must not remain in DuckDB. Backfill AgeBand, then null DOB."""
+        from warehouse.schema import age_band_from_dob
+
+        cols = self._table_columns("PATIENT")
+        if not cols or "DOB" not in cols:
+            return
+        frame = self.fetch_table("PATIENT")
+        if frame.empty or "DOB" not in frame.columns:
+            return
+        if frame["DOB"].isna().all():
+            return
+        today = date.today()
+        if "AgeBand" in frame.columns:
+            need = frame["AgeBand"].isna() & frame["DOB"].notna()
+            if need.any():
+                frame.loc[need, "AgeBand"] = [
+                    age_band_from_dob(d.date() if hasattr(d, "date") else d, today)
+                    if d is not None and not pd.isna(d)
+                    else None
+                    for d in frame.loc[need, "DOB"]
+                ]
+        frame["DOB"] = pd.NA
+        self.replace_table("PATIENT", frame)
 
     def _table_columns(self, table_name: str) -> list[str] | None:
         row = self.con.execute(

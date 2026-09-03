@@ -17,6 +17,7 @@ from analyst.banner import PRODUCT_BANNER
 from analyst.engine import Analyst
 from analyst.llm import llm_available, tools_notice, xai_model
 from analyst.tenant import parse_as_of, warehouse_path
+from integration_engine.deid import SAFE_HARBOR_NOTICE
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, mapping_from_dict, propose_mapping
 from warehouse.store import Warehouse
@@ -203,13 +204,17 @@ async def api_propose(
     dest = Path(tempfile.mkdtemp(prefix="ca-upload-")) / Path(name).name
     dest.write_bytes(await file.read())
     ent = entity if entity in ENTITIES else None
-    proposal = propose_mapping(dest, entity=ent)
+    as_of = parse_as_of(None, tenant_id=user.tenant_id)
+    proposal = propose_mapping(dest, entity=ent, tenant_id=user.tenant_id, as_of=as_of)
     upload_id = uuid.uuid4().hex
     _PENDING[upload_id] = {"path": str(dest), "mapping": proposal.to_dict(), "tenant_id": user.tenant_id}
+    receipt = proposal.deid_receipt
     return {
         "banner": PRODUCT_BANNER,
+        "notice": SAFE_HARBOR_NOTICE,
         "upload_id": upload_id,
         "mapping": _strip_samples(proposal.to_dict()),
+        "deid_receipt": receipt,
     }
 
 
@@ -223,7 +228,13 @@ def api_confirm(body: ConfirmBody, user: User = Depends(current_user)) -> dict[s
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     rec["mapping"] = confirmed.to_dict()
-    return {"banner": PRODUCT_BANNER, "upload_id": body.upload_id, "mapping": _strip_samples(confirmed.to_dict())}
+    return {
+        "banner": PRODUCT_BANNER,
+        "notice": SAFE_HARBOR_NOTICE,
+        "upload_id": body.upload_id,
+        "mapping": _strip_samples(confirmed.to_dict()),
+        "deid_receipt": confirmed.deid_receipt,
+    }
 
 
 @app.post("/api/load")
@@ -235,6 +246,7 @@ def api_load(body: LoadBody, user: User = Depends(current_user)) -> dict[str, An
     if not mapping.confirmed:
         raise HTTPException(400, "Mapping is not confirmed. Confirm before load.")
     mode = body.mode if body.mode in {"replace", "append"} else "append"
+    as_of = parse_as_of(None, tenant_id=user.tenant_id)
     with open_wh(user.tenant_id) as wh:
         counts = load_mapped_file(
             wh,
@@ -243,13 +255,16 @@ def api_load(body: LoadBody, user: User = Depends(current_user)) -> dict[str, An
             tenant_id=user.tenant_id,
             tenant_company=user.tenant_name,
             mode=mode,
+            as_of=as_of,
         )
     return {
         "banner": PRODUCT_BANNER,
+        "notice": SAFE_HARBOR_NOTICE,
         "loaded": counts,
         "mode": mode,
         "warehouse": str(warehouse_path(user.tenant_id)),
         "warehouse_empty": _warehouse_empty(user.tenant_id),
+        "deid_receipt": mapping.deid_receipt,
     }
 
 

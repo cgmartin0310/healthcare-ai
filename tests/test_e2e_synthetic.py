@@ -23,7 +23,7 @@ def _load_layout(wh: Warehouse, layout: str, tenant: str) -> None:
         },
     }[layout]
     for entity, path in files.items():
-        proposal = confirm_mapping(propose_mapping(path, entity=entity))
+        proposal = confirm_mapping(propose_mapping(path, entity=entity, tenant_id=tenant))
         load_mapped_file(wh, path, proposal, tenant_id=tenant, mode="replace")
 
 

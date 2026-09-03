@@ -7,6 +7,16 @@ from typing import Any
 
 import pandas as pd
 
+from datetime import date
+
+from integration_engine.deid import (
+    apply_deid,
+    generalize_mapped_dates,
+    get_or_create_deid_secret,
+    hash_mapped_identifiers,
+    persist_receipt,
+    scrub_patient_dob,
+)
 from integration_engine.mapper import MappingProposal, mapping_from_dict, read_tabular
 from integration_engine.normalize import NORMALIZERS
 from warehouse.schema import PREP_TABLES
@@ -16,8 +26,10 @@ from warehouse.store import Warehouse, write_json
 def apply_mapping(frame: pd.DataFrame, proposal: MappingProposal) -> dict[str, pd.DataFrame]:
     buckets: dict[str, dict[str, pd.Series]] = {}
     for source, (table, column) in proposal.bindings().items():
+        if column == "DOB":
+            continue
         if source not in frame.columns:
-            raise ValueError(f"Mapped source column missing from file: {source}")
+            continue
         series = frame[source]
         if column in NORMALIZERS:
             series = series.map(NORMALIZERS[column])
@@ -70,14 +82,25 @@ def load_mapped_file(
     tenant_company: str | None = None,
     mode: str = "replace",
     manifest_path: Path | None = None,
+    as_of: date | None = None,
+    deid_secret: bytes | None = None,
 ) -> dict[str, int]:
     if isinstance(proposal, dict):
         proposal = mapping_from_dict(proposal)
     if not proposal.confirmed:
         raise ValueError("Mapping is not confirmed. Human confirm is required before load.")
-    frame = read_tabular(path)
+    secret = deid_secret if deid_secret is not None else get_or_create_deid_secret(tenant_id)
+    when = as_of or date.today()
+    raw = read_tabular(path)
+    frame, receipt = apply_deid(raw, secret, when, source_filename=str(path), hash_ids=False)
     tables = apply_mapping(frame, proposal)
+    if "PATIENT" in tables and "AgeBand" in frame.columns and "AgeBand" in tables["PATIENT"].columns:
+        tables["PATIENT"]["AgeBand"] = frame["AgeBand"].values
     stamp_and_derive(tables, tenant_company=tenant_company)
+    hash_mapped_identifiers(tables, secret)
+    generalize_mapped_dates(tables)
+    scrub_patient_dob(tables)
+    persist_receipt(tenant_id, receipt, Path(path).name)
     counts: dict[str, int] = {}
     for table_name, mapped in tables.items():
         if mode == "append":

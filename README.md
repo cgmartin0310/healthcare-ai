@@ -35,6 +35,7 @@ Synthetic example dumps (two column layouts, PHI-free, tied to no real clinic) a
 Map, confirm, load, ask (as-of 2026-09-02 matches the fixture calendar):
 
 ```bash
+clinic-analyst --tenant example-clinic deid fixtures/synthetic/layout_a/SYNTHETIC_EXAMPLE_appointments.csv
 clinic-analyst --as-of 2026-09-02 demo
 ```
 
@@ -58,6 +59,30 @@ clinic-analyst --tenant example-clinic --as-of 2026-09-02 ask \
 clinic-analyst --tenant example-clinic --as-of 2026-09-02 alerts
 clinic-analyst --tenant example-clinic --as-of 2026-09-02 scheduled
 ```
+
+### De-identification (import gate)
+
+Prospects should assume **raw extracts are not stored**. This is a Safe Harbor-style gate, not ARX and not the OHDSI FHIR Anonymizer (wrong format; k-anonymity would destroy small-clinic metrics). It is **not** a legal determination that a file is de-identified. UI copy never says “HIPAA compliant” or “no HIPAA data.”
+
+Before confirm/load of any CSV/xlsx (synthetic demo files included):
+
+| Action | What |
+|---|---|
+| **Drop** (never mapped) | Likely PHI headers: name, first/last, address, street, city, zip, SSN, MRN, phone, email, account, member id, subscriber, insurance id, and DOB |
+| **Hash** | `PatientId`, `ProviderId`, `ApptId`, `ReferralId`, `TxnId`, `ClaimId` — HMAC-SHA256 with a **per-tenant** secret at `{CLINIC_ANALYST_DATA_DIR}/tenants/{tenant_id}/deid.hmac` (on `/data`, never in git). Same raw id → same hash within a tenant so joins work. Different tenants → different hashes. |
+| **Dates** | `ApptDate`, `PostedDate`, `DOS`, `DateTimeCreated` kept as month+year (day set to 1). `FirstInsPayment` is not generalized (days-to-pay needs a day). |
+| **Age** | DOB is not stored. If DOB is present, import writes optional `AgeBand` (`Child` / `Adult`) for locked early-quit bars only. Not `AgeGroup`. |
+
+A de-id **receipt** (dropped / hashed / generalized columns, row counts, no cell values) is shown after propose and written under `{data}/tenants/{tenant_id}/deid_receipts/`.
+
+Local pre-send (clinic can inspect before upload). The server still re-runs the same gate:
+
+```bash
+clinic-analyst --tenant example-clinic deid path/to/export.csv
+# writes path/to/export.deid.csv and path/to/export.deid.receipt.json
+```
+
+Notice on every receipt: “Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.”
 
 Tests:
 
@@ -121,7 +146,7 @@ See `.env.example`. Local state is `CLINIC_ANALYST_DATA_DIR` (default `./data`).
 v1 is **one-time file ingest** (CSV/xlsx) with an agent in the loop: propose a column mapping onto PREP `APPOINTMENT` / `REFERRAL` / `PATIENT` / optional `CLAIM_TXN`, human confirm, then load. Multiple files per tenant (schedule, referrals, payments/aging). A tenant can load APPOINTMENT only.
 
 - Does **not** log into client EHRs, scrape portals, or run a live ongoing feed.
-- PHI stays out of the extract where possible. Default views use ids, not patient names, addresses, or claim lists.
+- Every CSV/xlsx goes through a **de-identification gate** before confirm/load (and again on ingest). See below.
 - The proposer is synonym + fuzzy + type-hint scoring. Confirm is mandatory before load.
 
 ### 2. Analysis warehouse
@@ -195,7 +220,7 @@ Column remaps onto PREP (not new metrics):
 - `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName` (Boom `TherapistName` is a synonym for `ProviderName`). Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
 - Company is stamped from the logged-in tenant when an upload omits it. Do not require `Company` in every file.
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
-- `PATIENT.DOB` — there is no `AgeGroup` warehouse column. Locked early-quit bars derive child vs adult from DOB (child = age < 18 at last closed month end): PT / adult OT-ST < 3 months; child OT-ST < 6. DOB is not shown on default screens.
+- `PATIENT.DOB` is **not stored**. At import, DOB (if present) becomes optional `AgeBand` (`Child` / `Adult`, child = age < 18 at as-of). There is no `AgeGroup` warehouse column. Locked early-quit bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.
 - `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.
 - Optional `CLAIM_TXN` (payment source of truth when present): required `TxnId`, `ApptId`, `PatientId`, `Company`, `PostedDate`, `Payer`, `TxnType` (`charge|allowance|payment|adjustment|refund`), `Amount`. Optional `LocationName`, `Discipline`. When present, locked money metrics **derive** `TotalPaid` / `InsPaid` / `InsBalance` / `FirstInsPayment` from it. When absent, appointment rollup columns are used if present. If neither exists, the answer is that the data is not in the dump. Do not add `PatBalance`.
 - `APPOINTMENT.Telehealth` is stored for schema fidelity. There is no locked telehealth metric, so none is computed.

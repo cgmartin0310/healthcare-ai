@@ -42,7 +42,12 @@ def test_company_not_required_in_upload_is_stamped(tmp_path, warehouse):
     )
     frame = warehouse.fetch_table("APPOINTMENT")
     assert list(frame["Company"]) == ["Second Clinic"]
-    assert list(frame["ApptId"]) == ["A1"]
+    from integration_engine.deid import get_or_create_deid_secret, hash_identifier
+
+    secret = get_or_create_deid_secret("second-clinic")
+    assert list(frame["ApptId"]) == [hash_identifier(secret, "A1")]
+    appt_dates = [d.date() if hasattr(d, "date") else d for d in frame["ApptDate"]]
+    assert appt_dates == [date(2026, 8, 1)]
 
 
 def test_evaldate_derives_completed(tmp_path, warehouse):

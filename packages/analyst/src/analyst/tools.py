@@ -34,7 +34,7 @@ Locked metric definitions (do not redefine; do not invent a lookalike):
 - Cancelation % = (Cancelled + No Show) / (Complete + Cancelled + No Show). Pending/Waiting out. Closed months.
 - Active book = ≥1 Complete in the calendar month. Not PATIENT.PatientActive.
 - Churn grain = Company × Discipline × PatientId. Closed months only. Drop first-DOS on/after prior month start. Churned = prior active, not current active.
-- Early quit watch = cancelation > 30% under tenure bar: PT / adult OT-ST < 3 months; child OT-ST < 6 from PATIENT.DOB (child = age < 18).
+- Early quit watch = cancelation > 30% under tenure bar: PT / adult OT-ST < 3 months; child OT-ST < 6. Child vs adult from PATIENT.AgeBand at import (from DOB; DOB is not stored; child = age < 18). Not AgeGroup.
 - Referrals = COUNT REFERRAL rows. Conversion = Completed?=1 / referrals. EVAL notes are not conversion.
 - Payments = TotalPaid. AR/collections = InsPaid except dollar AR aged > 30 = SUM(InsBalance) on Completes, InsBalance>0, by PrimaryPayorName × LocationName, insurance only. Not billed−paid, not PatBalance, not Tableau NET AR.
 - Avg Collections = InsPaid by payer, DOS=ApptDate, 60-day lag then 3 months back, includes zeros/partials.

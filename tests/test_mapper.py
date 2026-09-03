@@ -48,13 +48,18 @@ def test_layout_b_referrals_map_completed_flag():
     confirm_mapping(proposal)
 
 
-def test_layout_b_patients_map_active_and_dob():
+def test_layout_b_patients_map_active_and_ageband_not_dob():
     path = FIXTURES / "layout_b" / "SYNTHETIC_EXAMPLE_clients.csv"
     proposal = propose_mapping(path, entity="PATIENT")
     bound = {c.source: c.target_column for c in proposal.columns if c.target_column}
     assert bound["is_active_flag"] == "PatientActive"
-    assert bound["dob"] == "DOB"
+    assert bound.get("AgeBand") == "AgeBand"
+    assert "dob" not in bound
+    assert "DOB" not in bound.values()
     assert "AgeGroup" not in bound.values()
+    assert proposal.deid_receipt
+    assert "dob" in [c.lower() for c in proposal.deid_receipt["columns_dropped"]]
+    assert proposal.deid_receipt["age_band_derived_from_dob"] is True
     confirm_mapping(proposal)
 
 

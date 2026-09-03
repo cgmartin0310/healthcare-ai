@@ -10,6 +10,7 @@ from pathlib import Path
 from analyst.banner import PRODUCT_BANNER
 from analyst.engine import Analyst
 from analyst.tenant import DEFAULT_TENANT, open_warehouse, parse_as_of, tenant_company, write_tenant_config
+from integration_engine.deid import SAFE_HARBOR_NOTICE, deid_file
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, load_mapping_json, propose_mapping, save_mapping_json
 
@@ -49,6 +50,14 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("scheduled", help="Run scheduled-metrics hooks for daily/weekly/monthly cadence.")
     sub.add_parser("snapshot", help="Print the closed-month metric snapshot.")
 
+    p_deid = sub.add_parser(
+        "deid",
+        help="Write a redacted CSV + receipt next to the file. Server still re-runs de-id on ingest.",
+    )
+    p_deid.add_argument("file")
+    p_deid.add_argument("--out", default=None, help="Redacted CSV path (default: <file>.deid.csv).")
+    p_deid.add_argument("--receipt", default=None, help="Receipt JSON path (default: <file>.deid.receipt.json).")
+
     p_demo = sub.add_parser("demo", help="Map + load both synthetic layouts and ask sample questions.")
     p_demo.add_argument(
         "--fixtures",
@@ -59,8 +68,20 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     as_of = parse_as_of(args.as_of, tenant_id=args.tenant)
 
+    if args.cmd == "deid":
+        dest, rec_dest, receipt = deid_file(
+            args.file,
+            tenant_id=args.tenant,
+            as_of=as_of,
+            out_path=Path(args.out) if args.out else None,
+            receipt_path=Path(args.receipt) if args.receipt else None,
+        )
+        print(SAFE_HARBOR_NOTICE)
+        print(json.dumps({"redacted": str(dest), "receipt": str(rec_dest), **receipt.to_dict()}, indent=2))
+        return 0
+
     if args.cmd == "propose":
-        proposal = propose_mapping(args.file, entity=args.entity)
+        proposal = propose_mapping(args.file, entity=args.entity, tenant_id=args.tenant, as_of=as_of)
         save_mapping_json(proposal, args.out)
         print(json.dumps(proposal.to_dict(), indent=2))
         if proposal.unmapped_required:
@@ -78,15 +99,16 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "load":
         proposal = load_mapping_json(args.mapping)
         with open_warehouse(args.tenant) as wh:
-            counts = load_mapped_file(
-                wh,
-                args.file,
-                proposal,
-                tenant_id=args.tenant,
-                tenant_company=tenant_company(args.tenant),
-                mode=args.mode,
-                manifest_path=Path(args.mapping).with_suffix(".manifest.json"),
-            )
+                counts = load_mapped_file(
+                    wh,
+                    args.file,
+                    proposal,
+                    tenant_id=args.tenant,
+                    tenant_company=tenant_company(args.tenant),
+                    mode=args.mode,
+                    manifest_path=Path(args.mapping).with_suffix(".manifest.json"),
+                    as_of=as_of,
+                )
         print(json.dumps({"tenant": args.tenant, "loaded": counts, "banner": PRODUCT_BANNER}, indent=2))
         return 0
 
@@ -183,7 +205,7 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
             for entity, path_a, path_b in pairs:
                 src = path_a if layout_idx == 0 else path_b
                 mapping_path = work / f"{tid}_{entity}.json"
-                proposal = propose_mapping(src, entity=entity)
+                proposal = propose_mapping(src, entity=entity, tenant_id=tid, as_of=as_of)
                 if proposal.unmapped_required:
                     print(f"FAIL propose {src}: missing {proposal.unmapped_required}")
                     return 2
@@ -197,6 +219,7 @@ def run_demo(fixtures: Path, tenant_id: str, as_of) -> int:
                     tenant_company=tenant_company(tid, fallback="Example Clinic"),
                     mode="replace",
                     manifest_path=mapping_path.with_suffix(".manifest.json"),
+                    as_of=as_of,
                 )
                 mapped = [c for c in confirmed.columns if c.target_column]
                 print(

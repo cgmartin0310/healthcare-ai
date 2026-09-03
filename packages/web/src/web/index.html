@@ -56,7 +56,7 @@
 
     <section>
       <h2>1. Map files (one export at a time)</h2>
-      <p class="muted">Schedule, referrals, payments/aging — each file maps onto one PREP table. Missing REFERRAL or CLAIM_TXN is fine. Load appends into your tenant only.</p>
+      <p class="muted">Schedule, referrals, payments/aging — each file maps onto one PREP table. Missing REFERRAL or CLAIM_TXN is fine. Load appends into your tenant only. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
       <label>Entity
         <select id="entity">
           <option value="APPOINTMENT">APPOINTMENT (visits)</option>
@@ -144,6 +144,17 @@
         n.classList.add("hide");
       }
       if (chat && chat.messages) renderThread(chat.messages);
+    }
+
+    function renderReceipt(receipt) {
+      if (!receipt) return "";
+      const notice = receipt.notice || "Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.";
+      return `<div class="notice"><p>${escapeHtml(notice)}</p>
+        <p>Dropped: ${(receipt.columns_dropped || []).join(", ") || "none"}</p>
+        <p>Hashed: ${(receipt.columns_hashed || []).join(", ") || "none"}</p>
+        <p>Dates generalized (month+year): ${(receipt.dates_generalized || []).join(", ") || "none"}</p>
+        <p>Rows: ${receipt.row_count || 0}. AgeBand from DOB: ${receipt.age_band_derived_from_dob ? "yes" : "no"}. DOB stored: no.</p>
+      </div>`;
     }
 
     function applyWarehouseEmpty(empty) {
@@ -236,7 +247,8 @@
         const rows = (data.mapping.columns || []).map(c =>
           `<tr><td>${c.source}</td><td>${c.target_table || "—"}</td><td>${c.target_column || "unmapped"}</td><td>${c.confidence}</td></tr>`
         ).join("");
-        out.innerHTML = `<p>Required unmapped: ${data.mapping.unmapped_required.join(", ") || "none"}</p>
+        out.innerHTML = renderReceipt(data.deid_receipt) +
+          `<p>Required unmapped: ${data.mapping.unmapped_required.join(", ") || "none"}</p>
           <table><thead><tr><th>Source</th><th>Table</th><th>PREP column</th><th>Conf.</th></tr></thead><tbody>${rows}</tbody></table>`;
         document.getElementById("confirm").disabled = data.mapping.unmapped_required.length > 0;
         document.getElementById("load").disabled = true;

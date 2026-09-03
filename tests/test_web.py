@@ -34,6 +34,10 @@ def test_index_shows_banner_and_login():
         assert "Chat with the analyst" in res.text
         assert "Type any ops" in res.text
         assert "No visits loaded yet — run synthetic demo or upload files" in res.text
+        assert "Safe Harbor identifiers are stripped or hashed before load" in res.text
+        assert "not a legal determination" in res.text
+        assert "HIPAA compliant" not in res.text
+        assert "no HIPAA data" not in res.text.lower()
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):

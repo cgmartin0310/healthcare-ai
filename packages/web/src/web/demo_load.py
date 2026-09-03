@@ -7,6 +7,7 @@ user can still load the labeled dump into their own tenant on purpose.
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +50,8 @@ def load_synthetic_demo(
     if not jobs:
         raise FileNotFoundError(f"Synthetic fixtures not found at {fixtures_dir()}")
     for entity, path, mode in jobs:
-        proposal = confirm_mapping(propose_mapping(path, entity=entity))
+        as_of = date.fromisoformat(DEMO_DEFAULT_AS_OF)
+        proposal = confirm_mapping(propose_mapping(path, entity=entity, tenant_id=tenant_id, as_of=as_of))
         counts = load_mapped_file(
             wh,
             path,
@@ -57,6 +59,7 @@ def load_synthetic_demo(
             tenant_id=tenant_id,
             tenant_company=tenant_company,
             mode=mode,
+            as_of=as_of,
         )
         mapped.append(
             {

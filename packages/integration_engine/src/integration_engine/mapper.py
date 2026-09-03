@@ -18,6 +18,7 @@ from typing import Any
 
 import pandas as pd
 
+from integration_engine.deid import SAFE_HARBOR_NOTICE, _PREVIEW_SECRET, apply_deid, get_or_create_deid_secret
 from warehouse.schema import PREP_TABLES, Table, mapping_required_missing
 
 
@@ -49,6 +50,7 @@ class MappingProposal:
     confirmed: bool = False
     confirmed_at: str | None = None
     synthetic_example: bool = False
+    deid_receipt: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -60,6 +62,7 @@ class MappingProposal:
             "confirmed": self.confirmed,
             "confirmed_at": self.confirmed_at,
             "synthetic_example": self.synthetic_example,
+            "deid_receipt": self.deid_receipt,
         }
 
     def bindings(self) -> dict[str, tuple[str, str]]:
@@ -182,14 +185,28 @@ def _guess_entity(columns: list[str], filename: str) -> str | None:
     return best if scores[best] else "APPOINTMENT"
 
 
-def propose_mapping(path: str | Path, *, entity: str | None = None) -> MappingProposal:
+def propose_mapping(
+    path: str | Path,
+    *,
+    entity: str | None = None,
+    tenant_id: str | None = None,
+    as_of: date | None = None,
+) -> MappingProposal:
     path = Path(path)
-    frame = read_tabular(path, nrows=50)
+    raw = read_tabular(path, nrows=50)
+    secret = get_or_create_deid_secret(tenant_id) if tenant_id else _PREVIEW_SECRET
+    frame, receipt = apply_deid(
+        raw,
+        secret,
+        as_of or date.today(),
+        source_filename=path.name,
+        hash_ids=True,
+    )
     entity_guess = entity or _guess_entity(list(frame.columns), path.name)
     notes = [
-        "PHI should stay out of the extract where possible.",
+        SAFE_HARBOR_NOTICE,
         "Default mapped tables do not require patient names, addresses, or claim lists on screen.",
-        "Human confirm is required before load.",
+        "Human confirm is required before load. The server re-runs de-id on ingest.",
     ]
     synthetic = "synthetic" in path.as_posix().lower() or "example" in path.name.lower()
     if synthetic:
@@ -247,6 +264,7 @@ def propose_mapping(path: str | Path, *, entity: str | None = None) -> MappingPr
         unmapped_required=required,
         notes=notes,
         synthetic_example=synthetic,
+        deid_receipt=receipt.to_dict(),
     )
 
 
@@ -289,6 +307,7 @@ def mapping_from_dict(payload: dict[str, Any]) -> MappingProposal:
         confirmed=bool(payload.get("confirmed")),
         confirmed_at=payload.get("confirmed_at"),
         synthetic_example=bool(payload.get("synthetic_example")),
+        deid_receipt=payload.get("deid_receipt"),
     )
 
 
