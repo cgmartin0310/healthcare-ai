@@ -6,6 +6,7 @@ refuse to compute a lookalike and say so.
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -27,12 +28,27 @@ def _in_list(values: tuple[str, ...]) -> str:
     return ", ".join("'" + v.replace("'", "''") + "'" for v in values)
 
 
+_HEX_ID = re.compile(r"^[0-9a-f]{32,}$", re.I)
+
+
 def _provider_key_sql() -> str:
     """Prefer ProviderId; fall back to ProviderName. Not TherapistId."""
     return (
         f"COALESCE(NULLIF(TRIM(CAST({qident('ProviderId')} AS VARCHAR)), ''), "
         f"NULLIF(TRIM(CAST({qident('ProviderName')} AS VARCHAR)), ''))"
     )
+
+
+def clinician_display_name(raw: Any) -> str | None:
+    """User-visible clinician name. Never a hashed ProviderId."""
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if not text or text.lower() in {"nan", "none", "<na>"}:
+        return None
+    if _HEX_ID.fullmatch(text):
+        return None
+    return text
 
 
 def _as_date(value: Any) -> date | None:
@@ -947,6 +963,7 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
                 {provider} AS provider,
                 {qident("LocationName")} AS location,
                 {qident("Discipline")} AS discipline,
+                MAX({qident("ProviderName")}) AS provider_name,
                 COUNT(*) AS completes
             FROM {quoted_table("APPOINTMENT")}
             WHERE {" AND ".join(filters)}
@@ -957,7 +974,7 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
                 ROW_NUMBER() OVER (PARTITION BY provider ORDER BY completes DESC, location) AS rn
             FROM loc
         )
-        SELECT provider, location, discipline, completes
+        SELECT provider, location, discipline, completes, provider_name
         FROM ranked
         WHERE rn = 1
         ORDER BY provider
@@ -966,6 +983,7 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
     rows = [
         {
             "provider": rec["provider"],
+            "provider_name": clinician_display_name(rec.get("provider_name")),
             "primary_location": rec["location"],
             "primary_discipline": rec["discipline"],
             "completes": int(rec["completes"]),
@@ -978,6 +996,86 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
         grain_note="unique ProviderId (fallback ProviderName) with ≥1 Complete in last closed month; one primary location",
         value=len(rows),
         details={"month_start": start.isoformat(), "month_end": end.isoformat(), "providers": rows},
+    )
+
+
+def completes_by_provider(wh: Warehouse, as_of: date, *, company: str | None = None) -> MetricResult:
+    """Last closed month Completes per clinician, ranked. Completes-only. Not a payroll model."""
+    start, end = last_closed_month(as_of)
+    provider = _provider_key_sql()
+    filters = [
+        f'{qident("AppointmentStatus")} = ?',
+        f'{qident("ApptDate")} >= ?',
+        f'{qident("ApptDate")} <= ?',
+        f"{provider} IS NOT NULL",
+    ]
+    params: list[Any] = [STATUS_COMPLETE, start, end]
+    if company:
+        filters.append(f'{qident("Company")} = ?')
+        params.append(company)
+    sql = f"""
+        SELECT
+            {provider} AS provider_key,
+            {qident("ProviderName")} AS provider_name,
+            {qident("Discipline")} AS discipline,
+            {qident("PatientId")} AS patient_id
+        FROM {quoted_table("APPOINTMENT")}
+        WHERE {" AND ".join(filters)}
+    """
+    frame = wh.fetch_df(sql, params)
+    grain = (
+        "Completes (AppointmentStatus='Complete') in last closed month, ranked by clinician. "
+        "Not payroll."
+    )
+    if frame.empty:
+        return MetricResult(
+            name="completes_by_provider",
+            as_of=as_of,
+            grain_note=grain,
+            value=[],
+            details={"month_start": start.isoformat(), "month_end": end.isoformat()},
+            unavailable="No Completes with a clinician in the last closed month.",
+        )
+    buckets: dict[str, dict[str, Any]] = {}
+    for rec in frame.to_dict(orient="records"):
+        key = str(rec["provider_key"]).strip()
+        bucket = buckets.setdefault(
+            key,
+            {
+                "provider_id": key,
+                "provider_name": None,
+                "completes": 0,
+                "patients": set(),
+                "discipline": None,
+            },
+        )
+        bucket["completes"] += 1
+        name = clinician_display_name(rec.get("provider_name"))
+        if name:
+            bucket["provider_name"] = name
+        pid = rec.get("patient_id")
+        if pid is not None and str(pid).strip() and str(pid).strip().lower() not in {"nan", "none"}:
+            bucket["patients"].add(str(pid).strip())
+        if rec.get("discipline") and not bucket["discipline"]:
+            bucket["discipline"] = str(rec["discipline"])
+    ranked = []
+    for bucket in buckets.values():
+        ranked.append(
+            {
+                "provider_id": bucket["provider_id"],
+                "provider_name": bucket["provider_name"],
+                "completes": bucket["completes"],
+                "patients": len(bucket["patients"]),
+                "discipline": bucket["discipline"],
+            }
+        )
+    ranked.sort(key=lambda row: (-int(row["completes"]), row["provider_name"] or ""))
+    return MetricResult(
+        name="completes_by_provider",
+        as_of=as_of,
+        grain_note=grain,
+        value=ranked,
+        details={"month_start": start.isoformat(), "month_end": end.isoformat(), "n_clinicians": len(ranked)},
     )
 
 
@@ -1024,12 +1122,13 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
         f"""
         SELECT
             {provider} AS provider,
+            {qident("ProviderName")} AS provider_name,
             {qident("Discipline")} AS discipline,
             {qident("ApptDate")} AS appt_date
         FROM {quoted_table("APPOINTMENT")}
         WHERE {" AND ".join(filters)}
           AND {qident("ApptDate")} <= ?
-        ORDER BY 1, 3
+        ORDER BY 1, 4
         """,
         params + [as_of],
     )
@@ -1070,8 +1169,15 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
             n = sum(1 for d in dates if window_start <= d <= cursor)
             if n >= target:
                 months = (cursor.year - first_d.year) * 12 + (cursor.month - first_d.month)
+                display = None
+                if "provider_name" in grp.columns:
+                    for raw_name in grp["provider_name"].tolist():
+                        display = clinician_display_name(raw_name)
+                        if display:
+                            break
                 reached = {
                     "therapist": therapist,
+                    "provider_name": display,
                     "discipline": disc,
                     "months_to_fill": months,
                     "target_weekly": target,

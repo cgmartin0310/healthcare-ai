@@ -94,6 +94,52 @@ def test_mocked_llm_free_text_ar_calls_insbalance_tool(warehouse, as_of, monkeyp
     assert ev["value"][0]["ins_balance"] == 125.0
 
 
+def test_complete_chat_retries_429_then_succeeds(monkeypatch):
+    import httpx
+    from analyst import llm as llm_mod
+
+    monkeypatch.setenv("XAI_API_KEY", "test-not-a-real-key")
+    monkeypatch.setattr(llm_mod.time, "sleep", lambda _s: None)
+    calls = {"n": 0}
+
+    class FakeResp:
+        def __init__(self, status, payload=None):
+            self.status_code = status
+            self._payload = payload or {}
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise httpx.HTTPStatusError(
+                    "429",
+                    request=httpx.Request("POST", "https://api.x.ai/v1/chat/completions"),
+                    response=httpx.Response(self.status_code, request=httpx.Request("POST", "https://api.x.ai/v1/chat/completions")),
+                )
+
+        def json(self):
+            return self._payload
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def post(self, *a, **k):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                return FakeResp(429)
+            return FakeResp(200, {"choices": [{"message": {"content": "ok", "tool_calls": []}}]})
+
+    monkeypatch.setattr(llm_mod.httpx, "Client", FakeClient)
+    out = llm_mod.complete_chat([{"role": "user", "content": "hi"}], [])
+    assert calls["n"] == 3
+    assert out["choices"][0]["message"]["content"] == "ok"
+
+
 def test_warehouse_select_is_read_only(warehouse):
     load_appts(warehouse, [appt_row(ApptId="1")])
     blocked = warehouse_select(warehouse, "DELETE FROM APPOINTMENT")

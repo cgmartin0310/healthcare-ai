@@ -332,7 +332,10 @@ def api_chat(body: ChatBody, user: User = Depends(current_user)) -> dict[str, An
     thread.append({"role": "user", "content": body.question.strip()})
     thread.append({"role": "assistant", "content": result["answer"]})
     _CHATS[user.user_id] = thread[-_CHAT_CAP:]
-    result["chat"] = _chat_state(user)
+    chat = _chat_state(user)
+    if result.get("tools_notice"):
+        chat["notice"] = result["tools_notice"]
+    result["chat"] = chat
     return result
 
 

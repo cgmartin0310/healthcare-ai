@@ -30,6 +30,7 @@ def test_each_profile_loads_and_analyst_answers(tmp_path, as_of):
         caseload = analyst.ask("How long does a new clinician take to fill a caseload?")
         payroll = analyst.ask("Which therapists are profitable after payroll?")
         improve = analyst.ask("What can I do to improve my business?")
+        productive = analyst.ask("Which therapist is the most productive?")
         alerts = analyst.alerts()
         assert cancel["intent"] == "cancelation"
         assert "%" in cancel["answer"]
@@ -38,6 +39,10 @@ def test_each_profile_loads_and_analyst_answers(tmp_path, as_of):
         assert "months" in caseload["answer"].lower()
         assert "No Completes with ProviderId or ProviderName" not in caseload["answer"]
         assert "payroll is not in this dump" in payroll["answer"].lower()
+        assert "Closed-month snapshot" not in productive["answer"]
+        assert "payroll is not in this dump" not in productive["answer"].lower()
+        assert "Complete" in productive["answer"]
+        assert productive["intent"] == "completes_by_provider"
         assert improve["suggestions"]
         triggered = {a["id"]: a["triggered"] for a in alerts["alerts"]}
         assert "cancel_over_25" in triggered

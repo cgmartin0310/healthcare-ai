@@ -87,6 +87,85 @@ def test_analyst_answers_referrals(warehouse, as_of):
     assert "staffing working model" in out["answer"].lower()
 
 
+def test_most_productive_is_completes_not_snapshot(warehouse, as_of, monkeypatch):
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    load_appts(
+        warehouse,
+        [
+            appt_row(
+                ApptId="j1",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 10),
+                PatientId="P1",
+            ),
+            appt_row(
+                ApptId="j2",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 17),
+                PatientId="P1",
+            ),
+            appt_row(
+                ApptId="c1",
+                ProviderId="PR-C",
+                ProviderName="Casey Hale",
+                ApptDate=date(2026, 8, 12),
+                PatientId="P2",
+            ),
+        ],
+    )
+    out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask("Which therapist is the most productive?")
+    assert "Closed-month snapshot" not in out["answer"]
+    assert "payroll is not in this dump" not in out["answer"].lower()
+    assert "Jordan Lee" in out["answer"]
+    assert "2" in out["answer"]
+    assert "Complete" in out["answer"]
+    assert out["intent"] == "completes_by_provider"
+
+
+def test_improve_still_uses_snapshot_path(warehouse, as_of, monkeypatch):
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    load_appts(warehouse, [appt_row(ApptId="1")])
+    out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask("What can I do to improve my business?")
+    assert out["intent"] == "improve_business"
+    assert "Closed-month snapshot" in out["answer"]
+
+
+def test_simulated_429_answers_productive_from_warehouse(warehouse, as_of, monkeypatch):
+    monkeypatch.setenv("XAI_API_KEY", "test-not-a-real-key")
+    load_appts(
+        warehouse,
+        [
+            appt_row(
+                ApptId="j1",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 10),
+            ),
+            appt_row(
+                ApptId="j2",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 11),
+            ),
+        ],
+    )
+
+    def boom(_messages, _tools):
+        raise RuntimeError("Client error '429 Too Many Requests' for url 'https://api.x.ai/v1/chat/completions'")
+
+    monkeypatch.setattr("analyst.engine.complete_chat", boom)
+    out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask("Which therapist is the most productive?")
+    assert out["mode"] == "fallback"
+    assert out["tools_notice"]
+    assert "warehouse" in out["tools_notice"].lower()
+    assert "Closed-month snapshot" not in out["answer"]
+    assert "payroll is not in this dump" not in out["answer"].lower()
+    assert "Jordan Lee" in out["answer"]
+    assert "Complete" in out["answer"]
+
+
 def test_analyst_refuses_payroll_invention(warehouse, as_of):
     load_appts(warehouse, [appt_row(ApptId="visit-1")])
     assert payroll_present(warehouse) is False

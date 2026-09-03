@@ -13,7 +13,9 @@ from warehouse.metrics import (
     cancelation_rate,
     caseload_fill,
     churn,
+    completes_by_provider,
     days_to_pay,
+    headcount,
     snapshot,
 )
 from warehouse.staffing import forecast
@@ -51,6 +53,7 @@ Locked metric definitions (do not redefine; do not invent a lookalike):
 - Days to pay = DATEDIFF(day, ApptDate, FirstInsPayment) on Completes with InsPaid>0, exclude negatives, min 20 claims.
 - When CLAIM_TXN (claim ledger: charges / payments / allowances / adjustments / refunds) is present, derive TotalPaid / InsPaid / InsBalance / FirstInsPayment from it. Else appointment rollups. If neither, say the data is not in the dump. There is no separate CHARGES table.
 - Headcount = unique ProviderId (fallback ProviderName) with ≥1 Complete in last closed month.
+- Completes by clinician = last closed month Completes (AppointmentStatus='Complete') ranked by clinician. Display ProviderName. ProviderId is a join key only. Not payroll.
 - Payroll is not a PREP object. Do not invent profitability.
 """.strip()
 
@@ -145,7 +148,23 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "caseload_fill",
-            "description": "Months for a provider to reach weekly Complete target from Completes only.",
+            "description": "Months for a provider to reach weekly Complete target from Completes only. Display ProviderName, not hashed ProviderId.",
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "headcount",
+            "description": "Unique clinicians with ≥1 Complete in last closed month, including Completes and ProviderName. ProviderId is a join key only.",
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "completes_by_provider",
+            "description": "Last closed month Completes per clinician, ranked. Use for most productive / most Completes / busiest therapist. Display provider_name. Not payroll.",
             "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
@@ -153,7 +172,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "snapshot",
-            "description": "Closed-month metric snapshot (cancel, churn, referrals, AR, collections, headcount, early-quit).",
+            "description": "Closed-month metric snapshot. Call only if the user asked for a snapshot. Do not use this to answer a single ranking question.",
             "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
@@ -292,6 +311,10 @@ def run_tool(
             return forecast(warehouse, as_of, company=args.get("company")), ""
         if name == "caseload_fill":
             return caseload_fill(warehouse, as_of, company=args.get("company")).to_dict(), ""
+        if name == "headcount":
+            return headcount(warehouse, as_of, company=args.get("company")).to_dict(), ""
+        if name == "completes_by_provider":
+            return completes_by_provider(warehouse, as_of, company=args.get("company")).to_dict(), ""
         if name == "snapshot":
             return snapshot(warehouse, as_of, company=args.get("company")), ""
         if name == "alerts":

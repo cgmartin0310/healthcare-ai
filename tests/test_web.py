@@ -59,6 +59,7 @@ def test_index_shows_banner_and_login():
         assert "payments/aging" not in res.text
         assert "Download sample files" in res.text
         assert "Harbor Pediatric Therapy" in res.text
+        assert "Which therapist had the most Completes last month?" in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):

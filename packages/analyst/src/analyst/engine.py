@@ -17,6 +17,7 @@ from warehouse.metrics import (
     cancelation_rate,
     caseload_fill,
     churn,
+    completes_by_provider,
     days_to_pay,
     payroll_present,
     referral_volume_change,
@@ -26,7 +27,17 @@ from warehouse.metrics import (
 from warehouse.staffing import forecast
 from warehouse.store import Warehouse
 
-from analyst.llm import complete_chat, llm_available, parse_tool_args, system_prompt, tools_notice, xai_model
+from analyst.llm import (
+    WAREHOUSE_FALLBACK_NOTICE,
+    complete_chat,
+    llm_available,
+    parse_tool_args,
+    system_prompt,
+    tools_notice,
+    xai_model,
+)
+
+MAX_TOOL_ROUNDS = 3
 from analyst.tools import TOOL_SCHEMAS, dump_tool_result, run_tool
 
 EMPTY_WAREHOUSE = "No visits loaded yet — run synthetic demo or upload files"
@@ -77,10 +88,10 @@ class Analyst:
         if use_tools:
             try:
                 return self._ask_with_tools(q, history or [])
-            except Exception as exc:
+            except Exception:
                 body = self._ask_regex(q)
                 body["mode"] = "fallback"
-                body["tools_notice"] = f"Chat-with-tools failed ({exc}). Using keyword routing."
+                body["tools_notice"] = WAREHOUSE_FALLBACK_NOTICE
                 return body
         return self._ask_regex(q)
 
@@ -117,7 +128,7 @@ class Analyst:
         tools_called: list[str] = []
         evidence: dict[str, Any] = {}
         final = ""
-        for _ in range(8):
+        for _ in range(MAX_TOOL_ROUNDS):
             raw = complete_chat(messages, TOOL_SCHEMAS)
             choice = (raw.get("choices") or [{}])[0]
             msg = choice.get("message") or {}
@@ -206,6 +217,12 @@ class Analyst:
             return self._payroll, "therapist_profit"
         if re.search(r"caseload|fill a caseload|new clinician", q):
             return self._caseload, "caseload_fill"
+        if re.search(
+            r"productiv|most complete|most completes|completes last month|"
+            r"busiest (therapist|clinician|provider)",
+            q,
+        ):
+            return self._completes_rank, "completes_by_provider"
         if re.search(r"\bar\b|past 30|collections sitting|aging", q):
             return self._ar, "ar_past_30"
         if re.search(r"cancel", q):
@@ -222,7 +239,7 @@ class Analyst:
             return self._avg_collections, "avg_collections"
         if re.search(r"improve|what can i do", q):
             return self._improve, "improve_business"
-        return self._improve, "improve_business"
+        return self._unknown, "unknown"
 
     def _cancelation(self, question: str) -> dict[str, Any]:
         result = cancelation_rate(self.warehouse, self.as_of, months=3, company=self.company)
@@ -350,8 +367,8 @@ class Analyst:
                 "evidence": result.to_dict(),
             }
         lines = [
-            f"- {r['therapist']} ({r['discipline']}): {r['months_to_fill']} months to reach "
-            f"{r['target_weekly']} Completes/week"
+            f"- {(r.get('provider_name') or 'clinician (name not in this dump)')} ({r['discipline']}): "
+            f"{r['months_to_fill']} months to reach {r['target_weekly']} Completes/week"
             for r in result.value
         ]
         months = [r["months_to_fill"] for r in result.value]
@@ -367,6 +384,35 @@ class Analyst:
                 "in this dump and are not averaged in."
             )
         return {"answer": answer, "evidence": result.to_dict()}
+
+    def _completes_rank(self, _question: str) -> dict[str, Any]:
+        result = completes_by_provider(self.warehouse, self.as_of, company=self.company)
+        rows = result.value or []
+        if not rows:
+            return {
+                "answer": result.unavailable or "No Completes by clinician in the last closed month.",
+                "evidence": result.to_dict(),
+            }
+        top = rows[0]
+        n = int(top["completes"])
+        name = top.get("provider_name")
+        start = result.details.get("month_start", "")
+        month = start[:7] if start else "last closed month"
+        if name:
+            lead = f"{name}, {n} Completes last closed month."
+        else:
+            lead = (
+                f"The top clinician had {n} Completes last closed month; "
+                "clinician display names are not in this dump."
+            )
+        grain = f" Completes only (AppointmentStatus='Complete') for {month}."
+        return {"answer": lead + grain, "evidence": result.to_dict()}
+
+    def _unknown(self, _question: str) -> dict[str, Any]:
+        return {
+            "answer": "That question is not a locked metric I can compute from this dump.",
+            "evidence": {},
+        }
 
     def _payroll(self, _question: str) -> dict[str, Any]:
         if payroll_present(self.warehouse):
