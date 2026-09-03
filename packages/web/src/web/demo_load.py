@@ -51,6 +51,8 @@ def load_synthetic_demo(
         raise FileNotFoundError(f"Synthetic fixtures not found at {fixtures_dir()}")
     for entity, path, mode in jobs:
         as_of = date.fromisoformat(DEMO_DEFAULT_AS_OF)
+        if mode == "replace":
+            wh.reset_table(entity)
         proposal = confirm_mapping(propose_mapping(path, entity=entity, tenant_id=tenant_id, as_of=as_of))
         counts = load_mapped_file(
             wh,
@@ -72,15 +74,35 @@ def load_synthetic_demo(
     return mapped
 
 
-def ensure_demo_warehouse_seeded(wh: Warehouse, tenant_id: str) -> bool:
-    """If this is the demo tenant and APPOINTMENT is empty, load synthetic CSVs.
+def _demo_needs_reload(wh: Warehouse) -> bool:
+    """Reload when empty, old TherapistName schema, or Completes have no provider key."""
+    if wh.count("APPOINTMENT") == 0:
+        return True
+    cols = wh._table_columns("APPOINTMENT") or []
+    if "TherapistName" in cols:
+        return True
+    row = wh.fetch_one(
+        """
+        SELECT COUNT(*) FROM "APPOINTMENT"
+        WHERE "AppointmentStatus" = 'Complete'
+          AND COALESCE(
+            NULLIF(TRIM(CAST("ProviderId" AS VARCHAR)), ''),
+            NULLIF(TRIM(CAST("ProviderName" AS VARCHAR)), '')
+          ) IS NOT NULL
+        """
+    )
+    return int((row or [0])[0] or 0) == 0
 
-    Idempotent: skips when appointment rows already exist. Never loads into
-    other tenants.
+
+def ensure_demo_warehouse_seeded(wh: Warehouse, tenant_id: str) -> bool:
+    """If this is the demo tenant and visits are missing or unusable, load synthetic CSVs.
+
+    Idempotent when Completes already have ProviderId/ProviderName. Never loads
+    into other tenants. Replace-load so an old TherapistName schema cannot linger.
     """
     if tenant_id != DEMO_TENANT_ID:
         return False
-    if wh.count("APPOINTMENT") > 0:
+    if not _demo_needs_reload(wh):
         return False
     load_synthetic_demo(wh, tenant_id=tenant_id, tenant_company=DEMO_TENANT_COMPANY)
     return True

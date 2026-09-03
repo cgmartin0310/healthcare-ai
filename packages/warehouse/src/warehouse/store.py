@@ -34,6 +34,7 @@ class Warehouse:
         self.close()
 
     def ensure_schema(self) -> None:
+        self._migrate_appointment_provider_columns()
         for table in PREP_TABLES.values():
             expected = [c.name for c in table.columns]
             existing = self._table_columns(table.name)
@@ -57,6 +58,41 @@ class Warehouse:
                     f"CREATE TABLE {quoted_table(table.name)} ({cols})"
                 )
         self._scrub_stored_dob()
+
+    def reset_table(self, table_name: str) -> None:
+        """Drop and recreate one PREP table so a replace load cannot keep leftover columns."""
+        self.con.execute(f"DROP TABLE IF EXISTS {quoted_table(table_name)}")
+        table = PREP_TABLES[table_name]
+        cols = ", ".join(f"{qident(c.name)} {c.duckdb_type}" for c in table.columns)
+        self.con.execute(f"CREATE TABLE {quoted_table(table_name)} ({cols})")
+
+    def _migrate_appointment_provider_columns(self) -> None:
+        """Copy leftover TherapistName into ProviderName; add ProviderId. Keep rows."""
+        existing = self._table_columns("APPOINTMENT")
+        if existing is None:
+            return
+        expected = [c.name for c in PREP_TABLES["APPOINTMENT"].columns]
+        needs_copy = "TherapistName" in existing
+        missing_provider = "ProviderName" not in existing or "ProviderId" not in existing
+        if not needs_copy and existing == expected:
+            return
+        if not needs_copy and not missing_provider and set(existing) >= set(expected):
+            return
+        raw = self.con.execute(f"SELECT * FROM {quoted_table('APPOINTMENT')}").fetchdf()
+        if raw.empty and not needs_copy and set(existing) != set(expected):
+            self.reset_table("APPOINTMENT")
+            return
+        if "TherapistName" in raw.columns:
+            if "ProviderName" not in raw.columns:
+                raw["ProviderName"] = raw["TherapistName"]
+            else:
+                blank = raw["ProviderName"].map(lambda v: v is None or (isinstance(v, float) and pd.isna(v)) or str(v).strip() == "")
+                raw.loc[blank, "ProviderName"] = raw.loc[blank, "TherapistName"]
+        if "ProviderId" not in raw.columns:
+            raw["ProviderId"] = pd.NA
+        self.reset_table("APPOINTMENT")
+        if not raw.empty:
+            self.replace_table("APPOINTMENT", raw)
 
     def _scrub_stored_dob(self) -> None:
         """DOB must not remain in DuckDB. Backfill AgeBand, then null DOB."""

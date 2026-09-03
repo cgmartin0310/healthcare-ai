@@ -9,6 +9,7 @@ from integration_engine.mapper import confirm_mapping, propose_mapping
 from tests.conftest import appt_row, load_appts
 from warehouse.metrics import headcount
 from warehouse.schema import APPOINTMENT, CLAIM_TXN, REFERRAL
+from warehouse.store import Warehouse
 
 
 def test_no_therapist_id_or_current_payer():
@@ -99,3 +100,75 @@ def test_headcount_prefers_provider_id_over_name(warehouse, as_of):
     providers = {row["provider"] for row in result.details["providers"]}
     assert providers == {"PR-1", "Name Only"}
     assert result.value == 2
+
+
+def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
+    """layout_a TherapistName + ProviderId must produce months-to-fill, not the empty-provider message."""
+    from analyst.engine import Analyst
+    from tests.conftest import FIXTURES
+    from warehouse.metrics import caseload_fill
+
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    path = FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"
+    proposal = propose_mapping(path, entity="APPOINTMENT", tenant_id="clinic-a", as_of=as_of)
+    by_source = {c.source: c.target_column for c in proposal.columns if c.target_column}
+    assert by_source["TherapistName"] == "ProviderName"
+    assert "TherapistName" not in (proposal.deid_receipt or {}).get("columns_dropped", [])
+    confirmed = confirm_mapping(proposal)
+    wh = Warehouse(tmp_path / "caseload.duckdb")
+    load_mapped_file(
+        wh,
+        path,
+        confirmed,
+        tenant_id="clinic-a",
+        tenant_company="Example Clinic",
+        as_of=as_of,
+    )
+    frame = wh.fetch_table("APPOINTMENT")
+    assert frame["ProviderName"].notna().any()
+    assert "Therapist_RAMP" in set(frame["ProviderName"].dropna().astype(str))
+    result = caseload_fill(wh, as_of)
+    assert result.unavailable != "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
+    assert result.value
+    assert any(r.get("months_to_fill") is not None for r in result.value)
+    out = Analyst(wh, tenant_id="clinic-a", as_of=as_of).ask(
+        "How long does a new clinician take to fill a caseload?"
+    )
+    assert "No Completes with ProviderId or ProviderName" not in out["answer"]
+    assert "months" in out["answer"].lower()
+
+
+def test_opens_migrates_therapist_name_into_provider_name(tmp_path, as_of):
+    import duckdb
+
+    path = tmp_path / "legacy.duckdb"
+    con = duckdb.connect(str(path))
+    con.execute(
+        """
+        CREATE TABLE "APPOINTMENT" (
+            "ApptId" VARCHAR, "ApptDate" DATE, "AppointmentStatus" VARCHAR,
+            "Company" VARCHAR, "Discipline" VARCHAR, "PatientId" VARCHAR,
+            "TherapistName" VARCHAR, "LocationName" VARCHAR
+        )
+        """
+    )
+    con.execute(
+        """
+        INSERT INTO "APPOINTMENT" VALUES
+        ('A1', DATE '2026-08-10', 'Complete', 'Example Clinic', 'OT', 'P1', 'Therapist_01', 'Site A')
+        """
+    )
+    con.close()
+    wh = Warehouse(path)
+    cols = wh._table_columns("APPOINTMENT")
+    assert cols is not None
+    assert "ProviderName" in cols
+    assert "ProviderId" in cols
+    assert "TherapistName" not in cols
+    frame = wh.fetch_table("APPOINTMENT")
+    assert list(frame["ProviderName"]) == ["Therapist_01"]
+    from warehouse.metrics import headcount
+
+    hc = headcount(wh, as_of)
+    assert hc.value == 1
+    assert hc.details["providers"][0]["provider"] == "Therapist_01"

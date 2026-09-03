@@ -11,6 +11,7 @@ from integration_engine.deid import (
     deid_file,
     get_or_create_deid_secret,
     hash_identifier,
+    is_clinician_display_header,
 )
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, propose_mapping
@@ -25,6 +26,29 @@ def _phi_csv(path) -> None:
         "Jane Roe,123 Main St,111-22-3333,A-RAW-2,P-RAW-1,2026-08-17,Cancelled,Example Clinic,OT\n"
         "Jane Roe,123 Main St,111-22-3333,A-RAW-3,P-RAW-1,2026-08-24,No Show,Example Clinic,OT\n"
     )
+
+
+def test_therapist_name_is_not_patient_phi():
+    assert is_clinician_display_header("TherapistName")
+    assert is_clinician_display_header("therapist")
+    assert is_clinician_display_header("rendering_provider")
+    assert not is_clinician_display_header("Name")
+    assert not is_clinician_display_header("Patient Name")
+    import pandas as pd
+
+    frame = pd.DataFrame(
+        {
+            "Name": ["Jane Roe"],
+            "TherapistName": ["Therapist_01"],
+            "PatientId": ["P1"],
+            "ApptDate": ["2026-08-10"],
+        }
+    )
+    redacted, receipt = apply_deid(frame, b"secret", date(2026, 9, 2), source_filename="v.csv")
+    assert "TherapistName" in redacted.columns
+    assert "Name" not in redacted.columns
+    assert "TherapistName" not in receipt.columns_dropped
+    assert redacted["TherapistName"].iloc[0] == "Therapist_01"
 
 
 def test_deid_drops_phi_hashes_id_generalizes_date():

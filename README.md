@@ -217,7 +217,7 @@ Staffing working model (when the analyst forecasts FTE):
 
 Column remaps onto PREP (not new metrics):
 
-- `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName` (Boom `TherapistName` is a synonym for `ProviderName`). Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
+- `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName`. Synthetic layout_a includes `ProviderId` (PRV01…) and keeps `TherapistName` as the display synonym that maps to `ProviderName` — it is not dropped as patient PHI. Opening a warehouse copies leftover `TherapistName` into `ProviderName` and adds `ProviderId` if missing. Demo reload replace-drops tables so an old schema cannot linger. Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
 - Company is stamped from the logged-in tenant when an upload omits it. Do not require `Company` in every file.
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` is **not stored**. At import, DOB (if present) becomes optional `AgeBand` (`Child` / `Adult`, child = age < 18 at as-of). There is no `AgeGroup` warehouse column. Locked early-quit bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.

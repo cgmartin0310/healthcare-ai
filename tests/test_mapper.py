@@ -13,6 +13,7 @@ def test_layout_a_appointments_map_required_fields():
     for required in ("ApptId", "ApptDate", "AppointmentStatus", "Company", "Discipline", "PatientId"):
         assert required in bound
     assert by_source["TherapistName"] == "ProviderName"
+    assert by_source["ProviderId"] == "ProviderId"
     assert "TherapistId" not in bound
     assert "FirstInsPayment" not in proposal.unmapped_required
     confirm_mapping(proposal)
@@ -28,6 +29,7 @@ def test_layout_b_appointments_map_despite_different_headers():
     assert bound["clinic_name"] == "Company"
     assert bound["therapy_type"] == "Discipline"
     assert bound["patient_num"] == "PatientId"
+    assert bound["provider_id"] == "ProviderId"
     assert bound["rendering_provider"] == "ProviderName"
     assert bound["insurance_name"] == "PrimaryPayorName"
     assert bound["insurance_paid"] == "InsPaid"

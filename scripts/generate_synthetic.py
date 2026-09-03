@@ -60,6 +60,7 @@ def build() -> None:
         )
 
     therapists = [f"Therapist_{n:02d}" for n in range(1, 8)] + ["Therapist_RAMP"]
+    therapist_ids = {name: f"PRV{i:02d}" for i, name in enumerate(therapists, start=1)}
 
     appointments: list[dict] = []
     appt_id = 1
@@ -89,6 +90,7 @@ def build() -> None:
                 "Company": COMPANY,
                 "Discipline": patient["_disc"],
                 "PatientId": patient["PatientId"],
+                "ProviderId": therapist_ids[therapist],
                 "TherapistName": therapist,
                 "LocationName": location,
                 "PrimaryPayorName": payer,
@@ -285,6 +287,7 @@ def build() -> None:
             "Company",
             "Discipline",
             "PatientId",
+            "ProviderId",
             "TherapistName",
             "LocationName",
             "PrimaryPayorName",
@@ -326,6 +329,7 @@ def build() -> None:
                 "clinic_name": row["Company"],
                 "therapy_type": disc,
                 "patient_num": row["PatientId"],
+                "provider_id": row["ProviderId"],
                 "rendering_provider": row["TherapistName"],
                 "site": row["LocationName"],
                 "insurance_name": row["PrimaryPayorName"],
@@ -367,6 +371,7 @@ def build() -> None:
             "clinic_name",
             "therapy_type",
             "patient_num",
+            "provider_id",
             "rendering_provider",
             "site",
             "insurance_name",

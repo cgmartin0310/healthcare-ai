@@ -18,7 +18,13 @@ from typing import Any
 
 import pandas as pd
 
-from integration_engine.deid import SAFE_HARBOR_NOTICE, _PREVIEW_SECRET, apply_deid, get_or_create_deid_secret
+from integration_engine.deid import (
+    SAFE_HARBOR_NOTICE,
+    _PREVIEW_SECRET,
+    apply_deid,
+    get_or_create_deid_secret,
+    is_clinician_display_header,
+)
 from warehouse.schema import PREP_TABLES, Table, mapping_required_missing
 
 
@@ -218,6 +224,20 @@ def propose_mapping(
 
     for source in frame.columns:
         samples = [v for v in frame[source].head(8).tolist() if pd.notna(v)]
+        if is_clinician_display_header(str(source)) and ("APPOINTMENT", "ProviderName") not in used_targets:
+            if entity_guess == "APPOINTMENT" or any(t.name == "APPOINTMENT" for t in tables):
+                used_targets.add(("APPOINTMENT", "ProviderName"))
+                proposals.append(
+                    ColumnProposal(
+                        source=str(source),
+                        target_table="APPOINTMENT",
+                        target_column="ProviderName",
+                        confidence=0.99,
+                        rationale="TherapistName / clinician display always maps to ProviderName (not patient PHI)",
+                        sample_values=_safe_samples(samples),
+                    )
+                )
+                continue
         best: tuple[float, str, str, str] | None = None  # score, rationale, table, col
         for table in tables:
             for col in table.columns:

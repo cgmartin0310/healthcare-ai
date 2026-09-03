@@ -132,6 +132,20 @@ _KEEP_NAME_TOKENS = frozenset(
     }
 )
 
+# Clinician display headers. Never drop as patient PHI.
+CLINICIAN_DISPLAY_HEADERS = frozenset(
+    {
+        "therapist name",
+        "therapistname",
+        "therapist",
+        "provider name",
+        "providername",
+        "provider",
+        "rendering provider",
+        "clinician",
+    }
+)
+
 
 def _norm(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", str(name).strip().lower()).strip()
@@ -241,7 +255,16 @@ def _is_dob_header(norm: str) -> bool:
     return norm in DOB_HEADERS
 
 
+def is_clinician_display_header(name: str) -> bool:
+    """TherapistName / provider display names are not patient PHI."""
+    norm = _norm(name)
+    compact = norm.replace(" ", "")
+    return norm in CLINICIAN_DISPLAY_HEADERS or compact in CLINICIAN_DISPLAY_HEADERS
+
+
 def _is_drop_header(norm: str) -> bool:
+    if is_clinician_display_header(norm):
+        return False
     if _is_hash_header(norm) or _is_date_header(norm):
         return False
     if _is_dob_header(norm):
