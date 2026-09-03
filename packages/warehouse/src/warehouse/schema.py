@@ -80,7 +80,7 @@ APPOINTMENT = Table(
             "Company",
             "VARCHAR",
             True,
-            "Clinic / company grain",
+            "Clinic / company grain. Overwritten from the logged-in tenant on load.",
             ("company", "clinic", "clinic_name", "organization", "org", "clinic_id"),
         ),
         Column(
@@ -351,7 +351,7 @@ CLAIM_TXN = Table(
             "Company",
             "VARCHAR",
             True,
-            "Clinic / company. Stamped from the logged-in tenant when the file omits it.",
+            "Clinic / company. Overwritten from the logged-in tenant on every row.",
             ("company", "clinic", "clinic_name"),
         ),
         Column(

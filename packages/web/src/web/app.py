@@ -31,7 +31,13 @@ from web.auth import (
     signup as auth_signup,
     user_from_cookie,
 )
-from web.demo_load import DEMO_DEFAULT_AS_OF, fixtures_dir, load_synthetic_demo
+from web.demo_load import (
+    DEMO_DEFAULT_AS_OF,
+    demo_caseload_readiness,
+    demo_not_ready,
+    fixtures_dir,
+    load_synthetic_demo,
+)
 
 INDEX_HTML = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
 SAMPLE_QUESTIONS = [
@@ -329,6 +335,18 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
             mapped.extend(
                 load_synthetic_demo(wh, tenant_id=user.tenant_id, tenant_company=user.tenant_name)
             )
+            readiness = demo_caseload_readiness(wh, as_of)
+            if demo_not_ready(readiness):
+                raise HTTPException(
+                    500,
+                    {
+                        "error": (
+                            "Demo load did not produce a usable caseload. "
+                            "Completes with ProviderId/ProviderName and a months-to-fill number are required."
+                        ),
+                        **readiness,
+                    },
+                )
             analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
             answers = [analyst.ask(q) for q in SAMPLE_QUESTIONS]
     except FileNotFoundError as exc:
@@ -341,4 +359,5 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
         "mapped": mapped,
         "answers": answers,
         "warehouse_empty": False,
+        **readiness,
     }

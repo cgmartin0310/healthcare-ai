@@ -57,13 +57,11 @@ def _empty_company(value: Any) -> bool:
 
 
 def stamp_and_derive(tables: dict[str, pd.DataFrame], *, tenant_company: str | None) -> None:
-    """Fill Company from the tenant; derive REFERRAL.Completed? from EvalDate when needed."""
+    """Overwrite Company from the logged-in tenant on every row; derive REFERRAL.Completed?."""
     company = (tenant_company or "").strip() or None
     for table_name, mapped in tables.items():
         if company and "Company" in mapped.columns:
-            missing = mapped["Company"].map(_empty_company)
-            if missing.any():
-                mapped.loc[missing, "Company"] = company
+            mapped["Company"] = company
         if table_name == "REFERRAL" and "EvalDate" in mapped.columns:
             derived = mapped["EvalDate"].notna().map(lambda ok: 1 if ok else 0)
             if "Completed?" not in mapped.columns:

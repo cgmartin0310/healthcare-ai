@@ -97,6 +97,15 @@ def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
         assert login.json()["user"]["tenant_id"] == "example-clinic"
         demo = client.post("/api/demo", json={"as_of": as_of.isoformat()})
         assert demo.status_code == 200
+        demo_body = demo.json()
+        assert demo_body["completes_with_provider"] > 0
+        assert demo_body["caseload_n_filled"] > 0
+        assert demo_body["caseload_unavailable"] in (None, "")
+        assert demo_body["distinct_company"]
+        caseload_answers = [a for a in demo_body["answers"] if "caseload" in a.get("question", "").lower()]
+        assert caseload_answers
+        assert "months" in caseload_answers[0]["answer"].lower()
+        assert "No Completes with ProviderId or ProviderName" not in caseload_answers[0]["answer"]
         res = client.post(
             "/api/ask",
             json={"question": "Is cancelation over 25% in the last three months?", "as_of": as_of.isoformat()},
@@ -107,6 +116,34 @@ def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
         assert body["intent"] == "cancelation"
         assert body["grounded"] is True
         assert "33.3%" in body["answer"] or "over 25%" in body["answer"]
+
+
+def test_api_demo_fails_when_caseload_reports_no_provider(tmp_path, monkeypatch, as_of):
+    from warehouse.metrics import MetricResult
+
+    def empty_caseload(wh, as_of_date, *, company=None):
+        return MetricResult(
+            name="caseload_fill",
+            as_of=as_of_date,
+            grain_note="derived from Completes only",
+            value=[],
+            unavailable="No Completes with ProviderId or ProviderName. Cannot measure caseload fill.",
+        )
+
+    monkeypatch.setattr("web.demo_load.caseload_fill", empty_caseload)
+    with _client(tmp_path, monkeypatch) as client:
+        client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        demo = client.post("/api/demo", json={"as_of": as_of.isoformat()})
+        assert demo.status_code == 500
+        detail = demo.json()["detail"]
+        assert detail["completes_with_provider"] >= 0
+        assert "appointment_rows" in detail
+        assert "completes" in detail
+        assert "distinct_company" in detail
+        assert "caseload_n_filled" in detail
+        assert detail["caseload_unavailable"] == (
+            "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
+        )
 
 
 def test_second_clinic_isolated_empty_warehouse(tmp_path, monkeypatch, as_of):

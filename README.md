@@ -218,7 +218,7 @@ Staffing working model (when the analyst forecasts FTE):
 Column remaps onto PREP (not new metrics):
 
 - `APPOINTMENT.LocationName` (not `Location`). Rendering clinician is `ProviderId` + optional `ProviderName`. Synthetic layout_a includes `ProviderId` (PRV01…) and keeps `TherapistName` as the display synonym that maps to `ProviderName` — it is not dropped as patient PHI. Opening a warehouse copies leftover `TherapistName` into `ProviderName` and adds `ProviderId` if missing. Demo reload replace-drops tables so an old schema cannot linger. Optional `CPT` and `SecondaryPayorName` (COB). Do not add `CurrentPayer` or a coverage table.
-- Company is stamped from the logged-in tenant when an upload omits it. Do not require `Company` in every file.
+- Company is stamped from the logged-in tenant on every row (overwrite). Do not require `Company` in every file. The demo tenant display name is `Example Clinic (synthetic)`; that is the warehouse Company after load.
 - `REFERRAL.Source` (often blank). KID dumps often have PCP Name; that is not the generic source field. Do **not** use `REFERRAL_SOURCES."Org Name"` (CST-only).
 - `PATIENT.DOB` is **not stored**. At import, DOB (if present) becomes optional `AgeBand` (`Child` / `Adult`, child = age < 18 at as-of). There is no `AgeGroup` warehouse column. Locked early-quit bars are unchanged: PT / adult OT-ST < 3 months; child OT-ST < 6.
 - `APPOINTMENT.InsBalance` — dollar AR aged > 30 days lands here (`SUM` on Completes, `InsBalance > 0`, `ApptDate` aged > 30 days, `PrimaryPayorName` × `LocationName`, insurance only). Not billed − paid. Not `PatBalance`. Not Tableau NET AR.

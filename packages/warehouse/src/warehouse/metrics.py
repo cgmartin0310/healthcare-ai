@@ -981,6 +981,31 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
     )
 
 
+NO_PROVIDER_CASELOAD = "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
+NO_COMPLETES_CASELOAD = "No Completes in the dump. Cannot measure caseload fill."
+COMPANY_MISS_CASELOAD = "Company filter matched no visits. Cannot measure caseload fill."
+
+
+def _count_appointments(wh: Warehouse, *, where: str, params: list[Any]) -> int:
+    row = wh.fetch_one(f'SELECT COUNT(*) FROM {quoted_table("APPOINTMENT")} WHERE {where}', params)
+    return int((row or [0])[0] or 0)
+
+
+def _caseload_empty_reason(wh: Warehouse, as_of: date, company: str | None) -> str:
+    """Do not say 'no provider' when Completes exist or the company filter missed."""
+    if company:
+        if _count_appointments(wh, where=f'{qident("Company")} = ?', params=[company]) == 0:
+            return COMPANY_MISS_CASELOAD
+    complete_where = f'{qident("AppointmentStatus")} = ? AND {qident("ApptDate")} <= ?'
+    complete_params: list[Any] = [STATUS_COMPLETE, as_of]
+    if company:
+        complete_where += f' AND {qident("Company")} = ?'
+        complete_params.append(company)
+    if _count_appointments(wh, where=complete_where, params=complete_params) == 0:
+        return NO_COMPLETES_CASELOAD
+    return NO_PROVIDER_CASELOAD
+
+
 def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> MetricResult:
     """Months from a therapist's first Complete until trailing-4-week Completes reach FTE visits/week.
 
@@ -1014,7 +1039,7 @@ def caseload_fill(wh: Warehouse, as_of: date, *, company: str | None = None) -> 
             as_of=as_of,
             grain_note="derived from Completes only",
             value=[],
-            unavailable="No Completes with ProviderId or ProviderName. Cannot measure caseload fill.",
+            unavailable=_caseload_empty_reason(wh, as_of, company),
         )
     filled = []
     insufficient = []

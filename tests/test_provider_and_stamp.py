@@ -102,18 +102,12 @@ def test_headcount_prefers_provider_id_over_name(warehouse, as_of):
     assert result.value == 2
 
 
-def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
-    """layout_a TherapistName + ProviderId must produce months-to-fill, not the empty-provider message."""
-    from analyst.engine import Analyst
+def _load_layout_a_appointments(tmp_path, monkeypatch, as_of, *, tenant_company: str):
     from tests.conftest import FIXTURES
-    from warehouse.metrics import caseload_fill
 
     monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
     path = FIXTURES / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv"
     proposal = propose_mapping(path, entity="APPOINTMENT", tenant_id="clinic-a", as_of=as_of)
-    by_source = {c.source: c.target_column for c in proposal.columns if c.target_column}
-    assert by_source["TherapistName"] == "ProviderName"
-    assert "TherapistName" not in (proposal.deid_receipt or {}).get("columns_dropped", [])
     confirmed = confirm_mapping(proposal)
     wh = Warehouse(tmp_path / "caseload.duckdb")
     load_mapped_file(
@@ -121,13 +115,52 @@ def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
         path,
         confirmed,
         tenant_id="clinic-a",
-        tenant_company="Example Clinic",
+        tenant_company=tenant_company,
         as_of=as_of,
     )
+    return path, proposal, wh
+
+
+def test_stamp_overwrites_csv_company_with_tenant(tmp_path, warehouse):
+    """Locked rule: Company is the logged-in tenant on every row, not the CSV clinic name."""
+    src = tmp_path / "visits_csv_company.csv"
+    src.write_text(
+        "visit_id,date_of_service,visit_status,clinic_name,therapy_type,patient_num\n"
+        "A1,2026-08-10,Complete,Example Clinic,OT,P1\n"
+        "A2,2026-08-11,Complete,Example Clinic,PT,P2\n"
+    )
+    proposal = propose_mapping(src, entity="APPOINTMENT")
+    confirm_mapping(proposal)
+    load_mapped_file(
+        warehouse,
+        src,
+        proposal,
+        tenant_id="example-clinic",
+        tenant_company="Example Clinic (synthetic)",
+        mode="replace",
+    )
+    frame = warehouse.fetch_table("APPOINTMENT")
+    assert set(frame["Company"].astype(str)) == {"Example Clinic (synthetic)"}
+    assert "Example Clinic" not in set(frame["Company"].astype(str))
+
+
+def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
+    """layout_a TherapistName + ProviderId must produce months-to-fill, not the empty-provider message."""
+    from analyst.engine import Analyst
+    from warehouse.metrics import caseload_fill
+
+    path, proposal, wh = _load_layout_a_appointments(
+        tmp_path, monkeypatch, as_of, tenant_company="Example Clinic"
+    )
+    by_source = {c.source: c.target_column for c in proposal.columns if c.target_column}
+    assert by_source["TherapistName"] == "ProviderName"
+    assert "TherapistName" not in (proposal.deid_receipt or {}).get("columns_dropped", [])
     frame = wh.fetch_table("APPOINTMENT")
-    assert frame["ProviderName"].notna().any()
+    completes = frame[frame["AppointmentStatus"] == "Complete"]
+    assert completes["ProviderName"].notna().all()
+    assert completes["ProviderId"].notna().all()
     assert "Therapist_RAMP" in set(frame["ProviderName"].dropna().astype(str))
-    result = caseload_fill(wh, as_of)
+    result = caseload_fill(wh, as_of, company=None)
     assert result.unavailable != "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
     assert result.value
     assert any(r.get("months_to_fill") is not None for r in result.value)
@@ -136,6 +169,37 @@ def test_caseload_fill_after_deid_layout_a(tmp_path, monkeypatch, as_of):
     )
     assert "No Completes with ProviderId or ProviderName" not in out["answer"]
     assert "months" in out["answer"].lower()
+
+
+def test_run_tool_drops_tenant_id_company_that_zeros_caseload(tmp_path, monkeypatch, as_of):
+    """Grok passes tenant_id / display name; warehouse Company is the CSV clinic name."""
+    from analyst.tools import run_tool
+    from warehouse.metrics import caseload_fill
+
+    _path, _proposal, wh = _load_layout_a_appointments(
+        tmp_path, monkeypatch, as_of, tenant_company="Example Clinic"
+    )
+    companies = {str(v) for v in wh.fetch_table("APPOINTMENT")["Company"].dropna()}
+    assert companies == {"Example Clinic"}
+    for bogus in ("example-clinic", "Example Clinic (synthetic)"):
+        direct = caseload_fill(wh, as_of, company=bogus)
+        assert direct.unavailable
+        assert "ProviderId" not in (direct.unavailable or "")
+        assert "company" in (direct.unavailable or "").lower()
+        payload, err = run_tool(
+            "caseload_fill",
+            {"company": bogus},
+            warehouse=wh,
+            as_of=as_of,
+            company=None,
+            alerts_fn=lambda: {},
+        )
+        assert err == ""
+        assert payload.get("unavailable") != (
+            "No Completes with ProviderId or ProviderName. Cannot measure caseload fill."
+        )
+        assert payload.get("value")
+        assert any(r.get("months_to_fill") is not None for r in payload["value"])
 
 
 def test_opens_migrates_therapist_name_into_provider_name(tmp_path, as_of):

@@ -28,6 +28,15 @@ _FORBIDDEN = re.compile(
 )
 _TABLE_REF = re.compile(r'\b(?:from|join)\s+"?([A-Za-z_][A-Za-z0-9_]*)"?', re.I)
 
+_COMPANY_PARAM = {
+    "type": "string",
+    "description": (
+        "Optional APPOINTMENT.Company value already stored in THIS tenant warehouse. "
+        "Do not pass tenant_id or the UI clinic label unless that exact string is Company. "
+        "Omit to query the whole tenant — the warehouse is already isolated."
+    ),
+}
+
 LOCKED_DEFS = """
 Locked metric definitions (do not redefine; do not invent a lookalike):
 - Completes = AppointmentStatus='Complete'
@@ -55,7 +64,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                 "type": "object",
                 "properties": {
                     "months": {"type": "integer", "description": "Closed-month window, default 3"},
-                    "company": {"type": "string"},
+                    "company": _COMPANY_PARAM,
                     "location": {"type": "string"},
                     "discipline": {"type": "string"},
                 },
@@ -67,7 +76,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "churn",
             "description": "Locked churn: Company × Discipline × PatientId, closed months, first-DOS drop.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -79,7 +88,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                 "type": "object",
                 "properties": {
                     "months": {"type": "integer", "description": "Default 1"},
-                    "company": {"type": "string"},
+                    "company": _COMPANY_PARAM,
                 },
             },
         },
@@ -89,7 +98,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "referral_volume_change",
             "description": "Last closed month vs prior closed month referral volume, including by source.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -97,7 +106,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "ar_past_30_days",
             "description": "Dollar AR aged > 30 days: SUM(InsBalance) on Completes, InsBalance>0, by PrimaryPayorName × LocationName. Insurance only. Use this for AR / aging / Site B collections questions.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -105,7 +114,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "avg_paid",
             "description": "Avg InsPaid>0 by payer, last 3 months through as-of.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -113,7 +122,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "avg_collections",
             "description": "Avg InsPaid including zeros/partials, 60-day lag then 3 months back.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -121,7 +130,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "days_to_pay",
             "description": "Avg days ApptDate to FirstInsPayment on Completes with InsPaid>0, min 20 claims.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -129,7 +138,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "staffing_forecast",
             "description": "Clinic×discipline FTE demand from last closed Completes + refs. Not a live schedule.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -137,7 +146,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "caseload_fill",
             "description": "Months for a provider to reach weekly Complete target from Completes only.",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -145,7 +154,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "snapshot",
             "description": "Closed-month metric snapshot (cancel, churn, referrals, AR, collections, headcount, early-quit).",
-            "parameters": {"type": "object", "properties": {"company": {"type": "string"}}},
+            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
         },
     },
     {
@@ -201,6 +210,39 @@ def warehouse_select(wh: Warehouse, sql: str) -> dict[str, Any]:
     return {"rows": rows, "row_count": len(rows), "capped_at": SELECT_ROW_CAP}
 
 
+def known_appointment_companies(warehouse: Warehouse) -> set[str]:
+    """Company values actually stored on APPOINTMENT in this tenant warehouse."""
+    if warehouse.count("APPOINTMENT") == 0:
+        return set()
+    try:
+        frame = warehouse.fetch_df(f'SELECT DISTINCT "Company" AS company FROM "APPOINTMENT"')
+    except Exception:
+        return set()
+    out: set[str] = set()
+    for raw in frame["company"].tolist():
+        if raw is None:
+            continue
+        text = str(raw).strip()
+        if text and text.lower() not in {"nan", "none", "<na>"}:
+            out.add(text)
+    return out
+
+
+def resolve_company_filter(warehouse: Warehouse, requested: str | None) -> str | None:
+    """Drop a model-supplied company that would zero this tenant.
+
+    Warehouse is already per-tenant. Only keep company when it equals an
+    APPOINTMENT.Company value in THIS warehouse. Default: no company filter.
+    """
+    if requested is None:
+        return None
+    text = str(requested).strip()
+    if not text:
+        return None
+    known = known_appointment_companies(warehouse)
+    return text if text in known else None
+
+
 def run_tool(
     name: str,
     arguments: dict[str, Any],
@@ -213,8 +255,10 @@ def run_tool(
     """Execute one locked tool. Returns (payload, error_or_empty)."""
     args = dict(arguments or {})
     args.pop("as_of", None)
-    if "company" not in args and company:
-        args["company"] = company
+    requested = args.get("company")
+    if requested is None or str(requested).strip() == "":
+        requested = company
+    args["company"] = resolve_company_filter(warehouse, requested)
     try:
         if name == "cancelation_rate":
             months = int(args.get("months") or 3)
