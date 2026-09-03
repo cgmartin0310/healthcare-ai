@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clinic Analyst</title>
+  <style>
+    :root { font-family: ui-sans-serif, system-ui, sans-serif; color: #102030; background: #f4f1ea; }
+    body { max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.35rem; margin: 0 0 .4rem; }
+    .banner { background: #1f3b4d; color: #f4f1ea; padding: .75rem 1rem; border-radius: 6px; margin: .75rem 0 1.25rem; }
+    section { background: #fff; border: 1px solid #d5cfc4; border-radius: 6px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+    label { display: block; font-size: .85rem; margin: .4rem 0 .2rem; }
+    input, select, textarea, button { font: inherit; }
+    input[type=email], input[type=password], input[type=text] { width: 100%; max-width: 22rem; }
+    textarea { width: 100%; min-height: 4.5rem; }
+    button { background: #1f3b4d; color: #fff; border: 0; padding: .4rem .8rem; border-radius: 4px; cursor: pointer; margin-right: .4rem; }
+    button.secondary { background: #5a6b75; }
+    button.chip { background: #e8e2d6; color: #102030; margin: .2rem .25rem .2rem 0; font-size: .8rem; }
+    .thread { max-height: 28rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
+    .bubble { border-radius: 8px; padding: .65rem .75rem; white-space: pre-wrap; font-size: .9rem; }
+    .bubble.user { background: #1f3b4d; color: #f4f1ea; align-self: flex-end; max-width: 85%; }
+    .bubble.assistant { background: #f7f5f1; align-self: stretch; }
+    .notice { background: #f3ead4; border: 1px solid #d5cfc4; padding: .5rem .7rem; border-radius: 4px; margin-bottom: .75rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { text-align: left; border-bottom: 1px solid #eee; padding: .25rem .3rem; }
+    pre { white-space: pre-wrap; background: #f7f5f1; padding: .75rem; font-size: .85rem; overflow-x: auto; }
+    .muted { color: #5a6b75; font-size: .85rem; }
+    .err { color: #8b1e1e; }
+    .hide { display: none; }
+    .who { font-size: .85rem; margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+  <h1>Clinic Analyst</h1>
+  <p class="muted">File ingest → isolated DuckDB warehouse per clinic → grounded analyst. Ids only. Not a live schedule product.</p>
+  <div id="banner" class="banner">This product does not have a live future schedule or this-week book. Closed-month results are the truth grain.</div>
+
+  <section id="auth-panel">
+    <h2>Sign in</h2>
+    <p class="muted">Demo (synthetic tenant, not a production secret): demo@example.clinic / demo-clinic-2026</p>
+    <label>Email <input id="email" type="email" autocomplete="username" /></label>
+    <label>Password <input id="password" type="password" autocomplete="current-password" /></label>
+    <label>New clinic name (signup only) <input id="clinic" type="text" autocomplete="organization" /></label>
+    <p>
+      <button type="button" id="login">Log in</button>
+      <button type="button" class="secondary" id="signup">Create clinic + owner</button>
+    </p>
+    <div id="auth-out" class="muted"></div>
+  </section>
+
+  <div id="app-panel" class="hide">
+    <p class="who">Signed in as <span id="who-email"></span> · tenant <span id="who-tenant"></span>
+      <button type="button" class="secondary" id="logout">Log out</button>
+    </p>
+
+    <section>
+      <h2>1. Download sample files, then map (one export at a time)</h2>
+      <p class="muted">These are SYNTHETIC / EXAMPLE practice-management exports — not warehouse headers, tied to no real clinic. Download a clinic profile, then upload a file so the mapper has to propose columns. Schedule, referrals, charges, payments, adjustments, aging each map onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
+      <label>Clinic profile
+        <select id="profile">
+          <option value="harbor">Harbor Pediatric Therapy</option>
+          <option value="riverbend">Riverbend Physical Therapy</option>
+          <option value="northside">Northside Behavioral Health</option>
+        </select>
+      </label>
+      <p class="muted" id="profile-blurb"></p>
+      <p><button type="button" class="secondary" id="download-samples">Download sample files (zip)</button></p>
+      <label>Entity
+        <select id="entity">
+          <option value="APPOINTMENT">APPOINTMENT (visits)</option>
+          <option value="REFERRAL">REFERRAL</option>
+          <option value="PATIENT">PATIENT</option>
+          <option value="CLAIM_TXN">CLAIM_TXN (charges / payments)</option>
+        </select>
+      </label>
+      <label>File <input id="file" type="file" accept=".csv,.xlsx,.xls,.txt" /></label>
+      <p>
+        <button type="button" id="propose">Propose mapping</button>
+        <button type="button" class="secondary" id="confirm" disabled>Confirm</button>
+        <button type="button" class="secondary" id="load" disabled>Load into my warehouse</button>
+      </p>
+      <div id="map-out" class="muted"></div>
+    </section>
+
+    <section>
+      <h2>2. Chat with the analyst</h2>
+      <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions. As-of defaults to 2026-09-02 for the demo tenant when omitted.</p>
+      <div id="empty-warehouse" class="notice hide">No visits loaded yet — run synthetic demo or upload files</div>
+      <div id="tools-notice" class="notice hide"></div>
+      <div id="thread" class="thread"></div>
+      <div id="chips"></div>
+      <label>Message
+        <textarea id="question" placeholder="Ask anything about this clinic's closed-month dump…"></textarea>
+      </label>
+      <label>As-of <input id="asof" type="date" value="2026-09-02" /></label>
+      <p>
+        <button type="button" id="ask">Send</button>
+        <button type="button" class="secondary" id="clear-chat">Clear thread</button>
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Synthetic demo (this tenant only)</h2>
+      <p class="muted">The example-clinic demo tenant is preloaded on startup with Harbor Pediatric. This button reloads the selected profile into <em>your</em> DuckDB only. Does not mix clinics. Signup tenants stay empty until you upload or run this.</p>
+      <p><button type="button" id="demo">Run synthetic demo</button></p>
+      <pre id="demo-out"></pre>
+    </section>
+  </div>
+
+  <script>
+    const banner = document.getElementById("banner");
+    let uploadId = null;
+    const CHIPS = [
+      "Is cancelation over 25% in the last three months?",
+      "Which payers have AR sitting past 30 days, by location?",
+      "Referral-source drop-off — does volume support another therapist?",
+      "How long does a new clinician take to fill a caseload?",
+      "Which therapist had the most Completes last month?",
+      "What is churn for the last closed month?",
+      "Which therapists are profitable after payroll?"
+    ];
+    const PROFILE_BLURB = {
+      harbor: "Peds OT/ST, two sites, school-year seasonality.",
+      riverbend: "Adult PT, three sites, higher visits per patient.",
+      northside: "Mental-health group, telehealth-heavy, different payer mix."
+    };
+
+    function renderChips() {
+      document.getElementById("chips").innerHTML = CHIPS.map((q, i) =>
+        `<button type="button" class="chip" data-q="${i}">${q}</button>`
+      ).join("");
+      document.querySelectorAll("#chips .chip").forEach(btn => {
+        btn.onclick = () => {
+          document.getElementById("question").value = CHIPS[Number(btn.dataset.q)];
+          sendChat();
+        };
+      });
+    }
+
+    function renderThread(messages) {
+      const el = document.getElementById("thread");
+      el.innerHTML = (messages || []).map(m =>
+        `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${escapeHtml(m.content || "")}</div>`
+      ).join("") || '<p class="muted">No messages yet. Ask anything.</p>';
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    }
+
+    function applyChatMeta(chat) {
+      const n = document.getElementById("tools-notice");
+      if (chat && chat.notice) {
+        n.textContent = chat.notice;
+        n.classList.remove("hide");
+      } else {
+        n.classList.add("hide");
+      }
+      if (chat && chat.messages) renderThread(chat.messages);
+    }
+
+    function renderReceipt(receipt) {
+      if (!receipt) return "";
+      const notice = receipt.notice || "Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.";
+      return `<div class="notice"><p>${escapeHtml(notice)}</p>
+        <p>Dropped: ${(receipt.columns_dropped || []).join(", ") || "none"}</p>
+        <p>Hashed: ${(receipt.columns_hashed || []).join(", ") || "none"}</p>
+        <p>Dates generalized (month+year): ${(receipt.dates_generalized || []).join(", ") || "none"}</p>
+        <p>Rows: ${receipt.row_count || 0}. AgeBand from DOB: ${receipt.age_band_derived_from_dob ? "yes" : "no"}. DOB stored: no.</p>
+      </div>`;
+    }
+
+    function applyWarehouseEmpty(empty) {
+      const n = document.getElementById("empty-warehouse");
+      if (empty) n.classList.remove("hide");
+      else n.classList.add("hide");
+    }
+
+    function setBanner(text) { if (text) banner.textContent = text; }
+    function showErr(el, e) { el.innerHTML = '<span class="err">' + (e.message || e) + '</span>'; }
+
+    async function jsonFetch(url, opts) {
+      const res = await fetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = data.detail;
+        const msg = typeof detail === "string" ? detail : (detail && detail.error) || res.statusText;
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    function showApp(user) {
+      document.getElementById("auth-panel").classList.add("hide");
+      document.getElementById("app-panel").classList.remove("hide");
+      document.getElementById("who-email").textContent = user.email;
+      document.getElementById("who-tenant").textContent = user.tenant_name + " (" + user.tenant_id + ")";
+    }
+
+    async function refreshMe() {
+      try {
+        const data = await jsonFetch("/api/me");
+        setBanner(data.banner);
+        showApp(data.user);
+        applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
+      } catch (e) {
+        document.getElementById("auth-panel").classList.remove("hide");
+        document.getElementById("app-panel").classList.add("hide");
+      }
+    }
+
+    document.getElementById("login").onclick = async () => {
+      const out = document.getElementById("auth-out");
+      try {
+        const data = await jsonFetch("/api/login", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+          })
+        });
+        setBanner(data.banner);
+        showApp(data.user);
+        applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("signup").onclick = async () => {
+      const out = document.getElementById("auth-out");
+      try {
+        const data = await jsonFetch("/api/signup", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+            clinic_name: document.getElementById("clinic").value
+          })
+        });
+        setBanner(data.banner);
+        showApp(data.user);
+        applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("logout").onclick = async () => {
+      await jsonFetch("/api/logout", { method: "POST" });
+      location.reload();
+    };
+
+    document.getElementById("propose").onclick = async () => {
+      const out = document.getElementById("map-out");
+      const file = document.getElementById("file").files[0];
+      if (!file) return showErr(out, "Choose a CSV or xlsx file.");
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("entity", document.getElementById("entity").value);
+      try {
+        const data = await jsonFetch("/api/propose", { method: "POST", body: fd });
+        uploadId = data.upload_id;
+        setBanner(data.banner);
+        const rows = (data.mapping.columns || []).map(c =>
+          `<tr><td>${escapeHtml(c.source)}</td><td>${escapeHtml(c.target_table || "—")}</td><td>${escapeHtml(c.target_column || "unmapped")}</td><td>${c.confidence}</td><td>${escapeHtml(c.rationale || "")}</td></tr>`
+        ).join("");
+        out.innerHTML = renderReceipt(data.deid_receipt) +
+          `<p>Required unmapped: ${escapeHtml((data.mapping.unmapped_required || []).join(", ") || "none")}</p>
+          <table><thead><tr><th>Source</th><th>Table</th><th>PREP column</th><th>Conf.</th><th>Rationale</th></tr></thead><tbody>${rows}</tbody></table>`;
+        document.getElementById("confirm").disabled = data.mapping.unmapped_required.length > 0;
+        document.getElementById("load").disabled = true;
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("confirm").onclick = async () => {
+      const out = document.getElementById("map-out");
+      try {
+        const data = await jsonFetch("/api/confirm", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ upload_id: uploadId })
+        });
+        setBanner(data.banner);
+        out.insertAdjacentHTML("afterbegin", "<p>Mapping confirmed. Load appends into this tenant only.</p>");
+        document.getElementById("load").disabled = false;
+      } catch (e) { showErr(out, e); }
+    };
+
+    document.getElementById("load").onclick = async () => {
+      const out = document.getElementById("map-out");
+      try {
+        const data = await jsonFetch("/api/load", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ upload_id: uploadId, mode: "append" })
+        });
+        setBanner(data.banner);
+        applyWarehouseEmpty(data.warehouse_empty);
+        out.insertAdjacentHTML("afterbegin", `<p>Loaded ${JSON.stringify(data.loaded)} (append).</p>`);
+      } catch (e) { showErr(out, e); }
+    };
+
+    async function sendChat() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
+      const thread = document.getElementById("thread");
+      thread.insertAdjacentHTML("beforeend", `<div class="bubble user">${escapeHtml(q)}</div>`);
+      thread.scrollTop = thread.scrollHeight;
+      document.getElementById("question").value = "";
+      try {
+        const data = await jsonFetch("/api/chat", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            question: q,
+            as_of: document.getElementById("asof").value || null
+          })
+        });
+        setBanner(data.banner);
+        applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.empty_warehouse);
+      } catch (e) {
+        thread.insertAdjacentHTML("beforeend", `<div class="bubble assistant err">${escapeHtml(e.message || String(e))}</div>`);
+      }
+    }
+
+    document.getElementById("ask").onclick = sendChat;
+    document.getElementById("question").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); sendChat(); }
+    });
+    document.getElementById("clear-chat").onclick = async () => {
+      const data = await jsonFetch("/api/chat/clear", { method: "POST" });
+      applyChatMeta(data.chat);
+    };
+
+    document.getElementById("demo").onclick = async () => {
+      const out = document.getElementById("demo-out");
+      out.textContent = "Running…";
+      try {
+        const data = await jsonFetch("/api/demo", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            as_of: document.getElementById("asof").value || "2026-09-02",
+            profile: document.getElementById("profile").value
+          })
+        });
+        setBanner(data.banner);
+        applyWarehouseEmpty(data.warehouse_empty);
+        const blocks = (data.answers || []).map(a => "Q: " + a.question + "\n" + a.answer).join("\n\n");
+        out.textContent = data.note + "\n" + data.banner + "\n\n" + blocks;
+      } catch (e) { out.textContent = e.message || String(e); }
+    };
+
+    document.getElementById("profile").onchange = () => {
+      document.getElementById("profile-blurb").textContent = PROFILE_BLURB[document.getElementById("profile").value] || "";
+    };
+    document.getElementById("profile").onchange();
+    document.getElementById("download-samples").onclick = () => {
+      const pid = document.getElementById("profile").value;
+      window.location.href = "/api/samples/" + encodeURIComponent(pid) + "/zip";
+    };
+
+    renderChips();
+    refreshMe();
+  </script>
+</body>
+</html>

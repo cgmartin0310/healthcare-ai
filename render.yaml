@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: clinic-analyst
+    runtime: python
+    plan: 0.5c-512mb
+    region: virginia
+    branch: cursor/clinic-analyst-first-pass-5759
+    buildCommand: pip install -e ".[web]"
+    startCommand: uvicorn web.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    disk:
+      name: warehouse
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: CLINIC_ANALYST_DATA_DIR
+        value: /data
+      - key: CLINIC_ANALYST_SECRET
+        generateValue: true
+      - key: XAI_API_KEY
+        sync: false
