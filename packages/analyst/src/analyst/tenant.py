@@ -42,10 +42,16 @@ def open_warehouse(tenant_id: str) -> Warehouse:
     return Warehouse(warehouse_path(tenant_id))
 
 
-def parse_as_of(value: str | None) -> date:
+# Demo warehouse is generated through 2026-08; keep August closed when omitted.
+_DEMO_DEFAULT_AS_OF = date(2026, 9, 2)
+
+
+def parse_as_of(value: str | None, tenant_id: str | None = None) -> date:
     raw = value or os.environ.get("CLINIC_ANALYST_AS_OF")
     if raw:
         return date.fromisoformat(raw)
+    if tenant_id == DEFAULT_TENANT:
+        return _DEMO_DEFAULT_AS_OF
     return date.today()
 
 

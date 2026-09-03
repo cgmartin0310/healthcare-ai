@@ -4,7 +4,7 @@ from datetime import date
 
 from analyst.alerts import DEFAULT_ALERTS, evaluate_alerts
 from analyst.banner import PRODUCT_BANNER
-from analyst.engine import Analyst
+from analyst.engine import EMPTY_WAREHOUSE, Analyst
 from analyst.schedule import CadenceConfig, is_due
 from tests.conftest import appt_row, load_appts, load_refs, referral_row
 from warehouse.metrics import payroll_present
@@ -13,6 +13,16 @@ from warehouse.metrics import payroll_present
 def test_banner_is_persistent():
     assert "does not have a live future schedule" in PRODUCT_BANNER.lower()
     assert "closed-month" in PRODUCT_BANNER.lower()
+
+
+def test_empty_warehouse_returns_visits_banner(warehouse, as_of):
+    out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask(
+        "Is cancelation over 25% in the last three months?"
+    )
+    assert out["empty_warehouse"] is True
+    assert out["intent"] == "empty_warehouse"
+    assert out["answer"] == EMPTY_WAREHOUSE
+    assert out["grounded"] is True
 
 
 def test_analyst_answers_cancelation(warehouse, as_of):
@@ -58,6 +68,7 @@ def test_analyst_answers_ar_by_payer_location(warehouse, as_of):
 
 
 def test_analyst_answers_referrals(warehouse, as_of):
+    load_appts(warehouse, [appt_row(ApptId="visit-1")])
     load_refs(
         warehouse,
         [
@@ -77,6 +88,7 @@ def test_analyst_answers_referrals(warehouse, as_of):
 
 
 def test_analyst_refuses_payroll_invention(warehouse, as_of):
+    load_appts(warehouse, [appt_row(ApptId="visit-1")])
     assert payroll_present(warehouse) is False
     out = Analyst(warehouse, tenant_id="t", as_of=as_of).ask(
         "Which therapists are profitable after payroll?"

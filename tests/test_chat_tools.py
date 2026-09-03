@@ -111,7 +111,6 @@ def test_chat_thread_requires_auth_and_keeps_history(tmp_path, monkeypatch, as_o
     with TestClient(app) as client:
         assert client.post("/api/chat", json={"question": "hi"}).status_code == 401
         client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
-        client.post("/api/demo", json={"as_of": as_of.isoformat()})
         first = client.post(
             "/api/chat",
             json={"question": "Is cancelation over 25% in the last three months?", "as_of": as_of.isoformat()},

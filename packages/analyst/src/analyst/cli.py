@@ -20,7 +20,11 @@ def main(argv: list[str] | None = None) -> int:
         description="Standalone clinic analyst (file ingest → PREP warehouse → grounded analyst).",
     )
     parser.add_argument("--tenant", default=DEFAULT_TENANT, help="Generic tenant id (not a Boom brand).")
-    parser.add_argument("--as-of", default=None, help="YYYY-MM-DD. Defaults to today / CLINIC_ANALYST_AS_OF.")
+    parser.add_argument(
+        "--as-of",
+        default=None,
+        help="YYYY-MM-DD. Defaults to CLINIC_ANALYST_AS_OF, else 2026-09-02 for example-clinic, else today.",
+    )
     parser.add_argument("--company", default=None, help="Optional Company filter.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
@@ -53,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     args = parser.parse_args(argv)
-    as_of = parse_as_of(args.as_of)
+    as_of = parse_as_of(args.as_of, tenant_id=args.tenant)
 
     if args.cmd == "propose":
         proposal = propose_mapping(args.file, entity=args.entity)

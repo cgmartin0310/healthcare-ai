@@ -182,14 +182,28 @@ def login(email: str, password: str) -> User:
     return user
 
 
+def _seed_demo_warehouse() -> None:
+    """Load synthetic visits into example-clinic only, and only when empty."""
+    from web.demo_load import ensure_demo_warehouse_seeded
+
+    _ensure_warehouse(DEMO_TENANT_ID)
+    with Warehouse(warehouse_path(DEMO_TENANT_ID)) as wh:
+        ensure_demo_warehouse_seeded(wh, DEMO_TENANT_ID)
+
+
 def seed_demo() -> User:
-    """Documented demo login. PHI-free. Not a production secret."""
+    """Documented demo login. PHI-free. Not a production secret.
+
+    Ensures the example-clinic warehouse has synthetic APPOINTMENT rows so
+    demo@example.clinic can chat without clicking Run synthetic demo.
+    Signup tenants stay empty.
+    """
     with _connect() as con:
         row = con.execute("SELECT user_id FROM users WHERE email = ?", [DEMO_EMAIL]).fetchone()
         if row:
             user = get_user(row["user_id"])
             if user:
-                _ensure_warehouse(user.tenant_id)
+                _seed_demo_warehouse()
                 return user
         con.execute(
             "INSERT OR IGNORE INTO tenants (tenant_id, display_name, created_at) VALUES (?, ?, ?)",
@@ -204,7 +218,7 @@ def seed_demo() -> User:
             [user_id, DEMO_EMAIL, _hash_password(DEMO_PASSWORD), DEMO_TENANT_ID, _now()],
         )
         con.commit()
-    _ensure_warehouse(DEMO_TENANT_ID)
+    _seed_demo_warehouse()
     user = get_user(user_id)
     assert user is not None
     return user

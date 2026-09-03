@@ -76,7 +76,8 @@
 
     <section>
       <h2>2. Chat with the analyst</h2>
-      <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions.</p>
+      <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions. As-of defaults to 2026-09-02 for the demo tenant when omitted.</p>
+      <div id="empty-warehouse" class="notice hide">No visits loaded yet — run synthetic demo or upload files</div>
       <div id="tools-notice" class="notice hide"></div>
       <div id="thread" class="thread"></div>
       <div id="chips"></div>
@@ -92,7 +93,7 @@
 
     <section>
       <h2>3. Synthetic demo (this tenant only)</h2>
-      <p class="muted">Loads the labeled example dump into <em>your</em> DuckDB. Does not mix clinics.</p>
+      <p class="muted">The example-clinic demo tenant is preloaded on startup. This button reloads the labeled dump into <em>your</em> DuckDB only. Does not mix clinics. Signup tenants stay empty until you upload or run this.</p>
       <p><button type="button" id="demo">Run synthetic demo</button></p>
       <pre id="demo-out"></pre>
     </section>
@@ -145,6 +146,12 @@
       if (chat && chat.messages) renderThread(chat.messages);
     }
 
+    function applyWarehouseEmpty(empty) {
+      const n = document.getElementById("empty-warehouse");
+      if (empty) n.classList.remove("hide");
+      else n.classList.add("hide");
+    }
+
     function setBanner(text) { if (text) banner.textContent = text; }
     function showErr(el, e) { el.innerHTML = '<span class="err">' + (e.message || e) + '</span>'; }
 
@@ -168,6 +175,7 @@
         setBanner(data.banner);
         showApp(data.user);
         applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
       } catch (e) {
         document.getElementById("auth-panel").classList.remove("hide");
         document.getElementById("app-panel").classList.add("hide");
@@ -187,6 +195,7 @@
         setBanner(data.banner);
         showApp(data.user);
         applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
       } catch (e) { showErr(out, e); }
     };
 
@@ -204,6 +213,7 @@
         setBanner(data.banner);
         showApp(data.user);
         applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.warehouse_empty);
       } catch (e) { showErr(out, e); }
     };
 
@@ -254,6 +264,7 @@
           body: JSON.stringify({ upload_id: uploadId, mode: "append" })
         });
         setBanner(data.banner);
+        applyWarehouseEmpty(data.warehouse_empty);
         out.insertAdjacentHTML("afterbegin", `<p>Loaded ${JSON.stringify(data.loaded)} (append).</p>`);
       } catch (e) { showErr(out, e); }
     };
@@ -275,6 +286,7 @@
         });
         setBanner(data.banner);
         applyChatMeta(data.chat);
+        applyWarehouseEmpty(data.empty_warehouse);
       } catch (e) {
         thread.insertAdjacentHTML("beforeend", `<div class="bubble assistant err">${escapeHtml(e.message || String(e))}</div>`);
       }
@@ -298,6 +310,7 @@
           body: JSON.stringify({ as_of: document.getElementById("asof").value || "2026-09-02" })
         });
         setBanner(data.banner);
+        applyWarehouseEmpty(data.warehouse_empty);
         const blocks = (data.answers || []).map(a => "Q: " + a.question + "\n" + a.answer).join("\n\n");
         out.textContent = data.note + "\n" + data.banner + "\n\n" + blocks;
       } catch (e) { out.textContent = e.message || String(e); }

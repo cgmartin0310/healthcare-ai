@@ -29,6 +29,8 @@ from warehouse.store import Warehouse
 from analyst.llm import complete_chat, llm_available, parse_tool_args, system_prompt, tools_notice, xai_model
 from analyst.tools import TOOL_SCHEMAS, dump_tool_result, run_tool
 
+EMPTY_WAREHOUSE = "No visits loaded yet — run synthetic demo or upload files"
+
 
 def _pct(value: float | None) -> str:
     if value is None:
@@ -51,6 +53,25 @@ class Analyst:
         use_tools: bool | None = None,
     ) -> dict[str, Any]:
         q = question.strip()
+        if self.warehouse.count("APPOINTMENT") == 0:
+            return {
+                "banner": PRODUCT_BANNER,
+                "tenant_id": self.tenant_id,
+                "as_of": self.as_of.isoformat(),
+                "last_closed_month": {
+                    k: v.isoformat() for k, v in zip(("start", "end"), last_closed_month(self.as_of))
+                },
+                "question": q,
+                "intent": "empty_warehouse",
+                "mode": "empty",
+                "tools_called": [],
+                "tools_notice": tools_notice(),
+                "answer": EMPTY_WAREHOUSE,
+                "evidence": {"appointment_rows": 0},
+                "suggestions": [],
+                "grounded": True,
+                "empty_warehouse": True,
+            }
         if use_tools is None:
             use_tools = llm_available()
         if use_tools:
@@ -80,6 +101,7 @@ class Analyst:
             "evidence": body.get("evidence"),
             "suggestions": body.get("suggestions") or [],
             "grounded": True,
+            "empty_warehouse": False,
         }
 
     def _ask_with_tools(self, q: str, history: list[dict[str, str]]) -> dict[str, Any]:
@@ -149,6 +171,7 @@ class Analyst:
             "evidence": evidence,
             "suggestions": [],
             "grounded": True,
+            "empty_warehouse": False,
         }
 
     def alerts(self, defs: list[AlertDef] | None = None) -> dict[str, Any]:

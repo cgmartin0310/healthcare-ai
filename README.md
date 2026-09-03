@@ -77,7 +77,9 @@ Documented **demo login** (PHI-free, not a production secret):
 - password: `demo-clinic-2026`
 - tenant: `example-clinic`
 
-A second clinic can sign up and gets an empty warehouse that cannot see the demo tenant.
+On startup, `seed_demo()` creates that user and, if the example-clinic warehouse has no APPOINTMENT rows, loads layout_a visits/referrals/patients plus layout_payments `CLAIM_TXN`. Idempotent. Demo chat works after login without clicking **Run synthetic demo**. When the client omits `as_of` for the demo tenant, the server uses **2026-09-02** (synthetic calendar; August stays closed). Other tenants still default to today / `CLINIC_ANALYST_AS_OF`. The as-of date field is on the chat form.
+
+A second clinic can sign up and gets an empty warehouse that cannot see the demo tenant. If a tenant has no visits, the UI and analyst show: “No visits loaded yet — run synthetic demo or upload files”.
 
 Local:
 

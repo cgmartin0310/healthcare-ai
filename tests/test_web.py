@@ -33,6 +33,7 @@ def test_index_shows_banner_and_login():
         assert "Sign in" in res.text
         assert "Chat with the analyst" in res.text
         assert "Type any ops" in res.text
+        assert "No visits loaded yet — run synthetic demo or upload files" in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
@@ -42,6 +43,43 @@ def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
         assert client.get("/api/me").status_code == 401
         assert client.post("/api/confirm", json={"upload_id": "x"}).status_code == 401
         assert client.post("/api/load", json={"upload_id": "x"}).status_code == 401
+
+
+def test_seed_demo_loads_visits_and_cancelation_without_api_demo(tmp_path, monkeypatch):
+    """Demo login must chat after seed_demo alone — no POST /api/demo."""
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("CLINIC_ANALYST_SECRET", "test-secret")
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    monkeypatch.delenv("CLINIC_ANALYST_AS_OF", raising=False)
+    seed_demo()
+    with Warehouse(warehouse_path("example-clinic")) as wh:
+        assert wh.count("APPOINTMENT") > 100
+        assert wh.count("REFERRAL") > 0
+        assert wh.count("PATIENT") > 0
+        assert wh.count("CLAIM_TXN") > 0
+    seed_demo()
+    with Warehouse(warehouse_path("example-clinic")) as wh:
+        rows = wh.count("APPOINTMENT")
+    assert rows > 100
+    with TestClient(app) as client:
+        login = client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        assert login.status_code == 200
+        assert login.json()["user"]["tenant_id"] == "example-clinic"
+        assert login.json()["warehouse_empty"] is False
+        me = client.get("/api/me")
+        assert me.json()["warehouse_empty"] is False
+        res = client.post(
+            "/api/ask",
+            json={"question": "Is cancelation over 25% in the last three months?"},
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["as_of"] == "2026-09-02"
+        assert body["intent"] == "cancelation"
+        assert body["grounded"] is True
+        assert body.get("empty_warehouse") is not True
+        assert "33.3%" in body["answer"] or "over 25%" in body["answer"]
+        assert "190/571" in body["answer"]
 
 
 def test_ask_against_synthetic_tenant(tmp_path, monkeypatch, as_of):
@@ -84,11 +122,14 @@ def test_second_clinic_isolated_empty_warehouse(tmp_path, monkeypatch, as_of):
         assert created.status_code == 200
         second_id = created.json()["user"]["tenant_id"]
         assert second_id != "example-clinic"
+        assert created.json()["warehouse_empty"] is True
         other = client.post(
             "/api/ask",
             json={"question": "Is cancelation over 25% in the last three months?", "as_of": as_of.isoformat()},
         )
         assert other.status_code == 200
+        assert other.json()["empty_warehouse"] is True
+        assert other.json()["answer"] == "No visits loaded yet — run synthetic demo or upload files"
         assert "33.3%" not in other.json()["answer"]
         assert "190/571" not in other.json()["answer"]
         demo_path = warehouse_path("example-clinic")
@@ -118,3 +159,25 @@ def test_two_tenant_duckdb_files_do_not_mix(tmp_path, monkeypatch):
     with Warehouse(a_path) as a:
         ids = set(a.fetch_table("APPOINTMENT")["ApptId"])
         assert ids == {"ONLY-A"}
+
+
+def test_ensure_demo_does_not_load_other_tenants(tmp_path, monkeypatch):
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    from web.demo_load import ensure_demo_warehouse_seeded
+
+    other = warehouse_path("second-clinic")
+    with Warehouse(other) as wh:
+        assert ensure_demo_warehouse_seeded(wh, "second-clinic") is False
+        assert wh.count("APPOINTMENT") == 0
+        assert wh.count("CLAIM_TXN") == 0
+
+
+def test_parse_as_of_defaults_demo_tenant(monkeypatch):
+    from datetime import date
+
+    from analyst.tenant import parse_as_of
+
+    monkeypatch.delenv("CLINIC_ANALYST_AS_OF", raising=False)
+    assert parse_as_of(None, tenant_id="example-clinic") == date(2026, 9, 2)
+    assert parse_as_of("2026-01-15", tenant_id="example-clinic") == date(2026, 1, 15)
+    assert parse_as_of(None, tenant_id="other-clinic") == date.today()

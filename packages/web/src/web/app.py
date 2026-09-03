@@ -30,6 +30,7 @@ from web.auth import (
     signup as auth_signup,
     user_from_cookie,
 )
+from web.demo_load import DEMO_DEFAULT_AS_OF, fixtures_dir, load_synthetic_demo
 
 INDEX_HTML = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
 SAMPLE_QUESTIONS = [
@@ -64,13 +65,6 @@ def _chat_state(user: User) -> dict[str, Any]:
     }
 
 
-def fixtures_dir() -> Path:
-    cwd = Path.cwd() / "fixtures" / "synthetic"
-    if cwd.exists():
-        return cwd
-    return Path(__file__).resolve().parents[4] / "fixtures" / "synthetic"
-
-
 def open_wh(tenant_id: str) -> Warehouse:
     return Warehouse(warehouse_path(tenant_id))
 
@@ -100,6 +94,20 @@ def _public_user(user: User) -> dict[str, str]:
         "tenant_id": user.tenant_id,
         "tenant_name": user.tenant_name,
         "role": user.role,
+    }
+
+
+def _warehouse_empty(tenant_id: str) -> bool:
+    with open_wh(tenant_id) as wh:
+        return wh.count("APPOINTMENT") == 0
+
+
+def _session_payload(user: User) -> dict[str, Any]:
+    return {
+        "banner": PRODUCT_BANNER,
+        "user": _public_user(user),
+        "chat": _chat_state(user),
+        "warehouse_empty": _warehouse_empty(user.tenant_id),
     }
 
 
@@ -155,7 +163,7 @@ def api_signup(body: AuthBody, response: Response) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     _set_session(response, user)
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
+    return _session_payload(user)
 
 
 @app.post("/api/login")
@@ -165,7 +173,7 @@ def api_login(body: AuthBody, response: Response) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(401, str(exc)) from exc
     _set_session(response, user)
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
+    return _session_payload(user)
 
 
 @app.post("/api/logout")
@@ -179,7 +187,7 @@ def api_logout(request: Request, response: Response) -> dict[str, str]:
 
 @app.get("/api/me")
 def api_me(user: User = Depends(current_user)) -> dict[str, Any]:
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
+    return _session_payload(user)
 
 
 @app.post("/api/propose")
@@ -241,12 +249,13 @@ def api_load(body: LoadBody, user: User = Depends(current_user)) -> dict[str, An
         "loaded": counts,
         "mode": mode,
         "warehouse": str(warehouse_path(user.tenant_id)),
+        "warehouse_empty": _warehouse_empty(user.tenant_id),
     }
 
 
 @app.post("/api/ask")
 def api_ask(body: AskBody, user: User = Depends(current_user)) -> dict[str, Any]:
-    as_of = parse_as_of(body.as_of)
+    as_of = parse_as_of(body.as_of, tenant_id=user.tenant_id)
     with open_wh(user.tenant_id) as wh:
         analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
         return analyst.ask(body.question)
@@ -260,7 +269,7 @@ def api_chat_get(user: User = Depends(current_user)) -> dict[str, Any]:
 @app.post("/api/chat")
 def api_chat(body: ChatBody, user: User = Depends(current_user)) -> dict[str, Any]:
     thread = _CHATS.setdefault(user.user_id, [])
-    as_of = parse_as_of(body.as_of)
+    as_of = parse_as_of(body.as_of, tenant_id=user.tenant_id)
     with open_wh(user.tenant_id) as wh:
         analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
         result = analyst.ask(body.question, history=thread)
@@ -279,16 +288,10 @@ def api_chat_clear(user: User = Depends(current_user)) -> dict[str, Any]:
 
 @app.post("/api/demo")
 def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -> dict[str, Any]:
-    as_of = parse_as_of((body.as_of if body else None) or "2026-09-02")
+    as_of = parse_as_of((body.as_of if body else None) or DEMO_DEFAULT_AS_OF, tenant_id=user.tenant_id)
     fixtures = fixtures_dir()
     if not fixtures.exists():
         raise HTTPException(500, f"Synthetic fixtures not found at {fixtures}")
-    files = [
-        ("APPOINTMENT", fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_appointments.csv", "replace"),
-        ("REFERRAL", fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_referrals.csv", "replace"),
-        ("PATIENT", fixtures / "layout_a" / "SYNTHETIC_EXAMPLE_patients.csv", "replace"),
-        ("CLAIM_TXN", fixtures / "layout_payments" / "SYNTHETIC_EXAMPLE_transactions.csv", "replace"),
-    ]
     layout_b = {
         "APPOINTMENT": fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_visits.csv",
         "REFERRAL": fixtures / "layout_b" / "SYNTHETIC_EXAMPLE_incoming_referrals.csv",
@@ -306,29 +309,15 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
                     "loaded": False,
                 }
             )
-    with open_wh(user.tenant_id) as wh:
-        for entity, path, mode in files:
-            if not path.exists():
-                continue
-            proposal = confirm_mapping(propose_mapping(path, entity=entity))
-            counts = load_mapped_file(
-                wh,
-                path,
-                proposal,
-                tenant_id=user.tenant_id,
-                tenant_company=user.tenant_name,
-                mode=mode,
+    try:
+        with open_wh(user.tenant_id) as wh:
+            mapped.extend(
+                load_synthetic_demo(wh, tenant_id=user.tenant_id, tenant_company=user.tenant_name)
             )
-            mapped.append(
-                {
-                    "layout": "A" if entity != "CLAIM_TXN" else "payments",
-                    "entity": entity,
-                    "columns": sum(1 for c in proposal.columns if c.target_column),
-                    "loaded": counts,
-                }
-            )
-        analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
-        answers = [analyst.ask(q) for q in SAMPLE_QUESTIONS]
+            analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
+            answers = [analyst.ask(q) for q in SAMPLE_QUESTIONS]
+    except FileNotFoundError as exc:
+        raise HTTPException(500, str(exc)) from exc
     return {
         "banner": PRODUCT_BANNER,
         "note": "SYNTHETIC EXAMPLE DATA — tied to no real clinic. Loaded only into your tenant DuckDB.",
@@ -336,4 +325,5 @@ def api_demo(body: DemoBody | None = None, user: User = Depends(current_user)) -
         "as_of": as_of.isoformat(),
         "mapped": mapped,
         "answers": answers,
+        "warehouse_empty": False,
     }
