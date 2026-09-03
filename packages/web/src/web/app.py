@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from analyst.banner import PRODUCT_BANNER
 from analyst.engine import Analyst
+from analyst.llm import llm_available, tools_notice, xai_model
 from analyst.tenant import parse_as_of, warehouse_path
 from integration_engine.load import load_mapped_file
 from integration_engine.mapper import confirm_mapping, mapping_from_dict, propose_mapping
@@ -50,6 +51,17 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="Clinic Analyst", docs_url=None, redoc_url=None, lifespan=lifespan)
 _PENDING: dict[str, dict[str, Any]] = {}
+_CHATS: dict[str, list[dict[str, str]]] = {}
+_CHAT_CAP = 40
+
+
+def _chat_state(user: User) -> dict[str, Any]:
+    return {
+        "mode": "tools" if llm_available() else "fallback",
+        "model": xai_model() if llm_available() else None,
+        "notice": tools_notice(),
+        "messages": list(_CHATS.get(user.user_id, [])),
+    }
 
 
 def fixtures_dir() -> Path:
@@ -118,6 +130,11 @@ class AskBody(BaseModel):
     as_of: str | None = None
 
 
+class ChatBody(BaseModel):
+    question: str = Field(min_length=1)
+    as_of: str | None = None
+
+
 class ConfirmBody(BaseModel):
     upload_id: str
 
@@ -138,7 +155,7 @@ def api_signup(body: AuthBody, response: Response) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
     _set_session(response, user)
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user)}
+    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
 
 
 @app.post("/api/login")
@@ -148,18 +165,21 @@ def api_login(body: AuthBody, response: Response) -> dict[str, Any]:
     except ValueError as exc:
         raise HTTPException(401, str(exc)) from exc
     _set_session(response, user)
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user)}
+    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
 
 
 @app.post("/api/logout")
-def api_logout(response: Response) -> dict[str, str]:
+def api_logout(request: Request, response: Response) -> dict[str, str]:
+    user = user_from_cookie(request.cookies.get(COOKIE_NAME))
+    if user:
+        _CHATS.pop(user.user_id, None)
     response.delete_cookie(COOKIE_NAME, path="/")
     return {"status": "ok"}
 
 
 @app.get("/api/me")
 def api_me(user: User = Depends(current_user)) -> dict[str, Any]:
-    return {"banner": PRODUCT_BANNER, "user": _public_user(user)}
+    return {"banner": PRODUCT_BANNER, "user": _public_user(user), "chat": _chat_state(user)}
 
 
 @app.post("/api/propose")
@@ -230,6 +250,31 @@ def api_ask(body: AskBody, user: User = Depends(current_user)) -> dict[str, Any]
     with open_wh(user.tenant_id) as wh:
         analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
         return analyst.ask(body.question)
+
+
+@app.get("/api/chat")
+def api_chat_get(user: User = Depends(current_user)) -> dict[str, Any]:
+    return {"banner": PRODUCT_BANNER, "chat": _chat_state(user)}
+
+
+@app.post("/api/chat")
+def api_chat(body: ChatBody, user: User = Depends(current_user)) -> dict[str, Any]:
+    thread = _CHATS.setdefault(user.user_id, [])
+    as_of = parse_as_of(body.as_of)
+    with open_wh(user.tenant_id) as wh:
+        analyst = Analyst(wh, tenant_id=user.tenant_id, as_of=as_of)
+        result = analyst.ask(body.question, history=thread)
+    thread.append({"role": "user", "content": body.question.strip()})
+    thread.append({"role": "assistant", "content": result["answer"]})
+    _CHATS[user.user_id] = thread[-_CHAT_CAP:]
+    result["chat"] = _chat_state(user)
+    return result
+
+
+@app.post("/api/chat/clear")
+def api_chat_clear(user: User = Depends(current_user)) -> dict[str, Any]:
+    _CHATS.pop(user.user_id, None)
+    return {"status": "ok", "chat": _chat_state(user)}
 
 
 @app.post("/api/demo")

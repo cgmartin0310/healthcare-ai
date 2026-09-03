@@ -86,19 +86,31 @@ pip install -e ".[web]"
 CLINIC_ANALYST_DATA_DIR=./data uvicorn web.app:app --host 0.0.0.0 --port 8000
 ```
 
-Open http://127.0.0.1:8000 — log in, upload multiple files (visits, referrals, payments), confirm mappings, ask, or run the synthetic demo into *your* tenant. Persistent banner: no live future schedule / this-week book.
+Open http://127.0.0.1:8000 — log in, upload multiple files (visits, referrals, payments), then **talk to the analyst** in the chat thread. Suggested chips are optional. Persistent banner: no live future schedule / this-week book.
+
+### Chat (Grok tools)
+
+After login the user types any ops/billing question. The analyst is this clinic's grounded bot:
+
+- Closed-month truth. No live schedule. PHI = ids only. Never invent numbers. Never mix tenants.
+- If `XAI_API_KEY` is set, answers go through xAI Grok (`https://api.x.ai/v1` chat completions, default model **grok-4.6** as published at [x.ai/api](https://x.ai/api); override with `XAI_MODEL`). The model may call locked metric tools (cancelation, churn, referrals, AR/`InsBalance`, avg paid, avg collections, days to pay, staffing forecast, caseload fill, snapshot, alerts) plus a read-only `SELECT` helper on this tenant's DuckDB only (`APPOINTMENT` / `PATIENT` / `REFERRAL` / `CLAIM_TXN`, row-capped). Prefer metric tools when the question matches a locked def.
+- If `XAI_API_KEY` is missing, keyword routing still answers (so Render without a key works). The UI says chat-with-tools is off until the key is set.
+
+Set the key in the Render dashboard (Blueprint prompts for `XAI_API_KEY` because `sync: false`). Do not commit the key.
+
+Synthetic demo data (not Boom): Example Clinic, ~1800 visits, 80 patients, ~200 referrals, plus `CLAIM_TXN` payment rows. Tied to no real clinic.
 
 ### Deploy on Render
 
 1. Push this branch (`cursor/clinic-analyst-first-pass-5759`).
 2. Render Dashboard → **New** → **Blueprint** → this repo → **Apply**.
-3. `render.yaml`: one web service, `uvicorn web.app:app --host 0.0.0.0 --port $PORT`, `/healthz`, disk `/data` (`CLINIC_ANALYST_DATA_DIR=/data`, generated `CLINIC_ANALYST_SECRET`).
+3. `render.yaml`: one web service, `uvicorn web.app:app --host 0.0.0.0 --port $PORT`, `/healthz`, disk `/data` (`CLINIC_ANALYST_DATA_DIR=/data`, generated `CLINIC_ANALYST_SECRET`). Set `XAI_API_KEY` in the dashboard when you want Grok tool-chat (Blueprint `sync: false` prompts on first apply).
 
 No Snowflake credentials and no Postgres add-on. Users + tenant DuckDB files persist on `/data`.
 
 ## Environment
 
-See `.env.example`. Local state is `CLINIC_ANALYST_DATA_DIR` (default `./data`). No secrets belong in the repo. An optional `OPENAI_API_KEY` is reserved for later prose rewrite of **already computed** facts and is not used as a source of numbers.
+See `.env.example`. Local state is `CLINIC_ANALYST_DATA_DIR` (default `./data`). No secrets belong in the repo. `XAI_API_KEY` enables Grok tool-chat; without it the regex fallback still answers from locked metrics.
 
 ## The three components
 
@@ -126,7 +138,7 @@ Payments use `TotalPaid`. AR/collections use `InsPaid`. Do not mix.
 
 ### 3. AI analysis layer
 
-Trained on the locked metric functions as the starting point. The user asks questions like an analyst. Answers are grounded: every number comes from those functions. If the dump cannot support a question (payroll, caseload fill), the analyst says the data is not there.
+The user talks to the analyst in free text, like a Grok bot — not canned buttons. With `XAI_API_KEY`, Grok calls the locked metric functions as tools. Without a key, a keyword router still maps common questions onto those same functions. Answers are grounded: every number comes from the tools / warehouse. If the dump cannot support a question (payroll, caseload fill), the analyst says the data is not there.
 
 Wired user-defined alerts:
 

@@ -19,3 +19,5 @@ services:
         value: /data
       - key: CLINIC_ANALYST_SECRET
         generateValue: true
+      - key: XAI_API_KEY
+        sync: false

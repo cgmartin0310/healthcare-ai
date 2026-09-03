@@ -31,6 +31,8 @@ def test_index_shows_banner_and_login():
         assert "does not have a live future schedule" in res.text
         assert "patient name" not in res.text.lower()
         assert "Sign in" in res.text
+        assert "Chat with the analyst" in res.text
+        assert "Type any ops" in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):

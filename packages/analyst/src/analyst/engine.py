@@ -26,6 +26,9 @@ from warehouse.metrics import (
 from warehouse.staffing import forecast
 from warehouse.store import Warehouse
 
+from analyst.llm import complete_chat, llm_available, parse_tool_args, system_prompt, tools_notice, xai_model
+from analyst.tools import TOOL_SCHEMAS, dump_tool_result, run_tool
+
 
 def _pct(value: float | None) -> str:
     if value is None:
@@ -40,8 +43,27 @@ class Analyst:
         self.as_of = as_of
         self.company = company
 
-    def ask(self, question: str) -> dict[str, Any]:
+    def ask(
+        self,
+        question: str,
+        *,
+        history: list[dict[str, str]] | None = None,
+        use_tools: bool | None = None,
+    ) -> dict[str, Any]:
         q = question.strip()
+        if use_tools is None:
+            use_tools = llm_available()
+        if use_tools:
+            try:
+                return self._ask_with_tools(q, history or [])
+            except Exception as exc:
+                body = self._ask_regex(q)
+                body["mode"] = "fallback"
+                body["tools_notice"] = f"Chat-with-tools failed ({exc}). Using keyword routing."
+                return body
+        return self._ask_regex(q)
+
+    def _ask_regex(self, q: str) -> dict[str, Any]:
         handler, intent = self._route(q)
         body = handler(q)
         return {
@@ -51,9 +73,81 @@ class Analyst:
             "last_closed_month": {k: v.isoformat() for k, v in zip(("start", "end"), last_closed_month(self.as_of))},
             "question": q,
             "intent": intent,
+            "mode": "fallback",
+            "tools_called": [],
+            "tools_notice": tools_notice(),
             "answer": body["answer"],
             "evidence": body.get("evidence"),
             "suggestions": body.get("suggestions") or [],
+            "grounded": True,
+        }
+
+    def _ask_with_tools(self, q: str, history: list[dict[str, str]]) -> dict[str, Any]:
+        messages: list[dict[str, Any]] = [
+            {"role": "system", "content": system_prompt(tenant_id=self.tenant_id, as_of=self.as_of.isoformat())}
+        ]
+        for turn in history[-16:]:
+            role = turn.get("role")
+            content = (turn.get("content") or "").strip()
+            if role in {"user", "assistant"} and content:
+                messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": q})
+        tools_called: list[str] = []
+        evidence: dict[str, Any] = {}
+        final = ""
+        for _ in range(8):
+            raw = complete_chat(messages, TOOL_SCHEMAS)
+            choice = (raw.get("choices") or [{}])[0]
+            msg = choice.get("message") or {}
+            tool_calls = msg.get("tool_calls") or []
+            if tool_calls:
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": msg.get("content") or "",
+                        "tool_calls": tool_calls,
+                    }
+                )
+                for call in tool_calls:
+                    fn = (call.get("function") or {}) if isinstance(call, dict) else {}
+                    name = str(fn.get("name") or "")
+                    args = parse_tool_args(fn.get("arguments"))
+                    payload, _err = run_tool(
+                        name,
+                        args,
+                        warehouse=self.warehouse,
+                        as_of=self.as_of,
+                        company=self.company,
+                        alerts_fn=self.alerts,
+                    )
+                    tools_called.append(name)
+                    evidence[f"{name}_{len(tools_called)}"] = payload
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": call.get("id") or name,
+                            "content": dump_tool_result(payload),
+                        }
+                    )
+                continue
+            final = (msg.get("content") or "").strip()
+            break
+        if not final:
+            final = "The warehouse tools returned no prose. Ask again, or the data is not in the dump."
+        return {
+            "banner": PRODUCT_BANNER,
+            "tenant_id": self.tenant_id,
+            "as_of": self.as_of.isoformat(),
+            "last_closed_month": {k: v.isoformat() for k, v in zip(("start", "end"), last_closed_month(self.as_of))},
+            "question": q,
+            "intent": "tool_chat",
+            "mode": "tools",
+            "model": xai_model(),
+            "tools_called": tools_called,
+            "tools_notice": None,
+            "answer": final,
+            "evidence": evidence,
+            "suggestions": [],
             "grounded": True,
         }
 

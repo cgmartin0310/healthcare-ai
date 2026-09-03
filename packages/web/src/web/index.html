@@ -16,6 +16,12 @@
     textarea { width: 100%; min-height: 4.5rem; }
     button { background: #1f3b4d; color: #fff; border: 0; padding: .4rem .8rem; border-radius: 4px; cursor: pointer; margin-right: .4rem; }
     button.secondary { background: #5a6b75; }
+    button.chip { background: #e8e2d6; color: #102030; margin: .2rem .25rem .2rem 0; font-size: .8rem; }
+    .thread { max-height: 28rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
+    .bubble { border-radius: 8px; padding: .65rem .75rem; white-space: pre-wrap; font-size: .9rem; }
+    .bubble.user { background: #1f3b4d; color: #f4f1ea; align-self: flex-end; max-width: 85%; }
+    .bubble.assistant { background: #f7f5f1; align-self: stretch; }
+    .notice { background: #f3ead4; border: 1px solid #d5cfc4; padding: .5rem .7rem; border-radius: 4px; margin-bottom: .75rem; }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     th, td { text-align: left; border-bottom: 1px solid #eee; padding: .25rem .3rem; }
     pre { white-space: pre-wrap; background: #f7f5f1; padding: .75rem; font-size: .85rem; overflow-x: auto; }
@@ -69,11 +75,19 @@
     </section>
 
     <section>
-      <h2>2. Ask</h2>
-      <textarea id="question">Is cancelation over 25% in the last three months?</textarea>
+      <h2>2. Chat with the analyst</h2>
+      <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions.</p>
+      <div id="tools-notice" class="notice hide"></div>
+      <div id="thread" class="thread"></div>
+      <div id="chips"></div>
+      <label>Message
+        <textarea id="question" placeholder="Ask anything about this clinic's closed-month dump…"></textarea>
+      </label>
       <label>As-of <input id="asof" type="date" value="2026-09-02" /></label>
-      <p><button type="button" id="ask">Ask</button></p>
-      <pre id="ask-out"></pre>
+      <p>
+        <button type="button" id="ask">Send</button>
+        <button type="button" class="secondary" id="clear-chat">Clear thread</button>
+      </p>
     </section>
 
     <section>
@@ -87,6 +101,49 @@
   <script>
     const banner = document.getElementById("banner");
     let uploadId = null;
+    const CHIPS = [
+      "Is cancelation over 25% in the last three months?",
+      "Why is Site B's AR high?",
+      "Referral-source drop-off — does volume support another therapist?",
+      "How long does a new clinician take to fill a caseload?",
+      "Which therapists are profitable after payroll?",
+      "What can I do to improve my business?"
+    ];
+
+    function renderChips() {
+      document.getElementById("chips").innerHTML = CHIPS.map((q, i) =>
+        `<button type="button" class="chip" data-q="${i}">${q}</button>`
+      ).join("");
+      document.querySelectorAll("#chips .chip").forEach(btn => {
+        btn.onclick = () => {
+          document.getElementById("question").value = CHIPS[Number(btn.dataset.q)];
+          sendChat();
+        };
+      });
+    }
+
+    function renderThread(messages) {
+      const el = document.getElementById("thread");
+      el.innerHTML = (messages || []).map(m =>
+        `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${escapeHtml(m.content || "")}</div>`
+      ).join("") || '<p class="muted">No messages yet. Ask anything.</p>';
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+    }
+
+    function applyChatMeta(chat) {
+      const n = document.getElementById("tools-notice");
+      if (chat && chat.notice) {
+        n.textContent = chat.notice;
+        n.classList.remove("hide");
+      } else {
+        n.classList.add("hide");
+      }
+      if (chat && chat.messages) renderThread(chat.messages);
+    }
 
     function setBanner(text) { if (text) banner.textContent = text; }
     function showErr(el, e) { el.innerHTML = '<span class="err">' + (e.message || e) + '</span>'; }
@@ -110,6 +167,7 @@
         const data = await jsonFetch("/api/me");
         setBanner(data.banner);
         showApp(data.user);
+        applyChatMeta(data.chat);
       } catch (e) {
         document.getElementById("auth-panel").classList.remove("hide");
         document.getElementById("app-panel").classList.add("hide");
@@ -128,6 +186,7 @@
         });
         setBanner(data.banner);
         showApp(data.user);
+        applyChatMeta(data.chat);
       } catch (e) { showErr(out, e); }
     };
 
@@ -144,6 +203,7 @@
         });
         setBanner(data.banner);
         showApp(data.user);
+        applyChatMeta(data.chat);
       } catch (e) { showErr(out, e); }
     };
 
@@ -198,20 +258,35 @@
       } catch (e) { showErr(out, e); }
     };
 
-    document.getElementById("ask").onclick = async () => {
-      const out = document.getElementById("ask-out");
+    async function sendChat() {
+      const q = document.getElementById("question").value.trim();
+      if (!q) return;
+      const thread = document.getElementById("thread");
+      thread.insertAdjacentHTML("beforeend", `<div class="bubble user">${escapeHtml(q)}</div>`);
+      thread.scrollTop = thread.scrollHeight;
+      document.getElementById("question").value = "";
       try {
-        const data = await jsonFetch("/api/ask", {
+        const data = await jsonFetch("/api/chat", {
           method: "POST", headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
-            question: document.getElementById("question").value,
+            question: q,
             as_of: document.getElementById("asof").value || null
           })
         });
         setBanner(data.banner);
-        out.textContent = [data.banner, "", data.answer, "",
-          (data.suggestions || []).map(s => "- " + s).join("\n")].join("\n");
-      } catch (e) { out.textContent = e.message || String(e); }
+        applyChatMeta(data.chat);
+      } catch (e) {
+        thread.insertAdjacentHTML("beforeend", `<div class="bubble assistant err">${escapeHtml(e.message || String(e))}</div>`);
+      }
+    }
+
+    document.getElementById("ask").onclick = sendChat;
+    document.getElementById("question").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); sendChat(); }
+    });
+    document.getElementById("clear-chat").onclick = async () => {
+      const data = await jsonFetch("/api/chat/clear", { method: "POST" });
+      applyChatMeta(data.chat);
     };
 
     document.getElementById("demo").onclick = async () => {
@@ -228,6 +303,7 @@
       } catch (e) { out.textContent = e.message || String(e); }
     };
 
+    renderChips();
     refreshMe();
   </script>
 </body>
