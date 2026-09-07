@@ -8,6 +8,7 @@
     :root { font-family: ui-sans-serif, system-ui, sans-serif; color: #102030; background: #f4f1ea; }
     body { max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; }
     h1 { font-size: 1.35rem; margin: 0 0 .4rem; }
+    h2 { font-size: 1.1rem; margin: 0 0 .6rem; }
     .banner { background: #1f3b4d; color: #f4f1ea; padding: .75rem 1rem; border-radius: 6px; margin: .75rem 0 1.25rem; }
     section { background: #fff; border: 1px solid #d5cfc4; border-radius: 6px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
     label { display: block; font-size: .85rem; margin: .4rem 0 .2rem; }
@@ -17,10 +18,11 @@
     button { background: #1f3b4d; color: #fff; border: 0; padding: .4rem .8rem; border-radius: 4px; cursor: pointer; margin-right: .4rem; }
     button.secondary { background: #5a6b75; }
     button.chip { background: #e8e2d6; color: #102030; margin: .2rem .25rem .2rem 0; font-size: .8rem; }
-    .thread { max-height: 28rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
+    .thread { max-height: 36rem; min-height: 12rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
     .bubble { border-radius: 8px; padding: .65rem .75rem; white-space: pre-wrap; font-size: .9rem; }
     .bubble.user { background: #1f3b4d; color: #f4f1ea; align-self: flex-end; max-width: 85%; }
     .bubble.assistant { background: #f7f5f1; align-self: stretch; }
+    .bubble a { color: #1f3b4d; font-weight: 600; }
     .notice { background: #f3ead4; border: 1px solid #d5cfc4; padding: .5rem .7rem; border-radius: 4px; margin-bottom: .75rem; }
     table { width: 100%; border-collapse: collapse; font-size: .85rem; }
     th, td { text-align: left; border-bottom: 1px solid #eee; padding: .25rem .3rem; }
@@ -28,7 +30,10 @@
     .muted { color: #5a6b75; font-size: .85rem; }
     .err { color: #8b1e1e; }
     .hide { display: none; }
-    .who { font-size: .85rem; margin-bottom: .75rem; }
+    .who { font-size: .85rem; margin-bottom: .75rem; display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+    .who a { color: #1f3b4d; }
+    details { margin-top: .75rem; }
+    details > summary { cursor: pointer; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -50,62 +55,76 @@
   </section>
 
   <div id="app-panel" class="hide">
-    <p class="who">Signed in as <span id="who-email"></span> · tenant <span id="who-tenant"></span>
+    <p class="who">
+      <span>Signed in as <span id="who-email"></span> · <span id="who-tenant"></span></span>
+      <a id="nav-chat" href="/">Chat</a>
+      <a id="nav-warehouse" href="/warehouse">Warehouse</a>
       <button type="button" class="secondary" id="logout">Log out</button>
     </p>
 
-    <section>
-      <h2>1. Download sample files, then map (one export at a time)</h2>
-      <p class="muted">These are SYNTHETIC / EXAMPLE practice-management exports — not warehouse headers, tied to no real clinic. Download a clinic profile, then upload a file so the mapper has to propose columns. Schedule, referrals, charges, payments, adjustments, aging each map onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
-      <label>Clinic profile
-        <select id="profile">
-          <option value="harbor">Harbor Pediatric Therapy</option>
-          <option value="riverbend">Riverbend Physical Therapy</option>
-          <option value="northside">Northside Behavioral Health</option>
-        </select>
-      </label>
-      <p class="muted" id="profile-blurb"></p>
-      <p><button type="button" class="secondary" id="download-samples">Download sample files (zip)</button></p>
-      <label>Entity
-        <select id="entity">
-          <option value="APPOINTMENT">APPOINTMENT (visits)</option>
-          <option value="REFERRAL">REFERRAL</option>
-          <option value="PATIENT">PATIENT</option>
-          <option value="CLAIM_TXN">CLAIM_TXN (charges / payments)</option>
-        </select>
-      </label>
-      <label>File <input id="file" type="file" accept=".csv,.xlsx,.xls,.txt" /></label>
-      <p>
-        <button type="button" id="propose">Propose mapping</button>
-        <button type="button" class="secondary" id="confirm" disabled>Confirm</button>
-        <button type="button" class="secondary" id="load" disabled>Load into my warehouse</button>
-      </p>
-      <div id="map-out" class="muted"></div>
-    </section>
+    <div id="view-chat">
+      <section>
+        <h2>Chat with the analyst</h2>
+        <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions. As-of defaults to 2026-09-02 for the demo tenant when omitted.</p>
+        <div id="empty-warehouse" class="notice hide">No visits loaded yet — run synthetic demo or upload files <a href="/warehouse">Open Warehouse</a></div>
+        <div id="tools-notice" class="notice hide"></div>
+        <div id="thread" class="thread"></div>
+        <div id="chips"></div>
+        <label>Message
+          <textarea id="question" placeholder="Ask anything about this clinic's closed-month dump…"></textarea>
+        </label>
+        <label>As-of <input id="asof" type="date" value="2026-09-02" /></label>
+        <p>
+          <button type="button" id="ask">Send</button>
+          <button type="button" class="secondary" id="clear-chat">Clear thread</button>
+        </p>
+      </section>
+    </div>
 
-    <section>
-      <h2>2. Chat with the analyst</h2>
-      <p class="muted">Type any ops or billing question. Suggested chips are optional — they are not the only questions. As-of defaults to 2026-09-02 for the demo tenant when omitted.</p>
-      <div id="empty-warehouse" class="notice hide">No visits loaded yet — run synthetic demo or upload files</div>
-      <div id="tools-notice" class="notice hide"></div>
-      <div id="thread" class="thread"></div>
-      <div id="chips"></div>
-      <label>Message
-        <textarea id="question" placeholder="Ask anything about this clinic's closed-month dump…"></textarea>
-      </label>
-      <label>As-of <input id="asof" type="date" value="2026-09-02" /></label>
-      <p>
-        <button type="button" id="ask">Send</button>
-        <button type="button" class="secondary" id="clear-chat">Clear thread</button>
-      </p>
-    </section>
-
-    <section>
-      <h2>3. Synthetic demo (this tenant only)</h2>
-      <p class="muted">The example-clinic demo tenant is preloaded on startup with Harbor Pediatric. This button reloads the selected profile into <em>your</em> DuckDB only. Does not mix clinics. Signup tenants stay empty until you upload or run this.</p>
-      <p><button type="button" id="demo">Run synthetic demo</button></p>
-      <pre id="demo-out"></pre>
-    </section>
+    <div id="view-warehouse" class="hide">
+      <section>
+        <h2>Warehouse status</h2>
+        <p class="muted">This tenant only. Closed-month results are the truth grain.</p>
+        <div id="wh-status" class="muted">Loading status…</div>
+      </section>
+      <section>
+        <details>
+          <summary>Upload and map</summary>
+          <p class="muted">Schedule, referrals, charges, payments, adjustments, aging each map onto one PREP table. CLAIM_TXN is the claim ledger (not payments-only). Missing REFERRAL or CLAIM_TXN is fine. Safe Harbor identifiers are stripped or hashed before load. This is not a legal determination that the file is de-identified.</p>
+          <label>Entity
+            <select id="entity">
+              <option value="APPOINTMENT">APPOINTMENT (visits)</option>
+              <option value="REFERRAL">REFERRAL</option>
+              <option value="PATIENT">PATIENT</option>
+              <option value="CLAIM_TXN">CLAIM_TXN (charges / payments)</option>
+            </select>
+          </label>
+          <label>File <input id="file" type="file" accept=".csv,.xlsx,.xls,.txt" /></label>
+          <p>
+            <button type="button" id="propose">Propose mapping</button>
+            <button type="button" class="secondary" id="confirm" disabled>Confirm</button>
+            <button type="button" class="secondary" id="load" disabled>Load into my warehouse</button>
+          </p>
+          <div id="map-out" class="muted"></div>
+        </details>
+        <details>
+          <summary>Sample files and synthetic demo</summary>
+          <p class="muted">SYNTHETIC / EXAMPLE practice-management exports — not warehouse headers, tied to no real clinic. These are secondary tools for demos and power users.</p>
+          <label>Clinic profile
+            <select id="profile">
+              <option value="harbor">Harbor Pediatric Therapy</option>
+              <option value="riverbend">Riverbend Physical Therapy</option>
+              <option value="northside">Northside Behavioral Health</option>
+            </select>
+          </label>
+          <p class="muted" id="profile-blurb"></p>
+          <p><button type="button" class="secondary" id="download-samples">Download sample files (zip)</button></p>
+          <p class="muted">The example-clinic demo tenant is preloaded on startup with Harbor Pediatric. This button reloads the selected profile into <em>your</em> DuckDB only. Does not mix clinics.</p>
+          <p><button type="button" id="demo">Run synthetic demo</button></p>
+          <pre id="demo-out"></pre>
+        </details>
+      </section>
+    </div>
   </div>
 
   <script>
@@ -126,6 +145,18 @@
       northside: "Mental-health group, telehealth-heavy, different payer mix."
     };
 
+    function currentView() {
+      const path = location.pathname.replace(/\/$/, "") || "/";
+      if (path === "/warehouse") return "warehouse";
+      return new URLSearchParams(location.search).get("view") === "warehouse" ? "warehouse" : "chat";
+    }
+
+    function showView(view) {
+      document.getElementById("view-chat").classList.toggle("hide", view !== "chat");
+      document.getElementById("view-warehouse").classList.toggle("hide", view !== "warehouse");
+      if (view === "warehouse") refreshStatus();
+    }
+
     function renderChips() {
       document.getElementById("chips").innerHTML = CHIPS.map((q, i) =>
         `<button type="button" class="chip" data-q="${i}">${q}</button>`
@@ -138,10 +169,14 @@
       });
     }
 
+    function linkify(escaped) {
+      return escaped.replace(/(\/api\/exports\/[A-Za-z0-9._-]+\.csv)/g, '<a href="$1" download>$1</a>');
+    }
+
     function renderThread(messages) {
       const el = document.getElementById("thread");
       el.innerHTML = (messages || []).map(m =>
-        `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${escapeHtml(m.content || "")}</div>`
+        `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${linkify(escapeHtml(m.content || ""))}</div>`
       ).join("") || '<p class="muted">No messages yet. Ask anything.</p>';
       el.scrollTop = el.scrollHeight;
     }
@@ -178,6 +213,33 @@
       else n.classList.add("hide");
     }
 
+    async function refreshStatus() {
+      const el = document.getElementById("wh-status");
+      try {
+        const s = await jsonFetch("/api/warehouse/status");
+        const c = s.counts || {};
+        const cov = s.coverage || {};
+        const overall = cov.overall || {};
+        const tables = cov.tables || {};
+        const emptyReq = cov.empty_required || {};
+        const rows = Object.keys(tables).map(name => {
+          const t = tables[name];
+          const miss = (emptyReq[name] || []).join(", ") || "none";
+          return `<tr><td>${escapeHtml(name)}</td><td>${t.rows}</td><td>${t.pct}%</td><td>${t.filled_columns}/${t.columns}</td><td>${escapeHtml(miss)}</td></tr>`;
+        }).join("");
+        el.innerHTML = `
+          <p><strong>Last updated:</strong> ${escapeHtml(s.last_updated || "unknown")}
+            <span class="muted">(${escapeHtml(s.last_updated_source || "")})</span></p>
+          <p>APPOINTMENT ${c.APPOINTMENT || 0} · Completes ${c.Completes || 0} · PATIENT ${c.PATIENT || 0} · REFERRAL ${c.REFERRAL || 0} · CLAIM_TXN ${c.CLAIM_TXN || 0}</p>
+          <p>Mapped coverage ${overall.pct || 0}% (${overall.filled_columns || 0}/${overall.columns || 0} PREP columns with at least one value).</p>
+          <table><thead><tr><th>Table</th><th>Rows</th><th>Coverage</th><th>Filled cols</th><th>Required empty</th></tr></thead><tbody>${rows}</tbody></table>
+          ${s.empty ? '<p class="notice">Warehouse is empty. Upload a file or run the synthetic demo below.</p>' : ""}
+          <p class="muted">${escapeHtml(s.note || "")}</p>`;
+      } catch (e) {
+        el.innerHTML = '<span class="err">' + escapeHtml(e.message || String(e)) + '</span>';
+      }
+    }
+
     function setBanner(text) { if (text) banner.textContent = text; }
     function showErr(el, e) { el.innerHTML = '<span class="err">' + (e.message || e) + '</span>'; }
 
@@ -197,6 +259,7 @@
       document.getElementById("app-panel").classList.remove("hide");
       document.getElementById("who-email").textContent = user.email;
       document.getElementById("who-tenant").textContent = user.tenant_name + " (" + user.tenant_id + ")";
+      showView(currentView());
     }
 
     async function refreshMe() {
@@ -249,7 +312,7 @@
 
     document.getElementById("logout").onclick = async () => {
       await jsonFetch("/api/logout", { method: "POST" });
-      location.reload();
+      location.href = "/";
     };
 
     document.getElementById("propose").onclick = async () => {
@@ -297,6 +360,7 @@
         setBanner(data.banner);
         applyWarehouseEmpty(data.warehouse_empty);
         out.insertAdjacentHTML("afterbegin", `<p>Loaded ${JSON.stringify(data.loaded)} (append).</p>`);
+        refreshStatus();
       } catch (e) { showErr(out, e); }
     };
 
@@ -347,6 +411,7 @@
         applyWarehouseEmpty(data.warehouse_empty);
         const blocks = (data.answers || []).map(a => "Q: " + a.question + "\n" + a.answer).join("\n\n");
         out.textContent = data.note + "\n" + data.banner + "\n\n" + blocks;
+        refreshStatus();
       } catch (e) { out.textContent = e.message || String(e); }
     };
 

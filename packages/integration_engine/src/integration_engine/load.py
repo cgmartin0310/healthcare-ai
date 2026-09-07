@@ -117,4 +117,7 @@ def load_mapped_file(
                 "note": "Example/synthetic dumps are tied to no real clinic.",
             },
         )
+    from analyst.tenant import mark_warehouse_updated
+
+    mark_warehouse_updated(tenant_id, "load")
     return counts

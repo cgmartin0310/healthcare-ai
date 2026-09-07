@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from analyst.banner import PRODUCT_BANNER
 from analyst.engine import Analyst
+from analyst.exports import cleanup_all_exports, read_export
 from analyst.llm import llm_available, tools_notice, xai_model
 from analyst.tenant import parse_as_of, warehouse_path
 from integration_engine.deid import SAFE_HARBOR_NOTICE
@@ -40,6 +41,7 @@ from web.demo_load import (
     resolve_profile,
 )
 from web.profiles import DEFAULT_PROFILE, list_profiles, profile_dir, profile_files
+from web.warehouse_status import warehouse_status
 
 INDEX_HTML = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
 SAMPLE_QUESTIONS = [
@@ -56,6 +58,7 @@ ENTITIES = ("APPOINTMENT", "REFERRAL", "PATIENT", "CLAIM_TXN")
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     seed_demo()
+    cleanup_all_exports()
     yield
 
 
@@ -166,6 +169,32 @@ def api_sample_zip(profile_id: str) -> Response:
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     return INDEX_HTML
+
+
+@app.get("/warehouse", response_class=HTMLResponse)
+def warehouse_page() -> str:
+    return INDEX_HTML
+
+
+@app.get("/api/warehouse/status")
+def api_warehouse_status(user: User = Depends(current_user)) -> dict[str, Any]:
+    return warehouse_status(user.tenant_id)
+
+
+@app.get("/api/exports/{filename}")
+def api_export_csv(filename: str, user: User = Depends(current_user)):
+    from fastapi.responses import FileResponse
+
+    export_id = filename[:-4] if filename.lower().endswith(".csv") else filename
+    found = read_export(user.tenant_id, export_id)
+    if not found:
+        raise HTTPException(404, "Export not found.")
+    path, meta = found
+    return FileResponse(
+        path,
+        media_type="text/csv",
+        filename=str(meta.get("filename") or f"{export_id}.csv"),
+    )
 
 
 class AuthBody(BaseModel):

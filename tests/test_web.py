@@ -60,6 +60,10 @@ def test_index_shows_banner_and_login():
         assert "Download sample files" in res.text
         assert "Harbor Pediatric Therapy" in res.text
         assert "Which therapist had the most Completes last month?" in res.text
+        assert "1. Download sample files" not in res.text
+        assert "3. Synthetic demo" not in res.text
+        assert 'id="view-chat"' in res.text
+        assert 'id="view-warehouse"' in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
@@ -69,6 +73,8 @@ def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
         assert client.get("/api/me").status_code == 401
         assert client.post("/api/confirm", json={"upload_id": "x"}).status_code == 401
         assert client.post("/api/load", json={"upload_id": "x"}).status_code == 401
+        assert client.get("/api/warehouse/status").status_code == 401
+        assert client.get("/api/exports/not-a-real.csv").status_code == 401
 
 
 def test_seed_demo_loads_visits_and_cancelation_without_api_demo(tmp_path, monkeypatch):
@@ -236,6 +242,64 @@ def test_ensure_demo_does_not_load_other_tenants(tmp_path, monkeypatch):
         assert ensure_demo_warehouse_seeded(wh, "second-clinic") is False
         assert wh.count("APPOINTMENT") == 0
         assert wh.count("CLAIM_TXN") == 0
+
+
+def test_warehouse_status_for_loaded_demo(tmp_path, monkeypatch):
+    with _client(tmp_path, monkeypatch) as client:
+        client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        res = client.get("/api/warehouse/status")
+        assert res.status_code == 200
+        body = res.json()
+        assert body["last_updated"]
+        assert body["counts"]["APPOINTMENT"] > 100
+        assert body["counts"]["Completes"] > 0
+        assert "PATIENT" in body["counts"]
+        assert "REFERRAL" in body["counts"]
+        assert "CLAIM_TXN" in body["counts"]
+        assert "overall" in body["coverage"]
+        assert "tables" in body["coverage"]
+        assert body["coverage"]["overall"]["columns"] > 0
+        assert 0 <= body["coverage"]["overall"]["pct"] <= 100
+
+
+def test_export_csv_is_tenant_scoped(tmp_path, monkeypatch, as_of):
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    with _client(tmp_path, monkeypatch) as client:
+        client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        asked = client.post(
+            "/api/ask",
+            json={
+                "question": "Download Completes by therapist as a CSV",
+                "as_of": as_of.isoformat(),
+            },
+        )
+        assert asked.status_code == 200
+        answer = asked.json()["answer"]
+        assert "Closed-month snapshot" not in answer
+        assert "/api/exports/" in answer
+        assert ".csv" in answer
+        import re
+
+        match = re.search(r"/api/exports/([A-Za-z0-9._-]+\.csv)", answer)
+        assert match
+        path = match.group(0)
+        got = client.get(path)
+        assert got.status_code == 200
+        assert "text/csv" in got.headers.get("content-type", "")
+        text = got.text
+        assert "provider_name" in text.splitlines()[0] or "ProviderName" in text.splitlines()[0]
+        assert len(text.splitlines()) > 1
+        client.post("/api/logout")
+        assert client.get(path).status_code == 401
+        client.post(
+            "/api/signup",
+            json={
+                "email": "other@example.clinic",
+                "password": "other-clinic-99",
+                "clinic_name": "Other Clinic",
+            },
+        )
+        assert client.get(path).status_code == 404
 
 
 def test_parse_as_of_defaults_demo_tenant(monkeypatch):

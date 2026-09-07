@@ -16,6 +16,7 @@ from warehouse.metrics import (
     completes_by_provider,
     days_to_pay,
     headcount,
+    referrals,
     snapshot,
 )
 from warehouse.staffing import forecast
@@ -187,6 +188,32 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "export_csv",
+            "description": (
+                "Write a tenant-scoped CSV of query/tool results and return a download URL. "
+                "Use after completes_by_provider, ar_past_30_days, or referrals when the user "
+                "asks to download/export a list. Pass rows from a prior tool, or a safe SELECT. "
+                "No patient names/addresses. Display ProviderName, not hashed ids as the name."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {"type": "string", "description": "Short file label, e.g. completes_by_therapist"},
+                    "source": {
+                        "type": "string",
+                        "description": "completes_by_provider | ar_past_30_days | referrals | rows | sql",
+                    },
+                    "rows": {"type": "array", "description": "List of objects to write when source=rows"},
+                    "columns": {"type": "array", "items": {"type": "string"}},
+                    "sql": {"type": "string", "description": "Read-only SELECT when source=sql"},
+                    "company": _COMPANY_PARAM,
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "warehouse_select",
             "description": "Read-only SELECT on this tenant DuckDB only. Tables: APPOINTMENT, PATIENT, REFERRAL, CLAIM_TXN. Max 50 rows. Prefer locked metric tools when the question matches a locked definition. No DML. Ids only — there are no patient names.",
             "parameters": {
@@ -203,7 +230,7 @@ def _dump(payload: Any) -> str:
     return json.dumps(payload, default=json_default, indent=None)[:12_000]
 
 
-def warehouse_select(wh: Warehouse, sql: str) -> dict[str, Any]:
+def warehouse_select(wh: Warehouse, sql: str, *, row_cap: int | None = None) -> dict[str, Any]:
     raw = (sql or "").strip().rstrip(";")
     if not raw:
         return {"error": "Empty SQL."}
@@ -220,13 +247,14 @@ def warehouse_select(wh: Warehouse, sql: str) -> dict[str, Any]:
         return {"error": f"Tables not allowed: {sorted(extra)}. Use {sorted(ALLOWED_TABLES)}."}
     if not tables:
         return {"error": "SELECT must reference APPOINTMENT, PATIENT, REFERRAL, or CLAIM_TXN."}
-    wrapped = f"SELECT * FROM ({raw}) AS _tool_q LIMIT {SELECT_ROW_CAP}"
+    cap = int(row_cap or SELECT_ROW_CAP)
+    wrapped = f"SELECT * FROM ({raw}) AS _tool_q LIMIT {cap}"
     try:
         frame = wh.fetch_df(wrapped)
     except Exception as exc:
         return {"error": f"Query failed: {exc}"}
     rows = json.loads(frame.to_json(orient="records", date_format="iso"))
-    return {"rows": rows, "row_count": len(rows), "capped_at": SELECT_ROW_CAP}
+    return {"rows": rows, "row_count": len(rows), "capped_at": cap}
 
 
 def known_appointment_companies(warehouse: Warehouse) -> set[str]:
@@ -262,6 +290,42 @@ def resolve_company_filter(warehouse: Warehouse, requested: str | None) -> str |
     return text if text in known else None
 
 
+def rows_for_export(
+    source: str,
+    *,
+    warehouse: Warehouse,
+    as_of,
+    company: str | None,
+) -> tuple[list[dict[str, Any]], list[str], str]:
+    """Build CSV rows from a locked metric. No invented numbers."""
+    src = (source or "").strip().lower()
+    if src in {"completes_by_provider", "completes", "therapist", "clinician"}:
+        result = completes_by_provider(warehouse, as_of, company=company)
+        rows = []
+        for rec in result.value or []:
+            rows.append(
+                {
+                    "provider_name": rec.get("provider_name") or "",
+                    "completes": rec.get("completes"),
+                    "patients": rec.get("patients"),
+                    "discipline": rec.get("discipline"),
+                }
+            )
+        return rows, ["provider_name", "completes", "patients", "discipline"], "completes_by_therapist"
+    if src in {"ar_past_30_days", "ar", "aging"}:
+        result = ar_past_30_days(warehouse, as_of, company=company)
+        rows = list(result.value or [])
+        cols = ["payer", "location", "claims", "ins_balance", "avg_age_days"]
+        return rows, cols, "ar_past_30"
+    if src in {"referrals", "referral"}:
+        from warehouse.metrics import referrals
+
+        refs = referrals(warehouse, as_of, months=1, company=company)
+        rows = list((refs.details or {}).get("by_source") or [])
+        return rows, ["source", "referrals", "converted", "conversion"], "referrals_last_month"
+    return [], [], src or "export"
+
+
 def run_tool(
     name: str,
     arguments: dict[str, Any],
@@ -270,6 +334,7 @@ def run_tool(
     as_of,
     company: str | None,
     alerts_fn,
+    tenant_id: str | None = None,
 ) -> tuple[Any, str]:
     """Execute one locked tool. Returns (payload, error_or_empty)."""
     args = dict(arguments or {})
@@ -321,6 +386,37 @@ def run_tool(
             return alerts_fn(), ""
         if name == "warehouse_select":
             return warehouse_select(warehouse, str(args.get("sql") or "")), ""
+        if name == "export_csv":
+            from analyst.exports import EXPORT_ROW_CAP, write_export
+
+            if not tenant_id:
+                return {"error": "export_csv requires a tenant."}, "export_csv requires a tenant."
+            source = str(args.get("source") or "rows")
+            filename = str(args.get("filename") or source or "export")
+            rows: list[dict[str, Any]] = []
+            columns = [str(c) for c in (args.get("columns") or [])]
+            if source == "sql" or args.get("sql"):
+                selected = warehouse_select(
+                    warehouse, str(args.get("sql") or ""), row_cap=EXPORT_ROW_CAP
+                )
+                if selected.get("error"):
+                    return selected, str(selected["error"])
+                rows = list(selected.get("rows") or [])
+            elif source == "rows" and args.get("rows"):
+                raw_rows = args.get("rows") or []
+                rows = [r for r in raw_rows if isinstance(r, dict)]
+            else:
+                rows, default_cols, default_name = rows_for_export(
+                    source, warehouse=warehouse, as_of=as_of, company=args.get("company")
+                )
+                if not columns:
+                    columns = default_cols
+                if filename in {"", "rows", "sql"}:
+                    filename = default_name
+            if not rows:
+                return {"error": "No rows to export."}, "No rows to export."
+            written = write_export(tenant_id, rows=rows, columns=columns or None, filename=filename)
+            return written, ""
     except Exception as exc:
         return {"error": str(exc)}, str(exc)
     return {"error": f"Unknown tool: {name}"}, f"Unknown tool: {name}"

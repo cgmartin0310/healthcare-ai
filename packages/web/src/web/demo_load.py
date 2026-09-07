@@ -77,6 +77,9 @@ def load_synthetic_demo(
                 "loaded": counts,
             }
         )
+    from analyst.tenant import mark_warehouse_updated
+
+    mark_warehouse_updated(tenant_id, "demo" if tenant_id != DEMO_TENANT_ID else "seed")
     return mapped
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +30,25 @@ def data_dir() -> Path:
 def tenant_dir(tenant_id: str) -> Path:
     path = data_dir() / "tenants" / sanitize_tenant_id(tenant_id)
     path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+STATUS_FILENAME = "warehouse_status.json"
+
+
+def mark_warehouse_updated(tenant_id: str, source: str) -> Path:
+    """Persist last successful load / demo / seed time on the tenant disk."""
+    path = tenant_dir(tenant_id) / STATUS_FILENAME
+    path.write_text(
+        json.dumps(
+            {
+                "last_updated": datetime.now(tz=timezone.utc).isoformat(),
+                "source": source,
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     return path
 
 

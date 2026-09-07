@@ -152,6 +152,7 @@ class Analyst:
                         as_of=self.as_of,
                         company=self.company,
                         alerts_fn=self.alerts,
+                        tenant_id=self.tenant_id,
                     )
                     tools_called.append(name)
                     evidence[f"{name}_{len(tools_called)}"] = payload
@@ -215,6 +216,8 @@ class Analyst:
         q = question.lower()
         if re.search(r"payroll|profitab", q):
             return self._payroll, "therapist_profit"
+        if re.search(r"\b(export|download|csv)\b", q) and "sample" not in q:
+            return self._export, "export_csv"
         if re.search(r"caseload|fill a caseload|new clinician", q):
             return self._caseload, "caseload_fill"
         if re.search(
@@ -407,6 +410,34 @@ class Analyst:
             )
         grain = f" Completes only (AppointmentStatus='Complete') for {month}."
         return {"answer": lead + grain, "evidence": result.to_dict()}
+
+    def _export(self, question: str) -> dict[str, Any]:
+        from analyst.exports import write_export
+        from analyst.tools import rows_for_export
+
+        q = question.lower()
+        if re.search(r"complete|therapist|clinician|productiv", q):
+            source = "completes_by_provider"
+        elif re.search(r"\bar\b|past 30|aging", q):
+            source = "ar_past_30_days"
+        elif re.search(r"referral", q):
+            source = "referrals"
+        else:
+            return {
+                "answer": "Say which list to export — Completes by therapist, AR past 30, or referrals.",
+                "evidence": {},
+            }
+        rows, columns, filename = rows_for_export(
+            source, warehouse=self.warehouse, as_of=self.as_of, company=self.company
+        )
+        if not rows:
+            return {"answer": "No rows to export for that list.", "evidence": {"source": source}}
+        written = write_export(self.tenant_id, rows=rows, columns=columns, filename=filename)
+        answer = (
+            f"CSV ready: {written['row_count']} rows. "
+            f"Download {written['url']}"
+        )
+        return {"answer": answer, "evidence": written}
 
     def _unknown(self, _question: str) -> dict[str, Any]:
         return {

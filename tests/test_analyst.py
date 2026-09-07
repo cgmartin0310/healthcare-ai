@@ -166,6 +166,47 @@ def test_simulated_429_answers_productive_from_warehouse(warehouse, as_of, monke
     assert "Complete" in out["answer"]
 
 
+def test_analyst_export_completes_csv(warehouse, as_of, tmp_path, monkeypatch):
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    load_appts(
+        warehouse,
+        [
+            appt_row(
+                ApptId="j1",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 10),
+            ),
+            appt_row(
+                ApptId="j2",
+                ProviderId="PR-J",
+                ProviderName="Jordan Lee",
+                ApptDate=date(2026, 8, 11),
+            ),
+        ],
+    )
+    out = Analyst(warehouse, tenant_id="export-clinic", as_of=as_of).ask(
+        "Download Completes by therapist as a CSV"
+    )
+    assert out["intent"] == "export_csv"
+    assert "/api/exports/" in out["answer"]
+    assert "Closed-month snapshot" not in out["answer"]
+    from analyst.exports import read_export
+    import re
+
+    match = re.search(r"/api/exports/([a-f0-9]{32})\.csv", out["answer"])
+    assert match
+    found = read_export("export-clinic", match.group(1))
+    assert found
+    path, meta = found
+    text = path.read_text()
+    assert "provider_name" in text.splitlines()[0]
+    assert "Jordan Lee" in text
+    assert "firstname" not in text.lower()
+    assert meta["tenant_id"] == "export-clinic"
+
+
 def test_analyst_refuses_payroll_invention(warehouse, as_of):
     load_appts(warehouse, [appt_row(ApptId="visit-1")])
     assert payroll_present(warehouse) is False
