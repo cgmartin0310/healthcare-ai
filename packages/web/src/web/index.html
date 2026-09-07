@@ -170,7 +170,9 @@
     }
 
     function linkify(escaped) {
-      return escaped.replace(/(\/api\/exports\/[A-Za-z0-9._-]+\.csv)/g, '<a href="$1" download>$1</a>');
+      return escaped
+        .replace(/\[([^\]]+)\]\((\/api\/exports\/[A-Za-z0-9._-]+\.csv)\)/g, '<a href="$2" download>$1</a>')
+        .replace(/(^|[^"'>])(\/api\/exports\/[A-Za-z0-9._-]+\.csv)/g, '$1<a href="$2" download>$2</a>');
     }
 
     function renderThread(messages) {
