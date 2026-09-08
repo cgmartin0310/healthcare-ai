@@ -34,6 +34,7 @@ def tenant_dir(tenant_id: str) -> Path:
 
 
 STATUS_FILENAME = "warehouse_status.json"
+CLEARED_SOURCE = "cleared"
 
 
 def mark_warehouse_updated(tenant_id: str, source: str) -> Path:
@@ -50,6 +51,25 @@ def mark_warehouse_updated(tenant_id: str, source: str) -> Path:
         + "\n"
     )
     return path
+
+
+def mark_warehouse_cleared(tenant_id: str) -> Path:
+    """Stamp an explicit wipe so status is empty and demo auto-seed does not refill."""
+    path = tenant_dir(tenant_id) / STATUS_FILENAME
+    path.write_text(
+        json.dumps({"last_updated": None, "source": CLEARED_SOURCE}, indent=2) + "\n"
+    )
+    return path
+
+
+def warehouse_intentionally_cleared(tenant_id: str) -> bool:
+    path = tenant_dir(tenant_id) / STATUS_FILENAME
+    if not path.exists():
+        return False
+    try:
+        return json.loads(path.read_text()).get("source") == CLEARED_SOURCE
+    except (OSError, json.JSONDecodeError):
+        return False
 
 
 def warehouse_path(tenant_id: str) -> Path:

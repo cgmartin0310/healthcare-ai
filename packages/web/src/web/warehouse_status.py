@@ -6,7 +6,13 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
-from analyst.tenant import STATUS_FILENAME, tenant_dir, warehouse_path
+from analyst.tenant import (
+    CLEARED_SOURCE,
+    STATUS_FILENAME,
+    mark_warehouse_cleared,
+    tenant_dir,
+    warehouse_path,
+)
 from warehouse.schema import PREP_TABLES, STATUS_COMPLETE, qident, quoted_table
 from warehouse.store import Warehouse
 
@@ -18,10 +24,13 @@ def _stamp(tenant_id: str) -> dict[str, Any]:
     if path.exists():
         try:
             payload = json.loads(path.read_text())
+            source = str(payload.get("source") or "")
+            if source == CLEARED_SOURCE:
+                return {"last_updated": None, "last_updated_source": CLEARED_SOURCE}
             if payload.get("last_updated"):
                 return {
                     "last_updated": str(payload["last_updated"]),
-                    "last_updated_source": str(payload.get("source") or "recorded"),
+                    "last_updated_source": source or "recorded",
                 }
         except (OSError, json.JSONDecodeError):
             pass
@@ -119,3 +128,33 @@ def warehouse_status(tenant_id: str) -> dict[str, Any]:
         "empty": tables["APPOINTMENT"]["rows"] == 0,
         "note": "Warehouse is this tenant only. Closed-month results are the truth grain.",
     }
+
+
+def _remove_tree(path) -> None:
+    if not path.exists():
+        return
+    if path.is_file():
+        path.unlink()
+        return
+    for child in path.iterdir():
+        _remove_tree(child)
+    path.rmdir()
+
+
+def clear_tenant_warehouse(tenant_id: str) -> dict[str, Any]:
+    """Empty PREP tables and load stamps for THIS tenant only. Auth/users stay."""
+    from analyst.exports import cleanup_exports
+
+    root = tenant_dir(tenant_id)
+    with Warehouse(warehouse_path(tenant_id)) as wh:
+        for name in PREP_TABLES:
+            wh.reset_table(name)
+    mark_warehouse_cleared(tenant_id)
+    cleanup_exports(tenant_id)
+    for path in root.glob("*.manifest.json"):
+        try:
+            path.unlink()
+        except OSError:
+            continue
+    _remove_tree(root / "deid_receipts")
+    return warehouse_status(tenant_id)

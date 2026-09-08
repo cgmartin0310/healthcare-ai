@@ -179,6 +179,10 @@ def ensure_demo_warehouse_seeded(wh: Warehouse, tenant_id: str) -> bool:
     """If this is the demo tenant and visits are missing or stale, load Harbor."""
     if tenant_id != DEMO_TENANT_ID:
         return False
+    from analyst.tenant import warehouse_intentionally_cleared
+
+    if warehouse_intentionally_cleared(tenant_id) and wh.count("APPOINTMENT") == 0:
+        return False
     if not _demo_needs_reload(wh):
         return False
     load_synthetic_demo(

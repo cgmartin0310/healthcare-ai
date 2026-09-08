@@ -17,6 +17,7 @@
     textarea { width: 100%; min-height: 4.5rem; }
     button { background: #1f3b4d; color: #fff; border: 0; padding: .4rem .8rem; border-radius: 4px; cursor: pointer; margin-right: .4rem; }
     button.secondary { background: #5a6b75; }
+    button.danger { background: #8b1e1e; }
     button.chip { background: #e8e2d6; color: #102030; margin: .2rem .25rem .2rem 0; font-size: .8rem; }
     .thread { max-height: 36rem; min-height: 12rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
     .bubble { border-radius: 8px; padding: .65rem .75rem; white-space: pre-wrap; font-size: .9rem; }
@@ -86,6 +87,20 @@
         <h2>Warehouse status</h2>
         <p class="muted">This tenant only. Closed-month results are the truth grain.</p>
         <div id="wh-status" class="muted">Loading status…</div>
+        <p>
+          <button type="button" class="danger" id="clear-warehouse">Clear warehouse</button>
+        </p>
+        <div id="clear-confirm" class="notice hide">
+          <p>This deletes all warehouse rows for <strong>this tenant only</strong>. It does not delete login accounts or other clinics.</p>
+          <label>Type DELETE to confirm
+            <input id="clear-confirm-text" type="text" autocomplete="off" />
+          </label>
+          <p>
+            <button type="button" class="danger" id="clear-warehouse-go">Delete all data</button>
+            <button type="button" class="secondary" id="clear-warehouse-cancel">Cancel</button>
+          </p>
+          <div id="clear-out" class="muted"></div>
+        </div>
       </section>
       <section>
         <details>
@@ -230,7 +245,7 @@
           return `<tr><td>${escapeHtml(name)}</td><td>${t.rows}</td><td>${t.pct}%</td><td>${t.filled_columns}/${t.columns}</td><td>${escapeHtml(miss)}</td></tr>`;
         }).join("");
         el.innerHTML = `
-          <p><strong>Last updated:</strong> ${escapeHtml(s.last_updated || "unknown")}
+          <p><strong>Last updated:</strong> ${escapeHtml(s.last_updated || (s.last_updated_source === "cleared" ? "none" : "unknown"))}
             <span class="muted">(${escapeHtml(s.last_updated_source || "")})</span></p>
           <p>APPOINTMENT ${c.APPOINTMENT || 0} · Completes ${c.Completes || 0} · PATIENT ${c.PATIENT || 0} · REFERRAL ${c.REFERRAL || 0} · CLAIM_TXN ${c.CLAIM_TXN || 0}</p>
           <p>Mapped coverage ${overall.pct || 0}% (${overall.filled_columns || 0}/${overall.columns || 0} PREP columns with at least one value).</p>
@@ -396,6 +411,31 @@
     document.getElementById("clear-chat").onclick = async () => {
       const data = await jsonFetch("/api/chat/clear", { method: "POST" });
       applyChatMeta(data.chat);
+    };
+
+    function showClearConfirm(on) {
+      document.getElementById("clear-confirm").classList.toggle("hide", !on);
+      if (on) {
+        document.getElementById("clear-confirm-text").value = "";
+        document.getElementById("clear-out").textContent = "";
+        document.getElementById("clear-confirm-text").focus();
+      }
+    }
+
+    document.getElementById("clear-warehouse").onclick = () => showClearConfirm(true);
+    document.getElementById("clear-warehouse-cancel").onclick = () => showClearConfirm(false);
+    document.getElementById("clear-warehouse-go").onclick = async () => {
+      const out = document.getElementById("clear-out");
+      try {
+        const data = await jsonFetch("/api/warehouse/clear", {
+          method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ confirm: document.getElementById("clear-confirm-text").value })
+        });
+        applyWarehouseEmpty(true);
+        applyChatMeta(data.chat);
+        showClearConfirm(false);
+        refreshStatus();
+      } catch (e) { showErr(out, e); }
     };
 
     document.getElementById("demo").onclick = async () => {

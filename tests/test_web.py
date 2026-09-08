@@ -64,6 +64,8 @@ def test_index_shows_banner_and_login():
         assert "3. Synthetic demo" not in res.text
         assert 'id="view-chat"' in res.text
         assert 'id="view-warehouse"' in res.text
+        assert "Clear warehouse" in res.text
+        assert "id=\"clear-warehouse\"" in res.text
 
 
 def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
@@ -75,6 +77,7 @@ def test_warehouse_routes_require_auth(tmp_path, monkeypatch):
         assert client.post("/api/load", json={"upload_id": "x"}).status_code == 401
         assert client.get("/api/warehouse/status").status_code == 401
         assert client.get("/api/exports/not-a-real.csv").status_code == 401
+        assert client.post("/api/warehouse/clear", json={"confirm": "DELETE"}).status_code == 401
 
 
 def test_seed_demo_loads_visits_and_cancelation_without_api_demo(tmp_path, monkeypatch):
@@ -300,6 +303,85 @@ def test_export_csv_is_tenant_scoped(tmp_path, monkeypatch, as_of):
             },
         )
         assert client.get(path).status_code == 404
+
+
+def test_warehouse_clear_empties_this_tenant_only(tmp_path, monkeypatch):
+    from tests.conftest import appt_row, load_appts
+    from web.auth import seed_demo as seed_again
+
+    with _client(tmp_path, monkeypatch) as client:
+        client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        before = client.get("/api/warehouse/status").json()
+        assert before["empty"] is False
+        assert before["counts"]["APPOINTMENT"] > 100
+        other_path = warehouse_path("other-keep")
+        with Warehouse(other_path) as other:
+            load_appts(other, [appt_row(ApptId="KEEP-OTHER")])
+            assert other.count("APPOINTMENT") == 1
+        refused = client.post("/api/warehouse/clear", json={"confirm": "nope"})
+        assert refused.status_code == 400
+        assert client.get("/api/warehouse/status").json()["counts"]["APPOINTMENT"] > 100
+        cleared = client.post("/api/warehouse/clear", json={"confirm": "DELETE"})
+        assert cleared.status_code == 200
+        body = cleared.json()
+        status = body.get("status") or body
+        assert status["empty"] is True
+        assert status["counts"]["APPOINTMENT"] == 0
+        assert status["counts"]["PATIENT"] == 0
+        assert status["counts"]["REFERRAL"] == 0
+        assert status["counts"]["CLAIM_TXN"] == 0
+        assert status["counts"]["Completes"] == 0
+        after = client.get("/api/warehouse/status").json()
+        assert after["empty"] is True
+        assert after["counts"]["APPOINTMENT"] == 0
+        assert after["last_updated"] is None
+        assert after["last_updated_source"] == "cleared"
+        seed_again()
+        still = client.get("/api/warehouse/status").json()
+        assert still["empty"] is True
+        assert still["counts"]["APPOINTMENT"] == 0
+        with Warehouse(other_path) as other:
+            assert other.count("APPOINTMENT") == 1
+            assert set(other.fetch_table("APPOINTMENT")["ApptId"]) == {"KEEP-OTHER"}
+        ask = client.post("/api/ask", json={"question": "Is cancelation over 25%?"})
+        assert ask.status_code == 200
+        assert ask.json()["empty_warehouse"] is True
+        me = client.get("/api/me").json()
+        assert me["warehouse_empty"] is True
+
+
+def test_warehouse_clear_then_load_sample_works(tmp_path, monkeypatch):
+    from web.profiles import profile_files
+
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    visits = dict(profile_files("harbor"))["APPOINTMENT"]
+    with _client(tmp_path, monkeypatch) as client:
+        client.post("/api/login", json={"email": DEMO_EMAIL, "password": DEMO_PASSWORD})
+        cleared = client.post("/api/warehouse/clear", json={"confirm": "DELETE"})
+        assert cleared.status_code == 200
+        assert client.get("/api/warehouse/status").json()["empty"] is True
+        with visits.open("rb") as fh:
+            proposed = client.post(
+                "/api/propose",
+                files={"file": (visits.name, fh, "text/csv")},
+                data={"entity": "APPOINTMENT"},
+            )
+        assert proposed.status_code == 200
+        upload_id = proposed.json()["upload_id"]
+        confirmed = client.post("/api/confirm", json={"upload_id": upload_id})
+        assert confirmed.status_code == 200
+        loaded = client.post("/api/load", json={"upload_id": upload_id, "mode": "replace"})
+        assert loaded.status_code == 200
+        status = client.get("/api/warehouse/status").json()
+        assert status["empty"] is False
+        assert status["counts"]["APPOINTMENT"] > 100
+        asked = client.post(
+            "/api/ask",
+            json={"question": "Is cancelation over 25% in the last three months?"},
+        )
+        assert asked.status_code == 200
+        assert asked.json()["empty_warehouse"] is not True
+        assert "%" in asked.json()["answer"]
 
 
 def test_parse_as_of_defaults_demo_tenant(monkeypatch):

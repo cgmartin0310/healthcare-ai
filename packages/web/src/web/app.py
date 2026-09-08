@@ -41,7 +41,7 @@ from web.demo_load import (
     resolve_profile,
 )
 from web.profiles import DEFAULT_PROFILE, list_profiles, profile_dir, profile_files
-from web.warehouse_status import warehouse_status
+from web.warehouse_status import clear_tenant_warehouse, warehouse_status
 
 INDEX_HTML = (Path(__file__).with_name("index.html")).read_text(encoding="utf-8")
 SAMPLE_QUESTIONS = [
@@ -179,6 +179,33 @@ def warehouse_page() -> str:
 @app.get("/api/warehouse/status")
 def api_warehouse_status(user: User = Depends(current_user)) -> dict[str, Any]:
     return warehouse_status(user.tenant_id)
+
+
+class ClearBody(BaseModel):
+    confirm: str = ""
+
+
+@app.post("/api/warehouse/clear")
+def api_warehouse_clear(body: ClearBody, user: User = Depends(current_user)) -> dict[str, Any]:
+    if (body.confirm or "").strip() != "DELETE":
+        raise HTTPException(
+            400,
+            "Type DELETE to confirm. This only clears this tenant's warehouse.",
+        )
+    for upload_id, rec in list(_PENDING.items()):
+        if rec.get("tenant_id") == user.tenant_id:
+            _PENDING.pop(upload_id, None)
+    _CHATS.pop(user.user_id, None)
+    status = clear_tenant_warehouse(user.tenant_id)
+    return {
+        "banner": PRODUCT_BANNER,
+        "cleared": True,
+        "tenant_id": user.tenant_id,
+        "warehouse_empty": True,
+        "status": status,
+        "chat": _chat_state(user),
+        "note": "Warehouse data for this tenant only was deleted. Auth users were not removed.",
+    }
 
 
 @app.get("/api/exports/{filename}")
