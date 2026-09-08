@@ -1,0 +1,90 @@
+{
+  "note": "SYNTHETIC EXAMPLE profiles \u2014 tied to no real clinic.",
+  "default": "harbor",
+  "profiles": [
+    {
+      "id": "harbor",
+      "name": "Harbor Pediatric Therapy",
+      "blurb": "Peds OT/ST, two sites, school-year seasonality. Synthetic example \u2014 not a real clinic.",
+      "default": true,
+      "files": [
+        {
+          "entity": "APPOINTMENT",
+          "filename": "SYNTHETIC_EXAMPLE_visits.csv",
+          "exists": true
+        },
+        {
+          "entity": "REFERRAL",
+          "filename": "SYNTHETIC_EXAMPLE_referrals.csv",
+          "exists": true
+        },
+        {
+          "entity": "PATIENT",
+          "filename": "SYNTHETIC_EXAMPLE_patients.xlsx",
+          "exists": true
+        },
+        {
+          "entity": "CLAIM_TXN",
+          "filename": "SYNTHETIC_EXAMPLE_ledger.csv",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "riverbend",
+      "name": "Riverbend Physical Therapy",
+      "blurb": "Adult PT, three sites, higher visits per patient. Synthetic example \u2014 not a real clinic.",
+      "default": false,
+      "files": [
+        {
+          "entity": "APPOINTMENT",
+          "filename": "SYNTHETIC_EXAMPLE_visits.csv",
+          "exists": true
+        },
+        {
+          "entity": "REFERRAL",
+          "filename": "SYNTHETIC_EXAMPLE_referrals.csv",
+          "exists": true
+        },
+        {
+          "entity": "PATIENT",
+          "filename": "SYNTHETIC_EXAMPLE_patients.csv",
+          "exists": true
+        },
+        {
+          "entity": "CLAIM_TXN",
+          "filename": "SYNTHETIC_EXAMPLE_ledger.xlsx",
+          "exists": true
+        }
+      ]
+    },
+    {
+      "id": "northside",
+      "name": "Northside Behavioral Health",
+      "blurb": "Mental-health group, telehealth-heavy, different payer mix. Synthetic example \u2014 not a real clinic.",
+      "default": false,
+      "files": [
+        {
+          "entity": "APPOINTMENT",
+          "filename": "SYNTHETIC_EXAMPLE_sessions.xlsx",
+          "exists": true
+        },
+        {
+          "entity": "REFERRAL",
+          "filename": "SYNTHETIC_EXAMPLE_referrals.csv",
+          "exists": true
+        },
+        {
+          "entity": "PATIENT",
+          "filename": "SYNTHETIC_EXAMPLE_members.csv",
+          "exists": true
+        },
+        {
+          "entity": "CLAIM_TXN",
+          "filename": "SYNTHETIC_EXAMPLE_ledger.csv",
+          "exists": true
+        }
+      ]
+    }
+  ]
+}

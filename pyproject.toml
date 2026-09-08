@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clinic-analyst"
+version = "0.1.0"
+description = "Standalone clinic analyst: file-mapping integration engine, analysis warehouse, and AI analyst layer."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Clinic Analyst" }]
+dependencies = [
+    "duckdb>=1.0",
+    "pandas>=2.1",
+    "openpyxl>=3.1",
+    "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "python-multipart>=0.0.9",
+    "bcrypt>=4.0",
+    "itsdangerous>=2.2",
+    "httpx>=0.27",
+]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "fastapi>=0.110",
+    "python-multipart>=0.0.9",
+    "bcrypt>=4.0",
+    "itsdangerous>=2.2",
+]
+
+[project.scripts]
+clinic-analyst = "analyst.cli:main"
+
+[tool.setuptools.packages.find]
+where = [
+    "packages/integration_engine/src",
+    "packages/warehouse/src",
+    "packages/analyst/src",
+    "packages/web/src",
+]
+
+[tool.setuptools.package-data]
+web = ["index.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = [
+    ".",
+    "packages/integration_engine/src",
+    "packages/warehouse/src",
+    "packages/analyst/src",
+    "packages/web/src",
+]

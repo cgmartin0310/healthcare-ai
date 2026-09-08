@@ -1,0 +1,565 @@
+IncomingRefID,CreatedOn,EvalDone,Practice,Modality,Campus,ReferralSource,EvalOn,MemberKey,RouterFlag
+R0001,2025-11-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0002,2025-11-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0003,2025-11-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,11/11/2025,P2002,SYNTHETIC_EXAMPLE
+R0004,2025-11-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2025-11-12,P2003,SYNTHETIC_EXAMPLE
+R0005,2025-11-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,13-Nov-2025,P2004,SYNTHETIC_EXAMPLE
+R0006,2025-11-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0007,2025-11-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0008,2025-11-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,11/16/2025,P2007,SYNTHETIC_EXAMPLE
+R0009,2025-11-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-Nov-2025,P2008,SYNTHETIC_EXAMPLE
+R0010,2025-11-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,18-Nov-2025,P2009,SYNTHETIC_EXAMPLE
+R0011,2025-11-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0012,2025-11-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0013,2025-11-13 09:12:00,converted,Northside Behavioral Health,OCC,North Campus,,11/21/2025,P2012,SYNTHETIC_EXAMPLE
+R0014,2025-11-14 09:13:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,22-Nov-2025,P2013,SYNTHETIC_EXAMPLE
+R0015,2025-11-15 09:14:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,23-Nov-2025,P2014,SYNTHETIC_EXAMPLE
+R0016,2025-11-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0017,2025-11-17 09:16:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0018,2025-11-18 09:17:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,26-Nov-2025,P2017,SYNTHETIC_EXAMPLE
+R0019,2025-11-19 09:18:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,2025-11-27,P2018,SYNTHETIC_EXAMPLE
+R0020,2025-11-20 09:19:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,11/28/2025,P2019,SYNTHETIC_EXAMPLE
+R0021,2025-11-21 09:20:00,open,Northside Behavioral Health,OCC,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0022,2025-11-22 09:21:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0023,2025-11-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0024,2025-11-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0025,2025-11-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,11/11/2025,P2002,SYNTHETIC_EXAMPLE
+R0026,2025-11-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2025-11-12,P2003,SYNTHETIC_EXAMPLE
+R0027,2025-11-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,13-Nov-2025,P2004,SYNTHETIC_EXAMPLE
+R0028,2025-11-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0029,2025-11-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0030,2025-11-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,16-Nov-2025,P2007,SYNTHETIC_EXAMPLE
+R0031,2025-11-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,2025-11-17,P2008,SYNTHETIC_EXAMPLE
+R0032,2025-11-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,11/18/2025,P2009,SYNTHETIC_EXAMPLE
+R0033,2025-11-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0034,2025-11-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0035,2025-11-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0036,2025-11-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0037,2025-11-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Self / Family,11/11/2025,P2002,SYNTHETIC_EXAMPLE
+R0038,2025-11-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,11/12/2025,P2003,SYNTHETIC_EXAMPLE
+R0039,2025-11-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,11/13/2025,P2004,SYNTHETIC_EXAMPLE
+R0040,2025-11-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0041,2025-11-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0042,2025-11-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,2025-11-16,P2007,SYNTHETIC_EXAMPLE
+R0043,2025-11-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,11/17/2025,P2008,SYNTHETIC_EXAMPLE
+R0044,2025-11-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,11/18/2025,P2009,SYNTHETIC_EXAMPLE
+R0045,2025-11-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0046,2025-11-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0047,2025-11-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0048,2025-11-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0049,2025-11-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,County Behavioral,11-Nov-2025,P2002,SYNTHETIC_EXAMPLE
+R0050,2025-11-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,2025-11-12,P2003,SYNTHETIC_EXAMPLE
+R0051,2025-11-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,11/13/2025,P2004,SYNTHETIC_EXAMPLE
+R0052,2025-11-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0053,2025-11-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0054,2025-11-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,2025-11-16,P2007,SYNTHETIC_EXAMPLE
+R0055,2025-11-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,11/17/2025,P2008,SYNTHETIC_EXAMPLE
+R0056,2025-11-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,11/18/2025,P2009,SYNTHETIC_EXAMPLE
+R0057,2025-11-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0058,2025-11-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0059,2025-12-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0060,2025-12-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0061,2025-12-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,2025-12-11,P2002,SYNTHETIC_EXAMPLE
+R0062,2025-12-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2025-12-12,P2003,SYNTHETIC_EXAMPLE
+R0063,2025-12-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,12/13/2025,P2004,SYNTHETIC_EXAMPLE
+R0064,2025-12-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0065,2025-12-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0066,2025-12-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,12/16/2025,P2007,SYNTHETIC_EXAMPLE
+R0067,2025-12-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,12/17/2025,P2008,SYNTHETIC_EXAMPLE
+R0068,2025-12-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2025-12-18,P2009,SYNTHETIC_EXAMPLE
+R0069,2025-12-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0070,2025-12-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0071,2025-12-13 09:12:00,converted,Northside Behavioral Health,OCC,North Campus,,12/21/2025,P2012,SYNTHETIC_EXAMPLE
+R0072,2025-12-14 09:13:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,12/22/2025,P2013,SYNTHETIC_EXAMPLE
+R0073,2025-12-15 09:14:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,12/23/2025,P2014,SYNTHETIC_EXAMPLE
+R0074,2025-12-16 09:15:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0075,2025-12-17 09:16:00,open,Northside Behavioral Health,OT,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0076,2025-12-18 09:17:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2025-12-26,P2017,SYNTHETIC_EXAMPLE
+R0077,2025-12-19 09:18:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,2025-12-27,P2018,SYNTHETIC_EXAMPLE
+R0078,2025-12-20 09:19:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,28-Dec-2025,P2019,SYNTHETIC_EXAMPLE
+R0079,2025-12-21 09:20:00,open,Northside Behavioral Health,OT,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0080,2025-12-22 09:21:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0081,2025-12-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0082,2025-12-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0083,2025-12-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,11-Dec-2025,P2002,SYNTHETIC_EXAMPLE
+R0084,2025-12-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,12-Dec-2025,P2003,SYNTHETIC_EXAMPLE
+R0085,2025-12-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,13-Dec-2025,P2004,SYNTHETIC_EXAMPLE
+R0086,2025-12-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0087,2025-12-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0088,2025-12-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,12/16/2025,P2007,SYNTHETIC_EXAMPLE
+R0089,2025-12-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Dec-2025,P2008,SYNTHETIC_EXAMPLE
+R0090,2025-12-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,12/18/2025,P2009,SYNTHETIC_EXAMPLE
+R0091,2025-12-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0092,2025-12-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0093,2025-12-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0094,2025-12-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0095,2025-12-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Self / Family,11-Dec-2025,P2002,SYNTHETIC_EXAMPLE
+R0096,2025-12-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,2025-12-12,P2003,SYNTHETIC_EXAMPLE
+R0097,2025-12-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,2025-12-13,P2004,SYNTHETIC_EXAMPLE
+R0098,2025-12-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0099,2025-12-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0100,2025-12-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,16-Dec-2025,P2007,SYNTHETIC_EXAMPLE
+R0101,2025-12-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-Dec-2025,P2008,SYNTHETIC_EXAMPLE
+R0102,2025-12-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,12/18/2025,P2009,SYNTHETIC_EXAMPLE
+R0103,2025-12-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0104,2025-12-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0105,2025-12-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0106,2025-12-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0107,2025-12-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,County Behavioral,2025-12-11,P2002,SYNTHETIC_EXAMPLE
+R0108,2025-12-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,12/12/2025,P2003,SYNTHETIC_EXAMPLE
+R0109,2025-12-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,13-Dec-2025,P2004,SYNTHETIC_EXAMPLE
+R0110,2025-12-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0111,2025-12-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0112,2025-12-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,16-Dec-2025,P2007,SYNTHETIC_EXAMPLE
+R0113,2025-12-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2025-12-17,P2008,SYNTHETIC_EXAMPLE
+R0114,2025-12-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,18-Dec-2025,P2009,SYNTHETIC_EXAMPLE
+R0115,2025-12-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0116,2025-12-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0117,2026-01-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0118,2026-01-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0119,2026-01-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,2026-01-11,P2002,SYNTHETIC_EXAMPLE
+R0120,2026-01-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,01/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0121,2026-01-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,13-Jan-2026,P2004,SYNTHETIC_EXAMPLE
+R0122,2026-01-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0123,2026-01-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0124,2026-01-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2026-01-16,P2007,SYNTHETIC_EXAMPLE
+R0125,2026-01-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,01/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0126,2026-01-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2026-01-18,P2009,SYNTHETIC_EXAMPLE
+R0127,2026-01-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0128,2026-01-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0129,2026-01-13 09:12:00,converted,Northside Behavioral Health,OT,North Campus,,21-Jan-2026,P2012,SYNTHETIC_EXAMPLE
+R0130,2026-01-14 09:13:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,22-Jan-2026,P2013,SYNTHETIC_EXAMPLE
+R0131,2026-01-15 09:14:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,01/23/2026,P2014,SYNTHETIC_EXAMPLE
+R0132,2026-01-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0133,2026-01-17 09:16:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0134,2026-01-18 09:17:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2026-01-26,P2017,SYNTHETIC_EXAMPLE
+R0135,2026-01-19 09:18:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,27-Jan-2026,P2018,SYNTHETIC_EXAMPLE
+R0136,2026-01-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,01/28/2026,P2019,SYNTHETIC_EXAMPLE
+R0137,2026-01-21 09:20:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0138,2026-01-22 09:21:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0139,2026-01-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0140,2026-01-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0141,2026-01-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Northside Primary Care,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE
+R0142,2026-01-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,01/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0143,2026-01-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,2026-01-13,P2004,SYNTHETIC_EXAMPLE
+R0144,2026-01-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0145,2026-01-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0146,2026-01-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,01/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0147,2026-01-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-Jan-2026,P2008,SYNTHETIC_EXAMPLE
+R0148,2026-01-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2026-01-18,P2009,SYNTHETIC_EXAMPLE
+R0149,2026-01-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0150,2026-01-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0151,2026-01-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0152,2026-01-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0153,2026-01-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Self / Family,11-Jan-2026,P2002,SYNTHETIC_EXAMPLE
+R0154,2026-01-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-01-12,P2003,SYNTHETIC_EXAMPLE
+R0155,2026-01-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,01/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0156,2026-01-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0157,2026-01-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0158,2026-01-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,16-Jan-2026,P2007,SYNTHETIC_EXAMPLE
+R0159,2026-01-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,01/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0160,2026-01-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,01/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0161,2026-01-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0162,2026-01-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0163,2026-01-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0164,2026-01-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0165,2026-01-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,County Behavioral,2026-01-11,P2002,SYNTHETIC_EXAMPLE
+R0166,2026-01-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,2026-01-12,P2003,SYNTHETIC_EXAMPLE
+R0167,2026-01-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,13-Jan-2026,P2004,SYNTHETIC_EXAMPLE
+R0168,2026-01-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0169,2026-01-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0170,2026-01-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,2026-01-16,P2007,SYNTHETIC_EXAMPLE
+R0171,2026-01-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,01/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0172,2026-01-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,01/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0173,2026-01-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0174,2026-01-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0175,2026-02-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0176,2026-02-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0177,2026-02-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,2026-02-11,P2002,SYNTHETIC_EXAMPLE
+R0178,2026-02-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,02/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0179,2026-02-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,2026-02-13,P2004,SYNTHETIC_EXAMPLE
+R0180,2026-02-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0181,2026-02-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0182,2026-02-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,02/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0183,2026-02-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-02-17,P2008,SYNTHETIC_EXAMPLE
+R0184,2026-02-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,18-Feb-2026,P2009,SYNTHETIC_EXAMPLE
+R0185,2026-02-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0186,2026-02-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0187,2026-02-13 09:12:00,converted,Northside Behavioral Health,OCC,North Campus,,2026-02-21,P2012,SYNTHETIC_EXAMPLE
+R0188,2026-02-14 09:13:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,02/22/2026,P2013,SYNTHETIC_EXAMPLE
+R0189,2026-02-15 09:14:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,23-Feb-2026,P2014,SYNTHETIC_EXAMPLE
+R0190,2026-02-16 09:15:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0191,2026-02-17 09:16:00,open,Northside Behavioral Health,OCC,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0192,2026-02-18 09:17:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2026-02-26,P2017,SYNTHETIC_EXAMPLE
+R0193,2026-02-19 09:18:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,02/27/2026,P2018,SYNTHETIC_EXAMPLE
+R0194,2026-02-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,28-Feb-2026,P2019,SYNTHETIC_EXAMPLE
+R0195,2026-02-21 09:20:00,open,Northside Behavioral Health,OT,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0196,2026-02-22 09:21:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0197,2026-02-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0198,2026-02-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0199,2026-02-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Northside Primary Care,11-Feb-2026,P2002,SYNTHETIC_EXAMPLE
+R0200,2026-02-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,12-Feb-2026,P2003,SYNTHETIC_EXAMPLE
+R0201,2026-02-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,02/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0202,2026-02-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0203,2026-02-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0204,2026-02-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,16-Feb-2026,P2007,SYNTHETIC_EXAMPLE
+R0205,2026-02-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Feb-2026,P2008,SYNTHETIC_EXAMPLE
+R0206,2026-02-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,02/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0207,2026-02-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0208,2026-02-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0209,2026-02-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0210,2026-02-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0211,2026-02-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Self / Family,11-Feb-2026,P2002,SYNTHETIC_EXAMPLE
+R0212,2026-02-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,12-Feb-2026,P2003,SYNTHETIC_EXAMPLE
+R0213,2026-02-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,02/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0214,2026-02-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0215,2026-02-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0216,2026-02-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,16-Feb-2026,P2007,SYNTHETIC_EXAMPLE
+R0217,2026-02-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,17-Feb-2026,P2008,SYNTHETIC_EXAMPLE
+R0218,2026-02-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,02/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0219,2026-02-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0220,2026-02-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0221,2026-02-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0222,2026-02-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0223,2026-02-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,County Behavioral,02/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0224,2026-02-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,12-Feb-2026,P2003,SYNTHETIC_EXAMPLE
+R0225,2026-02-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,13-Feb-2026,P2004,SYNTHETIC_EXAMPLE
+R0226,2026-02-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0227,2026-02-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0228,2026-02-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,2026-02-16,P2007,SYNTHETIC_EXAMPLE
+R0229,2026-02-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-02-17,P2008,SYNTHETIC_EXAMPLE
+R0230,2026-02-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,18-Feb-2026,P2009,SYNTHETIC_EXAMPLE
+R0231,2026-02-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0232,2026-02-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0233,2026-03-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0234,2026-03-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0235,2026-03-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,2026-03-11,P2002,SYNTHETIC_EXAMPLE
+R0236,2026-03-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-03-12,P2003,SYNTHETIC_EXAMPLE
+R0237,2026-03-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-03-13,P2004,SYNTHETIC_EXAMPLE
+R0238,2026-03-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0239,2026-03-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0240,2026-03-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2026-03-16,P2007,SYNTHETIC_EXAMPLE
+R0241,2026-03-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-Mar-2026,P2008,SYNTHETIC_EXAMPLE
+R0242,2026-03-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,18-Mar-2026,P2009,SYNTHETIC_EXAMPLE
+R0243,2026-03-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0244,2026-03-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0245,2026-03-13 09:12:00,converted,Northside Behavioral Health,OT,North Campus,,03/21/2026,P2012,SYNTHETIC_EXAMPLE
+R0246,2026-03-14 09:13:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-03-22,P2013,SYNTHETIC_EXAMPLE
+R0247,2026-03-15 09:14:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,2026-03-23,P2014,SYNTHETIC_EXAMPLE
+R0248,2026-03-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0249,2026-03-17 09:16:00,open,Northside Behavioral Health,OCC,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0250,2026-03-18 09:17:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-03-26,P2017,SYNTHETIC_EXAMPLE
+R0251,2026-03-19 09:18:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,27-Mar-2026,P2018,SYNTHETIC_EXAMPLE
+R0252,2026-03-20 09:19:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2026-03-28,P2019,SYNTHETIC_EXAMPLE
+R0253,2026-03-21 09:20:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0254,2026-03-22 09:21:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0255,2026-03-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0256,2026-03-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0257,2026-03-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,11-Mar-2026,P2002,SYNTHETIC_EXAMPLE
+R0258,2026-03-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2026-03-12,P2003,SYNTHETIC_EXAMPLE
+R0259,2026-03-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,03/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0260,2026-03-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0261,2026-03-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0262,2026-03-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2026-03-16,P2007,SYNTHETIC_EXAMPLE
+R0263,2026-03-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,2026-03-17,P2008,SYNTHETIC_EXAMPLE
+R0264,2026-03-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,18-Mar-2026,P2009,SYNTHETIC_EXAMPLE
+R0265,2026-03-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0266,2026-03-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0267,2026-03-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0268,2026-03-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0269,2026-03-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Self / Family,2026-03-11,P2002,SYNTHETIC_EXAMPLE
+R0270,2026-03-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,2026-03-12,P2003,SYNTHETIC_EXAMPLE
+R0271,2026-03-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,03/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0272,2026-03-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0273,2026-03-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0274,2026-03-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,03/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0275,2026-03-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Mar-2026,P2008,SYNTHETIC_EXAMPLE
+R0276,2026-03-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,03/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0277,2026-03-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0278,2026-03-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0279,2026-03-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0280,2026-03-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0281,2026-03-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,County Behavioral,2026-03-11,P2002,SYNTHETIC_EXAMPLE
+R0282,2026-03-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,03/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0283,2026-03-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-03-13,P2004,SYNTHETIC_EXAMPLE
+R0284,2026-03-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0285,2026-03-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0286,2026-03-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,2026-03-16,P2007,SYNTHETIC_EXAMPLE
+R0287,2026-03-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,03/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0288,2026-03-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,18-Mar-2026,P2009,SYNTHETIC_EXAMPLE
+R0289,2026-03-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0290,2026-03-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0291,2026-04-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0292,2026-04-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0293,2026-04-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,2026-04-11,P2002,SYNTHETIC_EXAMPLE
+R0294,2026-04-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,12-Apr-2026,P2003,SYNTHETIC_EXAMPLE
+R0295,2026-04-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,04/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0296,2026-04-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0297,2026-04-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0298,2026-04-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,04/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0299,2026-04-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,17-Apr-2026,P2008,SYNTHETIC_EXAMPLE
+R0300,2026-04-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE
+R0301,2026-04-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0302,2026-04-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0303,2026-04-13 09:12:00,converted,Northside Behavioral Health,Occupational,North Campus,,21-Apr-2026,P2012,SYNTHETIC_EXAMPLE
+R0304,2026-04-14 09:13:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,04/22/2026,P2013,SYNTHETIC_EXAMPLE
+R0305,2026-04-15 09:14:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,23-Apr-2026,P2014,SYNTHETIC_EXAMPLE
+R0306,2026-04-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0307,2026-04-17 09:16:00,open,Northside Behavioral Health,OT,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0308,2026-04-18 09:17:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2026-04-26,P2017,SYNTHETIC_EXAMPLE
+R0309,2026-04-19 09:18:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,27-Apr-2026,P2018,SYNTHETIC_EXAMPLE
+R0310,2026-04-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,04/28/2026,P2019,SYNTHETIC_EXAMPLE
+R0311,2026-04-21 09:20:00,open,Northside Behavioral Health,OT,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0312,2026-04-22 09:21:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0313,2026-04-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0314,2026-04-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0315,2026-04-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,11-Apr-2026,P2002,SYNTHETIC_EXAMPLE
+R0316,2026-04-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,04/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0317,2026-04-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,13-Apr-2026,P2004,SYNTHETIC_EXAMPLE
+R0318,2026-04-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0319,2026-04-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0320,2026-04-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,04/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0321,2026-04-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-04-17,P2008,SYNTHETIC_EXAMPLE
+R0322,2026-04-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,04/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0323,2026-04-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0324,2026-04-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0325,2026-04-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0326,2026-04-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0327,2026-04-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,Self / Family,2026-04-11,P2002,SYNTHETIC_EXAMPLE
+R0328,2026-04-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-04-12,P2003,SYNTHETIC_EXAMPLE
+R0329,2026-04-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,04/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0330,2026-04-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0331,2026-04-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0332,2026-04-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-04-16,P2007,SYNTHETIC_EXAMPLE
+R0333,2026-04-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-04-17,P2008,SYNTHETIC_EXAMPLE
+R0334,2026-04-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE
+R0335,2026-04-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0336,2026-04-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0337,2026-04-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0338,2026-04-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0339,2026-04-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,County Behavioral,2026-04-11,P2002,SYNTHETIC_EXAMPLE
+R0340,2026-04-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,2026-04-12,P2003,SYNTHETIC_EXAMPLE
+R0341,2026-04-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,13-Apr-2026,P2004,SYNTHETIC_EXAMPLE
+R0342,2026-04-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0343,2026-04-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0344,2026-04-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,16-Apr-2026,P2007,SYNTHETIC_EXAMPLE
+R0345,2026-04-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,17-Apr-2026,P2008,SYNTHETIC_EXAMPLE
+R0346,2026-04-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,18-Apr-2026,P2009,SYNTHETIC_EXAMPLE
+R0347,2026-04-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0348,2026-04-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0349,2026-05-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0350,2026-05-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0351,2026-05-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,05/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0352,2026-05-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2026-05-12,P2003,SYNTHETIC_EXAMPLE
+R0353,2026-05-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-05-13,P2004,SYNTHETIC_EXAMPLE
+R0354,2026-05-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0355,2026-05-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0356,2026-05-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,16-May-2026,P2007,SYNTHETIC_EXAMPLE
+R0357,2026-05-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,05/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0358,2026-05-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,18-May-2026,P2009,SYNTHETIC_EXAMPLE
+R0359,2026-05-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0360,2026-05-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0361,2026-05-13 09:12:00,converted,Northside Behavioral Health,Occupational,North Campus,,05/21/2026,P2012,SYNTHETIC_EXAMPLE
+R0362,2026-05-14 09:13:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,05/22/2026,P2013,SYNTHETIC_EXAMPLE
+R0363,2026-05-15 09:14:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,05/23/2026,P2014,SYNTHETIC_EXAMPLE
+R0364,2026-05-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0365,2026-05-17 09:16:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0366,2026-05-18 09:17:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,05/26/2026,P2017,SYNTHETIC_EXAMPLE
+R0367,2026-05-19 09:18:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,2026-05-27,P2018,SYNTHETIC_EXAMPLE
+R0368,2026-05-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,2026-05-28,P2019,SYNTHETIC_EXAMPLE
+R0369,2026-05-21 09:20:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0370,2026-05-22 09:21:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0371,2026-05-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0372,2026-05-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0373,2026-05-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,11-May-2026,P2002,SYNTHETIC_EXAMPLE
+R0374,2026-05-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,05/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0375,2026-05-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,13-May-2026,P2004,SYNTHETIC_EXAMPLE
+R0376,2026-05-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0377,2026-05-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0378,2026-05-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,05/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0379,2026-05-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,05/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0380,2026-05-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2026-05-18,P2009,SYNTHETIC_EXAMPLE
+R0381,2026-05-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0382,2026-05-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0383,2026-05-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0384,2026-05-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0385,2026-05-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Self / Family,2026-05-11,P2002,SYNTHETIC_EXAMPLE
+R0386,2026-05-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,05/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0387,2026-05-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,05/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0388,2026-05-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0389,2026-05-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0390,2026-05-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,05/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0391,2026-05-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-May-2026,P2008,SYNTHETIC_EXAMPLE
+R0392,2026-05-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-05-18,P2009,SYNTHETIC_EXAMPLE
+R0393,2026-05-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0394,2026-05-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0395,2026-05-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0396,2026-05-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0397,2026-05-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,County Behavioral,05/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0398,2026-05-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,05/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0399,2026-05-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,05/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0400,2026-05-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0401,2026-05-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0402,2026-05-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,16-May-2026,P2007,SYNTHETIC_EXAMPLE
+R0403,2026-05-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,05/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0404,2026-05-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,18-May-2026,P2009,SYNTHETIC_EXAMPLE
+R0405,2026-05-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0406,2026-05-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0407,2026-06-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0408,2026-06-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0409,2026-06-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,2026-06-11,P2002,SYNTHETIC_EXAMPLE
+R0410,2026-06-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,06/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0411,2026-06-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,06/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0412,2026-06-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0413,2026-06-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0414,2026-06-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,16-Jun-2026,P2007,SYNTHETIC_EXAMPLE
+R0415,2026-06-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,06/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0416,2026-06-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-06-18,P2009,SYNTHETIC_EXAMPLE
+R0417,2026-06-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0418,2026-06-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0419,2026-06-13 09:12:00,converted,Northside Behavioral Health,Occupational,North Campus,,21-Jun-2026,P2012,SYNTHETIC_EXAMPLE
+R0420,2026-06-14 09:13:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-06-22,P2013,SYNTHETIC_EXAMPLE
+R0421,2026-06-15 09:14:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,23-Jun-2026,P2014,SYNTHETIC_EXAMPLE
+R0422,2026-06-16 09:15:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0423,2026-06-17 09:16:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0424,2026-06-18 09:17:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-06-26,P2017,SYNTHETIC_EXAMPLE
+R0425,2026-06-19 09:18:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,06/27/2026,P2018,SYNTHETIC_EXAMPLE
+R0426,2026-06-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,28-Jun-2026,P2019,SYNTHETIC_EXAMPLE
+R0427,2026-06-21 09:20:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2020,SYNTHETIC_EXAMPLE
+R0428,2026-06-22 09:21:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2021,SYNTHETIC_EXAMPLE
+R0429,2026-06-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0430,2026-06-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0431,2026-06-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Northside Primary Care,06/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0432,2026-06-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,2026-06-12,P2003,SYNTHETIC_EXAMPLE
+R0433,2026-06-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,13-Jun-2026,P2004,SYNTHETIC_EXAMPLE
+R0434,2026-06-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0435,2026-06-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0436,2026-06-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,2026-06-16,P2007,SYNTHETIC_EXAMPLE
+R0437,2026-06-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,06/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0438,2026-06-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,06/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0439,2026-06-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0440,2026-06-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0441,2026-06-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0442,2026-06-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0443,2026-06-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,Self / Family,06/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0444,2026-06-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,2026-06-12,P2003,SYNTHETIC_EXAMPLE
+R0445,2026-06-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,2026-06-13,P2004,SYNTHETIC_EXAMPLE
+R0446,2026-06-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0447,2026-06-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0448,2026-06-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-06-16,P2007,SYNTHETIC_EXAMPLE
+R0449,2026-06-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,17-Jun-2026,P2008,SYNTHETIC_EXAMPLE
+R0450,2026-06-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,06/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0451,2026-06-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0452,2026-06-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0453,2026-06-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0454,2026-06-02 09:01:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0455,2026-06-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,County Behavioral,11-Jun-2026,P2002,SYNTHETIC_EXAMPLE
+R0456,2026-06-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,2026-06-12,P2003,SYNTHETIC_EXAMPLE
+R0457,2026-06-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,2026-06-13,P2004,SYNTHETIC_EXAMPLE
+R0458,2026-06-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0459,2026-06-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0460,2026-06-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,16-Jun-2026,P2007,SYNTHETIC_EXAMPLE
+R0461,2026-06-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Jun-2026,P2008,SYNTHETIC_EXAMPLE
+R0462,2026-06-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,06/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0463,2026-06-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0464,2026-06-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0465,2026-07-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0466,2026-07-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0467,2026-07-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,11-Jul-2026,P2002,SYNTHETIC_EXAMPLE
+R0468,2026-07-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,12-Jul-2026,P2003,SYNTHETIC_EXAMPLE
+R0469,2026-07-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,07/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0470,2026-07-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0471,2026-07-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0472,2026-07-08 09:07:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,2026-07-16,P2007,SYNTHETIC_EXAMPLE
+R0473,2026-07-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,07/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0474,2026-07-10 09:09:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE
+R0475,2026-07-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,,P2010,SYNTHETIC_EXAMPLE
+R0476,2026-07-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,City EAP Partners,,P2011,SYNTHETIC_EXAMPLE
+R0477,2026-07-13 09:12:00,converted,Northside Behavioral Health,OT,North Campus,,21-Jul-2026,P2012,SYNTHETIC_EXAMPLE
+R0478,2026-07-14 09:13:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,2026-07-22,P2013,SYNTHETIC_EXAMPLE
+R0479,2026-07-15 09:14:00,converted,Northside Behavioral Health,Occupational,North Campus,City EAP Partners,23-Jul-2026,P2014,SYNTHETIC_EXAMPLE
+R0480,2026-07-16 09:15:00,open,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,,P2015,SYNTHETIC_EXAMPLE
+R0481,2026-07-17 09:16:00,open,Northside Behavioral Health,OT,North Campus,,,P2016,SYNTHETIC_EXAMPLE
+R0482,2026-07-18 09:17:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,07/26/2026,P2017,SYNTHETIC_EXAMPLE
+R0483,2026-07-19 09:18:00,converted,Northside Behavioral Health,OCC,North Campus,City EAP Partners,2026-07-27,P2018,SYNTHETIC_EXAMPLE
+R0484,2026-07-20 09:19:00,converted,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,28-Jul-2026,P2019,SYNTHETIC_EXAMPLE
+R0485,2026-07-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0486,2026-07-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0487,2026-07-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,11-Jul-2026,P2002,SYNTHETIC_EXAMPLE
+R0488,2026-07-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,2026-07-12,P2003,SYNTHETIC_EXAMPLE
+R0489,2026-07-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,07/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0490,2026-07-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0491,2026-07-07 09:06:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0492,2026-07-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,07/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0493,2026-07-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Jul-2026,P2008,SYNTHETIC_EXAMPLE
+R0494,2026-07-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,18-Jul-2026,P2009,SYNTHETIC_EXAMPLE
+R0495,2026-07-11 09:10:00,open,Northside Behavioral Health,Occupational,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0496,2026-07-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0497,2026-07-01 09:00:00,open,Northside Behavioral Health,Occupational,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0498,2026-07-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0499,2026-07-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,Self / Family,07/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0500,2026-07-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,07/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0501,2026-07-05 09:04:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-07-13,P2004,SYNTHETIC_EXAMPLE
+R0502,2026-07-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0503,2026-07-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0504,2026-07-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,07/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0505,2026-07-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,17-Jul-2026,P2008,SYNTHETIC_EXAMPLE
+R0506,2026-07-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,07/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0507,2026-07-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0508,2026-07-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0509,2026-07-01 09:00:00,open,Northside Behavioral Health,OT,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0510,2026-07-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0511,2026-07-03 09:02:00,converted,Northside Behavioral Health,Occupational,North Campus,County Behavioral,11-Jul-2026,P2002,SYNTHETIC_EXAMPLE
+R0512,2026-07-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,12-Jul-2026,P2003,SYNTHETIC_EXAMPLE
+R0513,2026-07-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,07/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0514,2026-07-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0515,2026-07-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0516,2026-07-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,2026-07-16,P2007,SYNTHETIC_EXAMPLE
+R0517,2026-07-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,07/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0518,2026-07-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,2026-07-18,P2009,SYNTHETIC_EXAMPLE
+R0519,2026-07-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0520,2026-07-12 09:11:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
+R0521,2026-08-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0522,2026-08-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2001,SYNTHETIC_EXAMPLE
+R0523,2026-08-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,City EAP Partners,08/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0524,2026-08-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,12-Aug-2026,P2003,SYNTHETIC_EXAMPLE
+R0525,2026-08-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,2026-08-13,P2004,SYNTHETIC_EXAMPLE
+R0526,2026-08-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,City EAP Partners,,P2005,SYNTHETIC_EXAMPLE
+R0527,2026-08-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,City EAP Partners,,P2006,SYNTHETIC_EXAMPLE
+R0528,2026-08-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,City EAP Partners,08/16/2026,P2007,SYNTHETIC_EXAMPLE
+R0529,2026-08-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0530,2026-08-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,Northside Primary Care,,P2001,SYNTHETIC_EXAMPLE
+R0531,2026-08-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Northside Primary Care,08/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0532,2026-08-04 09:03:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,08/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0533,2026-08-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,08/13/2026,P2004,SYNTHETIC_EXAMPLE
+R0534,2026-08-06 09:05:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,,P2005,SYNTHETIC_EXAMPLE
+R0535,2026-08-07 09:06:00,open,Northside Behavioral Health,OT,North Campus,Northside Primary Care,,P2006,SYNTHETIC_EXAMPLE
+R0536,2026-08-08 09:07:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Northside Primary Care,2026-08-16,P2007,SYNTHETIC_EXAMPLE
+R0537,2026-08-09 09:08:00,converted,Northside Behavioral Health,Occupational,North Campus,,2026-08-17,P2008,SYNTHETIC_EXAMPLE
+R0538,2026-08-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,08/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0539,2026-08-11 09:10:00,open,Northside Behavioral Health,OCC,North Campus,Northside Primary Care,,P2010,SYNTHETIC_EXAMPLE
+R0540,2026-08-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Northside Primary Care,,P2011,SYNTHETIC_EXAMPLE
+R0541,2026-08-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0542,2026-08-02 09:01:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,,P2001,SYNTHETIC_EXAMPLE
+R0543,2026-08-03 09:02:00,converted,Northside Behavioral Health,OT,North Campus,Self / Family,08/11/2026,P2002,SYNTHETIC_EXAMPLE
+R0544,2026-08-04 09:03:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,Self / Family,12-Aug-2026,P2003,SYNTHETIC_EXAMPLE
+R0545,2026-08-05 09:04:00,converted,Northside Behavioral Health,OCC,North Campus,,2026-08-13,P2004,SYNTHETIC_EXAMPLE
+R0546,2026-08-06 09:05:00,open,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,,P2005,SYNTHETIC_EXAMPLE
+R0547,2026-08-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,Self / Family,,P2006,SYNTHETIC_EXAMPLE
+R0548,2026-08-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,Self / Family,2026-08-16,P2007,SYNTHETIC_EXAMPLE
+R0549,2026-08-09 09:08:00,converted,Northside Behavioral Health,OT,North Campus,,08/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0550,2026-08-10 09:09:00,converted,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,2026-08-18,P2009,SYNTHETIC_EXAMPLE
+R0551,2026-08-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,Self / Family,,P2010,SYNTHETIC_EXAMPLE
+R0552,2026-08-12 09:11:00,open,Northside Behavioral Health,OCC,Telehealth Hub,Self / Family,,P2011,SYNTHETIC_EXAMPLE
+R0553,2026-08-01 09:00:00,open,Northside Behavioral Health,OCC,North Campus,,,P2000,SYNTHETIC_EXAMPLE
+R0554,2026-08-02 09:01:00,open,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,,P2001,SYNTHETIC_EXAMPLE
+R0555,2026-08-03 09:02:00,converted,Northside Behavioral Health,OCC,North Campus,County Behavioral,2026-08-11,P2002,SYNTHETIC_EXAMPLE
+R0556,2026-08-04 09:03:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,08/12/2026,P2003,SYNTHETIC_EXAMPLE
+R0557,2026-08-05 09:04:00,converted,Northside Behavioral Health,OT,North Campus,,13-Aug-2026,P2004,SYNTHETIC_EXAMPLE
+R0558,2026-08-06 09:05:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2005,SYNTHETIC_EXAMPLE
+R0559,2026-08-07 09:06:00,open,Northside Behavioral Health,OCC,North Campus,County Behavioral,,P2006,SYNTHETIC_EXAMPLE
+R0560,2026-08-08 09:07:00,converted,Northside Behavioral Health,OT,Telehealth Hub,County Behavioral,2026-08-16,P2007,SYNTHETIC_EXAMPLE
+R0561,2026-08-09 09:08:00,converted,Northside Behavioral Health,OCC,North Campus,,08/17/2026,P2008,SYNTHETIC_EXAMPLE
+R0562,2026-08-10 09:09:00,converted,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,08/18/2026,P2009,SYNTHETIC_EXAMPLE
+R0563,2026-08-11 09:10:00,open,Northside Behavioral Health,OT,North Campus,County Behavioral,,P2010,SYNTHETIC_EXAMPLE
+R0564,2026-08-12 09:11:00,open,Northside Behavioral Health,Occupational,Telehealth Hub,County Behavioral,,P2011,SYNTHETIC_EXAMPLE
