@@ -43,6 +43,43 @@ from analyst.tools import TOOL_SCHEMAS, dump_tool_result, run_tool
 EMPTY_WAREHOUSE = "No visits loaded yet — run synthetic demo or upload files"
 
 
+def synthesize_tool_answer(evidence: dict[str, Any], tools_called: list[str]) -> str:
+    """Grounded fallback when the model called tools but returned no prose."""
+    payloads = [p for p in evidence.values() if isinstance(p, dict)]
+    for payload in payloads:
+        url = payload.get("url")
+        if isinstance(url, str) and url.startswith("/api/exports/"):
+            n = payload.get("row_count")
+            cols = payload.get("columns") or []
+            extra = f" ({', '.join(str(c) for c in cols)})" if cols else ""
+            return f"Here's your file: {url} {n} rows{extra}."
+    for payload in payloads:
+        if payload.get("name") == "completes_by_provider":
+            if payload.get("unavailable"):
+                return str(payload["unavailable"])
+            rows = payload.get("value") or []
+            if not rows:
+                return "No Completes by clinician in that closed-month window."
+            top = rows[0]
+            name = top.get("provider_name") or "clinician (name not in this dump)"
+            n = top.get("completes")
+            months = (payload.get("details") or {}).get("months") or 1
+            return (
+                f"{name}, {n} Completes. "
+                f"Completes by provider for the last {months} closed month(s) are in this dump."
+            )
+        if payload.get("unavailable"):
+            return str(payload["unavailable"])
+        if payload.get("error"):
+            return str(payload["error"])
+        rows = payload.get("rows")
+        if isinstance(rows, list) and rows:
+            return "The warehouse returned rows. Ask again if you want them exported as a file."
+    if tools_called:
+        return "The warehouse tools ran but returned no rows."
+    return "No answer came back. Ask again."
+
+
 def _pct(value: float | None) -> str:
     if value is None:
         return "n/a (insufficient denominator)"
@@ -167,7 +204,7 @@ class Analyst:
             final = (msg.get("content") or "").strip()
             break
         if not final:
-            final = "The warehouse tools returned no prose. Ask again, or the data is not in the dump."
+            final = synthesize_tool_answer(evidence, tools_called)
         return {
             "banner": PRODUCT_BANNER,
             "tenant_id": self.tenant_id,
@@ -216,7 +253,7 @@ class Analyst:
         q = question.lower()
         if re.search(r"payroll|profitab", q):
             return self._payroll, "therapist_profit"
-        if re.search(r"\b(export|download|csv)\b", q) and "sample" not in q:
+        if re.search(r"\b(export|download|csv|xlsx|excel|spreadsheet)\b", q) and "sample" not in q:
             return self._export, "export_csv"
         if re.search(r"caseload|fill a caseload|new clinician", q):
             return self._caseload, "caseload_fill"
@@ -416,7 +453,14 @@ class Analyst:
         from analyst.tools import rows_for_export
 
         q = question.lower()
-        if re.search(r"complete|therapist|clinician|productiv", q):
+        fmt = "xlsx" if re.search(r"excel|xlsx|spreadsheet", q) else "csv"
+        months = 1
+        m = re.search(r"(?:last|past|over the last)\s+(\d+)\s+months?", q) or re.search(
+            r"(\d+)\s+months?", q
+        )
+        if m:
+            months = max(1, min(int(m.group(1)), 24))
+        if re.search(r"complete|closed appointment|therapist|clinician|provider|productiv", q):
             source = "completes_by_provider"
         elif re.search(r"\bar\b|past 30|aging", q):
             source = "ar_past_30_days"
@@ -428,14 +472,21 @@ class Analyst:
                 "evidence": {},
             }
         rows, columns, filename = rows_for_export(
-            source, warehouse=self.warehouse, as_of=self.as_of, company=self.company
+            source,
+            warehouse=self.warehouse,
+            as_of=self.as_of,
+            company=self.company,
+            months=months,
         )
         if not rows:
             return {"answer": "No rows to export for that list.", "evidence": {"source": source}}
-        written = write_export(self.tenant_id, rows=rows, columns=columns, filename=filename)
+        written = write_export(
+            self.tenant_id, rows=rows, columns=columns, filename=filename, fmt=fmt
+        )
+        grain = f"last {months} closed month(s)" if source == "completes_by_provider" else "this dump"
         answer = (
-            f"CSV ready: {written['row_count']} rows. "
-            f"Download {written['url']}"
+            f"Here's your file: {written['url']} {written['row_count']} rows "
+            f"({', '.join(written.get('columns') or columns)}; {grain})."
         )
         return {"answer": answer, "evidence": written}
 

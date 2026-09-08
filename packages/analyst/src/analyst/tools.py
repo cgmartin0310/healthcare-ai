@@ -54,7 +54,7 @@ Locked metric definitions (do not redefine; do not invent a lookalike):
 - Days to pay = DATEDIFF(day, ApptDate, FirstInsPayment) on Completes with InsPaid>0, exclude negatives, min 20 claims.
 - When CLAIM_TXN (claim ledger: charges / payments / allowances / adjustments / refunds) is present, derive TotalPaid / InsPaid / InsBalance / FirstInsPayment from it. Else appointment rollups. If neither, say the data is not in the dump. There is no separate CHARGES table.
 - Headcount = unique ProviderId (fallback ProviderName) with ≥1 Complete in last closed month.
-- Completes by clinician = last closed month Completes (AppointmentStatus='Complete') ranked by clinician. Display ProviderName. ProviderId is a join key only. Not payroll.
+- Completes by clinician = Completes (AppointmentStatus='Complete') ranked by clinician over the last N closed months (default 1). Display ProviderName. ProviderId is a join key only. Not payroll.
 - Payroll is not a PREP object. Do not invent profitability.
 """.strip()
 
@@ -165,8 +165,18 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "completes_by_provider",
-            "description": "Last closed month Completes per clinician, ranked. Use for most productive / most Completes / busiest therapist. Display provider_name. Not payroll.",
-            "parameters": {"type": "object", "properties": {"company": _COMPANY_PARAM}},
+            "description": (
+                "Completes (AppointmentStatus='Complete') per clinician, ranked. "
+                "Use for most productive / most Completes / busiest therapist / closed appointments by provider. "
+                "Display provider_name. months = last N closed months (default 1). Not payroll."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "company": _COMPANY_PARAM,
+                    "months": {"type": "integer", "description": "Closed-month window, default 1"},
+                },
+            },
         },
     },
     {
@@ -192,8 +202,8 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
             "description": (
                 "Write a tenant-scoped CSV of query/tool results and return a download URL. "
                 "Use after completes_by_provider, ar_past_30_days, or referrals when the user "
-                "asks to download/export a list. Pass rows from a prior tool, or a safe SELECT. "
-                "No patient names/addresses. Display ProviderName, not hashed ids as the name."
+                "asks to download/export a CSV. For Excel/xlsx/spreadsheet, use export_table "
+                "with format=xlsx. No patient names/addresses. Display ProviderName."
             ),
             "parameters": {
                 "type": "object",
@@ -206,6 +216,35 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
                     "rows": {"type": "array", "description": "List of objects to write when source=rows"},
                     "columns": {"type": "array", "items": {"type": "string"}},
                     "sql": {"type": "string", "description": "Read-only SELECT when source=sql"},
+                    "months": {"type": "integer", "description": "Closed-month window when source is a locked metric"},
+                    "company": _COMPANY_PARAM,
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "export_table",
+            "description": (
+                "Write a tenant-scoped CSV or Excel (.xlsx) of query/tool results and return a "
+                "download URL. Use format=xlsx when they ask for excel/xlsx/spreadsheet. "
+                "Pass source=completes_by_provider and months=N for Completes by clinician. "
+                "Always follow with a short prose reply that includes the raw url."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {"type": "string", "description": "Short file label"},
+                    "format": {"type": "string", "description": "csv or xlsx"},
+                    "source": {
+                        "type": "string",
+                        "description": "completes_by_provider | ar_past_30_days | referrals | rows | sql",
+                    },
+                    "rows": {"type": "array", "description": "List of objects when source=rows"},
+                    "columns": {"type": "array", "items": {"type": "string"}},
+                    "sql": {"type": "string"},
+                    "months": {"type": "integer", "description": "Closed-month window for completes_by_provider"},
                     "company": _COMPANY_PARAM,
                 },
             },
@@ -296,11 +335,12 @@ def rows_for_export(
     warehouse: Warehouse,
     as_of,
     company: str | None,
+    months: int = 1,
 ) -> tuple[list[dict[str, Any]], list[str], str]:
-    """Build CSV rows from a locked metric. No invented numbers."""
+    """Build export rows from a locked metric. No invented numbers."""
     src = (source or "").strip().lower()
     if src in {"completes_by_provider", "completes", "therapist", "clinician"}:
-        result = completes_by_provider(warehouse, as_of, company=company)
+        result = completes_by_provider(warehouse, as_of, company=company, months=months)
         rows = []
         for rec in result.value or []:
             rows.append(
@@ -379,20 +419,25 @@ def run_tool(
         if name == "headcount":
             return headcount(warehouse, as_of, company=args.get("company")).to_dict(), ""
         if name == "completes_by_provider":
-            return completes_by_provider(warehouse, as_of, company=args.get("company")).to_dict(), ""
+            months = int(args.get("months") or 1)
+            return completes_by_provider(
+                warehouse, as_of, company=args.get("company"), months=months
+            ).to_dict(), ""
         if name == "snapshot":
             return snapshot(warehouse, as_of, company=args.get("company")), ""
         if name == "alerts":
             return alerts_fn(), ""
         if name == "warehouse_select":
             return warehouse_select(warehouse, str(args.get("sql") or "")), ""
-        if name == "export_csv":
+        if name in {"export_csv", "export_table"}:
             from analyst.exports import EXPORT_ROW_CAP, write_export
 
             if not tenant_id:
-                return {"error": "export_csv requires a tenant."}, "export_csv requires a tenant."
+                return {"error": f"{name} requires a tenant."}, f"{name} requires a tenant."
             source = str(args.get("source") or "rows")
             filename = str(args.get("filename") or source or "export")
+            fmt = str(args.get("format") or ("csv" if name == "export_csv" else "xlsx"))
+            months = int(args.get("months") or 1)
             rows: list[dict[str, Any]] = []
             columns = [str(c) for c in (args.get("columns") or [])]
             if source == "sql" or args.get("sql"):
@@ -407,7 +452,11 @@ def run_tool(
                 rows = [r for r in raw_rows if isinstance(r, dict)]
             else:
                 rows, default_cols, default_name = rows_for_export(
-                    source, warehouse=warehouse, as_of=as_of, company=args.get("company")
+                    source,
+                    warehouse=warehouse,
+                    as_of=as_of,
+                    company=args.get("company"),
+                    months=months,
                 )
                 if not columns:
                     columns = default_cols
@@ -415,7 +464,9 @@ def run_tool(
                     filename = default_name
             if not rows:
                 return {"error": "No rows to export."}, "No rows to export."
-            written = write_export(tenant_id, rows=rows, columns=columns or None, filename=filename)
+            written = write_export(
+                tenant_id, rows=rows, columns=columns or None, filename=filename, fmt=fmt
+            )
             return written, ""
     except Exception as exc:
         return {"error": str(exc)}, str(exc)

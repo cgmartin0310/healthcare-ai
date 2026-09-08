@@ -999,9 +999,18 @@ def headcount(wh: Warehouse, as_of: date, *, company: str | None = None) -> Metr
     )
 
 
-def completes_by_provider(wh: Warehouse, as_of: date, *, company: str | None = None) -> MetricResult:
-    """Last closed month Completes per clinician, ranked. Completes-only. Not a payroll model."""
-    start, end = last_closed_month(as_of)
+def completes_by_provider(
+    wh: Warehouse,
+    as_of: date,
+    *,
+    company: str | None = None,
+    months: int = 1,
+) -> MetricResult:
+    """Completes per clinician over the last N closed months. Completes-only. Not payroll."""
+    n = max(1, min(int(months or 1), 24))
+    window = closed_months_back(as_of, n)
+    start, _ = window[0]
+    _, end = window[-1]
     provider = _provider_key_sql()
     filters = [
         f'{qident("AppointmentStatus")} = ?',
@@ -1024,8 +1033,8 @@ def completes_by_provider(wh: Warehouse, as_of: date, *, company: str | None = N
     """
     frame = wh.fetch_df(sql, params)
     grain = (
-        "Completes (AppointmentStatus='Complete') in last closed month, ranked by clinician. "
-        "Not payroll."
+        f"Completes (AppointmentStatus='Complete') in last {n} closed month(s), "
+        "ranked by clinician. Not payroll."
     )
     if frame.empty:
         return MetricResult(
@@ -1033,8 +1042,8 @@ def completes_by_provider(wh: Warehouse, as_of: date, *, company: str | None = N
             as_of=as_of,
             grain_note=grain,
             value=[],
-            details={"month_start": start.isoformat(), "month_end": end.isoformat()},
-            unavailable="No Completes with a clinician in the last closed month.",
+            details={"month_start": start.isoformat(), "month_end": end.isoformat(), "months": n},
+            unavailable=f"No Completes with a clinician in the last {n} closed month(s).",
         )
     buckets: dict[str, dict[str, Any]] = {}
     for rec in frame.to_dict(orient="records"):
@@ -1075,7 +1084,12 @@ def completes_by_provider(wh: Warehouse, as_of: date, *, company: str | None = N
         as_of=as_of,
         grain_note=grain,
         value=ranked,
-        details={"month_start": start.isoformat(), "month_end": end.isoformat(), "n_clinicians": len(ranked)},
+        details={
+            "month_start": start.isoformat(),
+            "month_end": end.isoformat(),
+            "months": n,
+            "n_clinicians": len(ranked),
+        },
     )
 
 

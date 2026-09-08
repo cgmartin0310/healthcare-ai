@@ -207,6 +207,108 @@ def test_analyst_export_completes_csv(warehouse, as_of, tmp_path, monkeypatch):
     assert meta["tenant_id"] == "export-clinic"
 
 
+CHRISTOPHER_EXCEL_Q = (
+    "Can you create an excel file for closed appointments by provider over the last 2 months"
+)
+
+
+def _closed_appts_two_months():
+    return [
+        appt_row(
+            ApptId="j1",
+            ProviderId="PR-J",
+            ProviderName="Jordan Lee",
+            ApptDate=date(2026, 8, 10),
+        ),
+        appt_row(
+            ApptId="j2",
+            ProviderId="PR-J",
+            ProviderName="Jordan Lee",
+            ApptDate=date(2026, 8, 11),
+        ),
+        appt_row(
+            ApptId="c1",
+            ProviderId="PR-C",
+            ProviderName="Casey Hale",
+            ApptDate=date(2026, 7, 15),
+        ),
+    ]
+
+
+def test_excel_closed_appointments_by_provider_two_months(warehouse, as_of, tmp_path, monkeypatch):
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    load_appts(warehouse, _closed_appts_two_months())
+    out = Analyst(warehouse, tenant_id="xlsx-clinic", as_of=as_of).ask(CHRISTOPHER_EXCEL_Q)
+    assert "warehouse tools returned no prose" not in out["answer"].lower()
+    assert "Closed-month snapshot" not in out["answer"]
+    assert ".xlsx" in out["answer"]
+    import re
+
+    from analyst.exports import read_export
+    from openpyxl import load_workbook
+
+    match = re.search(r"/api/exports/([a-f0-9]{32})\.xlsx", out["answer"])
+    assert match
+    found = read_export("xlsx-clinic", match.group(1))
+    assert found
+    path, meta = found
+    assert path.suffix == ".xlsx"
+    wb = load_workbook(path)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    assert "provider_name" in headers
+    assert "completes" in headers
+    rows = {ws.cell(r, headers.index("provider_name") + 1).value: ws.cell(r, headers.index("completes") + 1).value for r in range(2, ws.max_row + 1)}
+    assert rows.get("Jordan Lee") == 2
+    assert rows.get("Casey Hale") == 1
+    assert meta.get("format") == "xlsx" or path.suffix == ".xlsx"
+
+
+def test_empty_prose_after_export_is_synthesized(warehouse, as_of, tmp_path, monkeypatch):
+    monkeypatch.setenv("CLINIC_ANALYST_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("XAI_API_KEY", "test-not-a-real-key")
+    load_appts(warehouse, _closed_appts_two_months())
+    calls = {"n": 0}
+
+    def fake_complete(messages, tools):
+        calls["n"] += 1
+        names = [t["function"]["name"] for t in tools]
+        assert "export_table" in names or "export_csv" in names
+        if calls["n"] == 1:
+            return {
+                "choices": [
+                    {
+                        "message": {
+                            "role": "assistant",
+                            "content": "",
+                            "tool_calls": [
+                                {
+                                    "id": "call_x",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "export_table",
+                                        "arguments": (
+                                            '{"source":"completes_by_provider","format":"xlsx",'
+                                            '"months":2,"filename":"completes_by_provider"}'
+                                        ),
+                                    },
+                                }
+                            ],
+                        }
+                    }
+                ]
+            }
+        return {"choices": [{"message": {"role": "assistant", "content": ""}}]}
+
+    monkeypatch.setattr("analyst.engine.complete_chat", fake_complete)
+    out = Analyst(warehouse, tenant_id="synth-clinic", as_of=as_of).ask(CHRISTOPHER_EXCEL_Q)
+    assert "warehouse tools returned no prose" not in out["answer"].lower()
+    assert "/api/exports/" in out["answer"]
+    assert ".xlsx" in out["answer"]
+    assert "Closed-month snapshot" not in out["answer"]
+
+
 def test_analyst_refuses_payroll_invention(warehouse, as_of):
     load_appts(warehouse, [appt_row(ApptId="visit-1")])
     assert payroll_present(warehouse) is False

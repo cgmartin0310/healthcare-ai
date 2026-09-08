@@ -65,6 +65,7 @@ def test_index_shows_banner_and_login():
         assert 'id="view-chat"' in res.text
         assert 'id="view-warehouse"' in res.text
         assert "Clear warehouse" in res.text
+        assert ".xlsx" in res.text
         assert "id=\"clear-warehouse\"" in res.text
 
 

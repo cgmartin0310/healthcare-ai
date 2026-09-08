@@ -212,15 +212,29 @@ def api_warehouse_clear(body: ClearBody, user: User = Depends(current_user)) -> 
 def api_export_csv(filename: str, user: User = Depends(current_user)):
     from fastapi.responses import FileResponse
 
-    export_id = filename[:-4] if filename.lower().endswith(".csv") else filename
+    lower = filename.lower()
+    if lower.endswith(".xlsx"):
+        export_id = filename[:-5]
+        default_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    elif lower.endswith(".csv"):
+        export_id = filename[:-4]
+        default_type = "text/csv"
+    else:
+        export_id = filename
+        default_type = "application/octet-stream"
     found = read_export(user.tenant_id, export_id)
     if not found:
         raise HTTPException(404, "Export not found.")
     path, meta = found
+    media = default_type
+    if str(meta.get("format") or path.suffix.lstrip(".")) == "xlsx":
+        media = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    elif path.suffix.lower() == ".csv":
+        media = "text/csv"
     return FileResponse(
         path,
-        media_type="text/csv",
-        filename=str(meta.get("filename") or f"{export_id}.csv"),
+        media_type=media,
+        filename=str(meta.get("filename") or path.name),
     )
 
 

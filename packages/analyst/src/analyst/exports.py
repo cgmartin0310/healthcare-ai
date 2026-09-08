@@ -78,12 +78,21 @@ def _sanitize_label(label: str) -> str:
     return cleaned or "export"
 
 
+def _resolve_format(fmt: str | None, filename: str) -> str:
+    raw = (fmt or "").strip().lower()
+    name = (filename or "").strip().lower()
+    if raw in {"xlsx", "excel", "spreadsheet"} or name.endswith(".xlsx"):
+        return "xlsx"
+    return "csv"
+
+
 def write_export(
     tenant_id: str,
     *,
     rows: list[dict[str, Any]],
     columns: list[str] | None = None,
     filename: str = "export",
+    fmt: str | None = None,
 ) -> dict[str, Any]:
     cleanup_exports(tenant_id)
     if columns:
@@ -94,19 +103,31 @@ def write_export(
         cols = []
     capped = rows[:EXPORT_ROW_CAP]
     export_id = uuid.uuid4().hex
-    label = _sanitize_label(filename)
-    csv_name = f"{export_id}.csv"
+    label = _sanitize_label(re.sub(r"\.(csv|xlsx)$", "", filename or "export", flags=re.I))
+    out_fmt = _resolve_format(fmt, filename)
     folder = _exports_dir(tenant_id)
-    csv_path = folder / csv_name
-    with csv_path.open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
-        writer.writeheader()
+    file_path = folder / f"{export_id}.{out_fmt}"
+    if out_fmt == "xlsx":
+        from openpyxl import Workbook
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "export"
+        ws.append(cols)
         for row in capped:
-            writer.writerow({c: "" if row.get(c) is None else row.get(c) for c in cols})
+            ws.append(["" if row.get(c) is None else row.get(c) for c in cols])
+        wb.save(file_path)
+    else:
+        with file_path.open("w", newline="", encoding="utf-8") as fh:
+            writer = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+            writer.writeheader()
+            for row in capped:
+                writer.writerow({c: "" if row.get(c) is None else row.get(c) for c in cols})
     meta = {
         "tenant_id": tenant_id,
         "export_id": export_id,
-        "filename": f"{label}.csv",
+        "filename": f"{label}.{out_fmt}",
+        "format": out_fmt,
         "columns": cols,
         "row_count": len(capped),
         "capped_at": EXPORT_ROW_CAP,
@@ -114,8 +135,9 @@ def write_export(
     (folder / f"{export_id}.json").write_text(json.dumps(meta, indent=2, default=json_default) + "\n")
     return {
         "export_id": export_id,
-        "filename": f"{label}.csv",
-        "url": f"/api/exports/{export_id}.csv",
+        "filename": f"{label}.{out_fmt}",
+        "format": out_fmt,
+        "url": f"/api/exports/{export_id}.{out_fmt}",
         "row_count": len(capped),
         "columns": cols,
     }
@@ -127,8 +149,7 @@ def read_export(tenant_id: str, export_id: str) -> tuple[Path, dict[str, Any]] |
         return None
     folder = _exports_dir(tenant_id)
     meta_path = folder / f"{export_id}.json"
-    csv_path = folder / f"{export_id}.csv"
-    if not meta_path.exists() or not csv_path.exists():
+    if not meta_path.exists():
         return None
     try:
         meta = json.loads(meta_path.read_text())
@@ -136,4 +157,15 @@ def read_export(tenant_id: str, export_id: str) -> tuple[Path, dict[str, Any]] |
         return None
     if meta.get("tenant_id") != tenant_id:
         return None
-    return csv_path, meta
+    ext = str(meta.get("format") or "csv")
+    if ext not in {"csv", "xlsx"}:
+        ext = "csv"
+    file_path = folder / f"{export_id}.{ext}"
+    if not file_path.exists():
+        for candidate in (folder / f"{export_id}.xlsx", folder / f"{export_id}.csv"):
+            if candidate.exists():
+                file_path = candidate
+                break
+        else:
+            return None
+    return file_path, meta
